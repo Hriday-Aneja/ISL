@@ -34,3 +34,7 @@ recognition-ml/data/features/
 recognition-ml/venv312/
 # Python virtual environment
 venv312/
+
+# Generated ML features
+recognition-ml/data/features/
+recognition-ml/data/features_stratified/
