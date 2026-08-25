@@ -1,0 +1,12 @@
+{
+  "_comment": "Deterministic hearing->ISL fallback. Extend using shared/vocabulary.json gloss IDs.",
+  "mappings": [
+    { "phrases": ["hello", "hi"], "glossSequence": ["HELLO"] },
+    { "phrases": ["thank you", "thanks"], "glossSequence": ["THANK_YOU"] },
+    { "phrases": ["i need water", "water please"], "glossSequence": ["I", "NEED", "WATER"] },
+    { "phrases": ["help", "i need help"], "glossSequence": ["HELP"] },
+    { "phrases": ["sorry"], "glossSequence": ["SORRY"] },
+    { "phrases": ["yes"], "glossSequence": ["YES"] },
+    { "phrases": ["no"], "glossSequence": ["NO"] }
+  ]
+}

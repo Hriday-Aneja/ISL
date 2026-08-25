@@ -1,0 +1,15 @@
+{
+  "name": "isl-connect",
+  "version": "1.0.0",
+  "description": "Two-way AI communication platform for Indian Sign Language (ISL) video calls.",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

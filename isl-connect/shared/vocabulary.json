@@ -1,0 +1,14 @@
+{
+  "_comment": "TODO: finalize as a team in the first 30 minutes. Edit this file, then everyone re-syncs.",
+  "namingConvention": "SCREAMING_SNAKE_CASE",
+  "signs": [
+    "HELLO", "THANK_YOU", "PLEASE", "SORRY", "YES", "NO",
+    "HELP", "WATER", "FOOD", "NAME", "MY", "YOUR",
+    "GOOD", "BAD", "WHERE", "WHEN", "WHY", "HOW",
+    "WHO", "HOME", "SCHOOL", "HOSPITAL", "TODAY", "TOMORROW",
+    "STOP", "GO", "COME", "WAIT", "TIME", "UNDERSTAND"
+  ],
+  "avatarPriorityMVP": [
+    "HELLO", "THANK_YOU", "HELP", "WATER", "YES", "NO", "SORRY", "PLEASE"
+  ]
+}
