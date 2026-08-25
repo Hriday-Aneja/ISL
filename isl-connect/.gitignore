@@ -26,3 +26,11 @@ avatar/animations/*.fbx
 # OS/editor
 .DS_Store
 .vscode/
+
+# Dataset files
+recognition-ml/data/raw/
+recognition-ml/data/processed/
+recognition-ml/data/features/
+recognition-ml/venv312/
+# Python virtual environment
+venv312/
