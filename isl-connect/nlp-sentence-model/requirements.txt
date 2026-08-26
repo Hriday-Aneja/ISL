@@ -2,3 +2,6 @@ transformers
 torch
 pandas
 sentencepiece
+scikit-learn
+evaluate
+sacrebleu
