@@ -37,6 +37,33 @@ export default function App() {
     }
   }}
 />
+<div className="flex gap-2 mt-2">
+  <button
+    className="bg-green-600 text-white px-4 py-2 rounded"
+    onClick={() => {
+      window.playSigns?.([
+        "hello",
+        "thankyou",
+        "water",
+      ]);
+    }}
+  >
+    Test Queue
+  </button>
+
+  <button
+    className="bg-blue-600 text-white px-4 py-2 rounded"
+    onClick={() => {
+      window.playSigns?.([
+        "help",
+        "yes",
+        "sorry",
+      ]);
+    }}
+  >
+    Test Queue 2
+  </button>
+</div>
         <TranscriptPanel entries={[{ speaker: "ISL user", text: mockSentence.text, timestamp: Date.now() }]} />
       </div>
     </div>
