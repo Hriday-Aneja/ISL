@@ -1,8 +1,6 @@
 """
 Stratified k-fold cross-validation on train+val combined. Test stays
-completely untouched throughout — this only fixes the fact that the
-original 5-sample val split couldn't give a meaningful accuracy signal
-(only 6 possible values: 0/20/40/60/80/100%).
+completely untouched throughout.
 
 After cross-validation, trains one final model on all of train+val (median
 epoch count across folds) and evaluates it once on the held-out test split.
@@ -20,15 +18,16 @@ import tensorflow as tf
 from sklearn.model_selection import StratifiedKFold
 from sklearn.utils.class_weight import compute_class_weight
 
-from dataset import FEATURE_DIR, FEATURE_SIZE, LABELS_PATH, SEQUENCE_LENGTH, discover_classes, load_split
+from dataset import FEATURE_SIZE, LABELS_PATH, SEQUENCE_LENGTH, discover_classes, load_split
 from model import build_model
 
 MODELS_DIR = Path(__file__).resolve().parent.parent / "models"
+DEFAULT_FEATURE_DIR = MODELS_DIR.parent / "data" / "features_selected"
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data-dir", type=str, default=str(FEATURE_DIR),
+    parser.add_argument("--data-dir", type=str, default=str(DEFAULT_FEATURE_DIR),
                          help="Path to a features dir with train/val/test subfolders "
                               "(e.g. the output of resplit_dataset.py)")
     parser.add_argument("--folds", type=int, default=5)
@@ -112,8 +111,8 @@ def main():
     print(f"Mean val accuracy: {np.mean(accs):.4f} (std: {np.std(accs):.4f})")
     print(f"Per-fold: {[round(a, 3) for a in accs]}")
     print("A wide std relative to the mean means the model's performance genuinely "
-          "depends on which samples land in val — expected at this dataset size, "
-          "but worth knowing rather than trusting a single split's number.")
+          "depends on which samples land in val, but is worth knowing rather than "
+          "trusting a single split's number.")
 
     summary = {
         "folds": args.folds, "fold_results": fold_results,

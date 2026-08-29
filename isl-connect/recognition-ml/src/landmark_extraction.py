@@ -25,7 +25,64 @@ FEATURE_SIZE = 225
 # ---------------------------------------------------------
 # Extract landmarks from one video
 # ---------------------------------------------------------
+def normalize_landmarks(left_hand, right_hand, pose):
+    """
+    Normalize landmarks so that the model is less sensitive
+    to camera distance and body position.
 
+    - Pose: shoulder-center + shoulder-distance normalization
+    - Hands: wrist-relative + same body scale
+    """
+
+    # Default values
+    center = np.zeros(3, dtype=np.float32)
+    scale = 1.0
+
+    # Use shoulders to define body reference
+    if np.any(pose):
+        left_shoulder = pose[11]
+        right_shoulder = pose[12]
+
+        center = (left_shoulder + right_shoulder) / 2.0
+
+        scale = np.linalg.norm(
+            left_shoulder - right_shoulder
+        ) + 1e-6
+
+    # -------------------------
+    # Normalize pose
+    # -------------------------
+
+    if np.any(pose):
+        pose_norm = (pose - center) / scale
+    else:
+        pose_norm = pose
+
+    # -------------------------
+    # Normalize left hand
+    # -------------------------
+
+    if np.any(left_hand):
+        wrist = left_hand[0]
+        left_hand_norm = (left_hand - wrist) / scale
+    else:
+        left_hand_norm = left_hand
+
+    # -------------------------
+    # Normalize right hand
+    # -------------------------
+
+    if np.any(right_hand):
+        wrist = right_hand[0]
+        right_hand_norm = (right_hand - wrist) / scale
+    else:
+        right_hand_norm = right_hand
+
+    return (
+        left_hand_norm,
+        right_hand_norm,
+        pose_norm
+    )
 def extract_landmarks(video_path):
 
     cap = cv2.VideoCapture(str(video_path))
@@ -109,7 +166,11 @@ def extract_landmarks(video_path):
             # Combine
             # 63 + 63 + 99 = 225
             # -------------------------------------------------
-
+            left_hand, right_hand, pose = normalize_landmarks(
+    left_hand,
+    right_hand,
+    pose
+)
             frame_features = np.concatenate([
                 left_hand.flatten(),
                 right_hand.flatten(),

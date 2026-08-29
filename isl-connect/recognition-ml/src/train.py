@@ -17,15 +17,16 @@ import numpy as np
 import tensorflow as tf
 from sklearn.utils.class_weight import compute_class_weight
 
-from dataset import FEATURE_SIZE, SEQUENCE_LENGTH, FEATURE_DIR, load_all_splits
+from dataset import FEATURE_SIZE, SEQUENCE_LENGTH, load_all_splits
 from model import build_model
 
 MODELS_DIR = Path(__file__).resolve().parent.parent / "models"
+DEFAULT_FEATURE_DIR = MODELS_DIR.parent / "data" / "features_selected"
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data-dir", type=str, default=str(FEATURE_DIR),
+    parser.add_argument("--data-dir", type=str, default=str(DEFAULT_FEATURE_DIR),
                          help="Path to a features dir with train/val/test subfolders "
                               "(e.g. the output of resplit_dataset.py)")
     parser.add_argument("--epochs", type=int, default=60)
@@ -53,7 +54,7 @@ def main():
         counts = np.bincount(y, minlength=num_classes)
         print(f"{split_name}: {X.shape[0]} samples -> {dict(zip(classes, counts.tolist()))}")
 
-    # Small dataset (82 videos / 4 classes total) — flag this plainly rather
+    #  (433 videos / 24 classes total) — flag this plainly rather
     # than silently training as if this were a large dataset. Class weights
     # help if the split is imbalanced; early stopping + restore_best_weights
     # guards against the LSTM overfitting on so few samples.

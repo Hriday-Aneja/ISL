@@ -23,9 +23,9 @@ MODELS_DIR = Path(__file__).resolve().parent.parent / "models"
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", type=str, default=str(MODELS_DIR / "isl_recognition_model.keras"))
+    parser.add_argument("--model", type=str, default="models/isl_recognition_model_kfold.keras")
     parser.add_argument("--split", type=str, default="test", choices=["train", "val", "test"])
-    parser.add_argument("--data-dir", type=str, default=str(FEATURE_DIR),
+    parser.add_argument("--data-dir", type=str, default="data/features_selected",
                          help="Path to a features dir with train/val/test subfolders "
                               "(e.g. the output of resplit_dataset.py) — must match "
                               "whatever dir the model was trained on")
