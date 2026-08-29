@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ISL Sign Reference</title>
+    <style>
+      :root {
+        --bg: #f5f7fb;
+        --panel: #ffffff;
+        --panel-strong: #eef3ff;
+        --text: #1f2937;
+        --muted: #5b6475;
+        --border: #dfe7f3;
+        --accent: #2563eb;
+        --accent-soft: rgba(37, 99, 235, 0.08);
+        --shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      .page {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 24px 18px 48px;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #eef4ff, #f8fbff);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        padding: 24px;
+        margin-bottom: 18px;
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: clamp(1.7rem, 2vw, 2.4rem);
+      }
+
+      .note {
+        margin: 0;
+        color: var(--muted);
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin: 20px 0 18px;
+      }
+
+      .search-wrap {
+        flex: 1 1 320px;
+        display: flex;
+        align-items: center;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 10px 12px;
+        box-shadow: var(--shadow);
+      }
+
+      .search-wrap input {
+        width: 100%;
+        border: none;
+        outline: none;
+        font-size: 1rem;
+        background: transparent;
+        color: var(--text);
+      }
+
+      .count-pill {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 10px 14px;
+        font-weight: 700;
+        color: var(--muted);
+        box-shadow: var(--shadow);
+      }
+
+      .instruction-box {
+        margin: 18px 0 24px;
+        padding: 16px 18px;
+        background: var(--panel-strong);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        color: var(--text);
+      }
+
+      .instruction-box p {
+        margin: 0 0 12px;
+        line-height: 1.5;
+      }
+
+      .instruction-box p:last-child {
+        margin-bottom: 0;
+      }
+
+      .command {
+        display: block;
+        margin-top: 8px;
+        background: #0f172a;
+        color: #f8fafc;
+        border-radius: 10px;
+        padding: 12px 14px;
+        font-family: Consolas, monospace;
+        font-size: 0.95rem;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 18px;
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
+      }
+
+      .video-shell {
+        position: relative;
+        background: #0f172a;
+        width: 100%;
+        aspect-ratio: 16 / 10;
+        border-bottom: 1px solid var(--border);
+      }
+
+      video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        background: #0f172a;
+      }
+
+      .fallback {
+        display: none;
+        position: absolute;
+        inset: 0;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 16px;
+        color: #e2e8f0;
+        background: rgba(15, 23, 42, 0.85);
+        font-size: 0.9rem;
+        line-height: 1.5;
+      }
+
+      .card-body {
+        padding: 14px 14px 16px;
+      }
+
+      .sign-name {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+      }
+
+      .video-path {
+        margin-top: 10px;
+        font-size: 0.8rem;
+        color: var(--muted);
+        word-break: break-word;
+      }
+
+      .empty-state {
+        display: none;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 28px 20px;
+        color: var(--muted);
+        text-align: center;
+        box-shadow: var(--shadow);
+      }
+
+      @media (max-width: 640px) {
+        .page {
+          padding-left: 12px;
+          padding-right: 12px;
+        }
+
+        .header,
+        .instruction-box {
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="header">
+        <h1>ISL Sign Reference</h1>
+        <p class="note">Use these clips as reference examples before recording your own personal sign data.</p>
+      </header>
+
+      <div class="toolbar">
+        <label class="search-wrap" aria-label="Search signs">
+          <input id="searchInput" type="text" placeholder="Search signs..." />
+        </label>
+        <div id="countPill" class="count-pill" aria-live="polite">24 signs</div>
+      </div>
+
+      <div class="instruction-box">
+        <p>Watch the reference, then record 8–10 personal clips with hands and upper body clearly visible.</p>
+        <code class="command">python src/record_personal_data.py --signer YOUR_NAME</code>
+      </div>
+
+      <main>
+        <div id="cards" class="cards" aria-live="polite"></div>
+        <div id="emptyState" class="empty-state">No signs match your search.</div>
+      </main>
+    </div>
+
+    <script>
+      const signs = [
+        { name: 'Beautiful', video: 'videos/Beautiful.MOV' },
+        { name: 'Bird', video: 'videos/Bird.MOV' },
+        { name: 'Daughter', video: 'videos/Daughter.MOV' },
+        { name: 'Doctor', video: 'videos/Doctor.MOV' },
+        { name: 'Dog', video: 'videos/Dog.MOV' },
+        { name: 'Father', video: 'videos/Father.MOV' },
+        { name: 'happy', video: 'videos/happy.MOV' },
+        { name: 'he', video: 'videos/he.MOV' },
+        { name: 'Hello', video: 'videos/Hello.MOV' },
+        { name: 'House', video: 'videos/House.MOV' },
+        { name: 'I', video: 'videos/I.MOV' },
+        { name: 'Lawyer', video: 'videos/Lawyer.MOV' },
+        { name: 'Mother', video: 'videos/Mother.MOV' },
+        { name: 'Parent', video: 'videos/Parent.MOV' },
+        { name: 'Restaurant', video: 'videos/Restaurant.MOV' },
+        { name: 'sad', video: 'videos/sad.MOV' },
+        { name: 'she', video: 'videos/she.MOV' },
+        { name: 'Son', video: 'videos/Son.MOV' },
+        { name: 'Student', video: 'videos/Student.MOV' },
+        { name: 'Teacher', video: 'videos/Teacher.MOV' },
+        { name: 'Thank you', video: 'videos/Thank you.MOV' },
+        { name: 'Train Station', video: 'videos/Train Station.MOV' },
+        { name: 'Waiter', video: 'videos/Waiter.MOV' },
+        { name: 'you', video: 'videos/you.MOV' }
+      ];
+
+      const cardsEl = document.getElementById('cards');
+      const searchInput = document.getElementById('searchInput');
+      const countPill = document.getElementById('countPill');
+      const emptyState = document.getElementById('emptyState');
+
+      function renderCards(filterText = '') {
+        const query = filterText.trim().toLowerCase();
+        const filtered = signs.filter((item) => item.name.toLowerCase().includes(query));
+
+        cardsEl.innerHTML = filtered.map((item) => `
+          <article class="card" data-name="${item.name}">
+            <div class="video-shell">
+              <video controls preload="metadata" playsinline muted>
+                <source src="${item.video}" type="video/quicktime" />
+                <source src="${item.video}" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+              <div class="fallback">This video format may not play in this browser. Try a browser that supports MOV files, or use the original dataset file locally.</div>
+            </div>
+            <div class="card-body">
+              <h2 class="sign-name">${item.name}</h2>
+              <div class="video-path">${item.video}</div>
+            </div>
+          </article>
+        `).join('');
+
+        cardsEl.querySelectorAll('video').forEach((video) => {
+          video.addEventListener('error', () => {
+            const shell = video.closest('.video-shell');
+            const fallback = shell.querySelector('.fallback');
+            video.style.display = 'none';
+            fallback.style.display = 'flex';
+          });
+        });
+
+        countPill.textContent = `${filtered.length} sign${filtered.length === 1 ? '' : 's'}`;
+        emptyState.style.display = filtered.length ? 'none' : 'block';
+      }
+
+      searchInput.addEventListener('input', (event) => {
+        renderCards(event.target.value);
+      });
+
+      renderCards();
+    </script>
+  </body>
+</html>
