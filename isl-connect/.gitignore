@@ -38,3 +38,7 @@ venv312/
 # Generated ML features
 recognition-ml/data/features/
 recognition-ml/data/features_stratified/
+
+# Personal recordings/features - never commit
+recognition-ml/data/personal_raw/
+recognition-ml/data/personal_features/

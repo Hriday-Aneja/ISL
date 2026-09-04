@@ -5,3 +5,5 @@ sentencepiece
 scikit-learn
 evaluate
 sacrebleu
+fastapi
+uvicorn

@@ -1,0 +1,23 @@
+{
+  "_comment": "Matches recognition-ml/sign_reference.html exactly (24 signs, confirmed as the real, currently-being-recorded vocabulary). Verify with Hriday before replacing shared/vocabulary.json, then everyone re-syncs.",
+  "namingConvention": "SCREAMING_SNAKE_CASE",
+  "signs": [
+    "BEAUTIFUL", "BIRD", "DAUGHTER", "DOCTOR", "DOG", "FATHER", "HELLO",
+    "HOUSE", "I", "LAWYER", "MOTHER", "PARENT", "RESTAURANT", "SON",
+    "STUDENT", "TEACHER", "THANK_YOU", "TRAIN_STATION", "WAITER",
+    "HAPPY", "HE", "SAD", "SHE", "YOU"
+  ],
+  "sourceMapping": {
+    "_comment": "Original text (from sign_reference.html) -> gloss ID",
+    "Beautiful": "BEAUTIFUL", "Bird": "BIRD", "Daughter": "DAUGHTER",
+    "Doctor": "DOCTOR", "Dog": "DOG", "Father": "FATHER", "Hello": "HELLO",
+    "House": "HOUSE", "I": "I", "Lawyer": "LAWYER", "Mother": "MOTHER",
+    "Parent": "PARENT", "Restaurant": "RESTAURANT", "Son": "SON",
+    "Student": "STUDENT", "Teacher": "TEACHER", "Thank you": "THANK_YOU",
+    "Train Station": "TRAIN_STATION", "Waiter": "WAITER", "happy": "HAPPY",
+    "he": "HE", "sad": "SAD", "she": "SHE", "you": "YOU"
+  },
+  "avatarPriorityMVP": [
+    "HELLO", "THANK_YOU", "HAPPY", "SAD", "I", "YOU", "MOTHER", "FATHER"
+  ]
+}

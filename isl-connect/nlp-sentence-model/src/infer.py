@@ -13,39 +13,24 @@ MODEL_DIR = Path(__file__).resolve().parent.parent / "models" / "gloss-to-text"
 PROMPT_PREFIX = "translate ISL gloss to English: "  # must match train.py exactly — do not edit one without the other
 
 # ---------------------------------------------------------------------------
-# Rule-based fallback / demo safety net.
+# Rule-based fallback / demo safety net — built for the CONFIRMED real
+# vocabulary (recognition-ml/sign_reference.html, 24 signs).
 # Add every phrase you actually plan to demo on stage here. Tuple key ->
 # guaranteed sentence, regardless of what the trained model might produce.
 # ---------------------------------------------------------------------------
 RULES = {
     ("HELLO",): "Hello",
     ("THANK_YOU",): "Thank you",
-    ("PLEASE",): "Please",
-    ("SORRY",): "I am sorry",
-    ("YES",): "Yes",
-    ("NO",): "No",
-    ("HELP",): "I need help",
-    ("HELP", "PLEASE"): "Please help me",
-    ("HELP", "WATER"): "I need help getting water",
-    ("WATER",): "Water",
-    ("FOOD",): "Food",
-    ("WATER", "PLEASE"): "Water, please",
-    ("FOOD", "PLEASE"): "Food, please",
-    ("WHERE", "HOME"): "Where is home",
-    ("WHERE", "SCHOOL"): "Where is the school",
-    ("WHERE", "HOSPITAL"): "Where is the hospital",
-    ("TODAY",): "Today",
-    ("TOMORROW",): "Tomorrow",
-    ("UNDERSTAND",): "I understand",
-    ("STOP",): "Stop",
-    ("WAIT",): "Please wait",
-    ("GO", "HOME"): "Going home",
-    ("GO", "SCHOOL"): "Going to school",
-    ("COME",): "Please come here",
+    ("I", "HAPPY"): "I am happy",
+    ("I", "SAD"): "I am sad",
+    ("I", "STUDENT"): "I am a student",
+    ("I", "DOCTOR"): "I am a doctor",
+    ("YOU", "BEAUTIFUL"): "You are beautiful",
+    ("HE", "TEACHER"): "He is a teacher",
+    ("SHE", "TEACHER"): "She is a teacher",
+    ("MOTHER", "HAPPY"): "My mother is happy",
+    ("FATHER", "HAPPY"): "My father is happy",
 }
-# NOTE: ("MY","NAME") is deliberately NOT hardcoded — the name itself varies
-# each time, so this is left to the trained model, which correctly learned
-# the "My name is ___" pattern during training (verified: "My name is Divya").
 
 _tokenizer = None
 _model = None
@@ -103,12 +88,14 @@ def gloss_to_sentence(gloss_sequence: list[str], lang: str = "en") -> str:
 if __name__ == "__main__":
     tests = [
         ["HELLO"],
-        ["HELP"],
-        ["MY", "NAME"],
         ["THANK_YOU"],
-        ["WHERE", "HOME"],
-        ["WATER", "PLEASE"],
-        ["STOP"],
+        ["I", "HAPPY"],
+        ["I", "DOCTOR"],
+        ["SHE", "TEACHER"],
+        ["MOTHER", "HAPPY"],
+        ["DAUGHTER", "SAD"],
+        ["YOU", "BEAUTIFUL"],
+        ["HE", "RESTAURANT"],
     ]
     for t in tests:
         print(t, "->", gloss_to_sentence(t))
