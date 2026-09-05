@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+venv312/
 
 # Node
 node_modules/
@@ -16,8 +17,26 @@ build/
 *.onnx
 recognition-ml/models/*
 !recognition-ml/models/.gitkeep
+
 nlp-sentence-model/models/*
 !nlp-sentence-model/models/.gitkeep
+
+# Dataset files
+recognition-ml/data/raw/
+recognition-ml/data/raw_selected/
+recognition-ml/data/processed/
+recognition-ml/data/features/
+recognition-ml/data/features_selected/
+recognition-ml/data/features_stratified/
+recognition-ml/data/personal_raw/
+recognition-ml/data/personal_features/
+recognition-ml/data/personal_features_hriday_finetune/
+recognition-ml/data/personal_features_hriday_test/
+recognition-ml/data/personal_features_hriday_split/
+recognition-ml/include_selected/
+recognition-ml/sign_references/
+# Local Python environment
+recognition-ml/venv312/
 
 # Avatar assets (large binary files)
 avatar/animations/*.glb
