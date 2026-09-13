@@ -15,13 +15,16 @@ build/
 *.h5
 *.pt
 *.onnx
+
+# Recognition ML models
 recognition-ml/models/*
 !recognition-ml/models/.gitkeep
 
+# NLP models
 nlp-sentence-model/models/*
 !nlp-sentence-model/models/.gitkeep
 
-# Dataset files
+# Recognition-ML datasets / generated data
 recognition-ml/data/raw/
 recognition-ml/data/raw_selected/
 recognition-ml/data/processed/
@@ -35,29 +38,27 @@ recognition-ml/data/personal_features_hriday_test/
 recognition-ml/data/personal_features_hriday_split/
 recognition-ml/include_selected/
 recognition-ml/sign_references/
-# Local Python environment
+
+# Recognition-ML local environments
+recognition-ml/venv/
 recognition-ml/venv312/
 
-# Avatar assets (large binary files)
+# INCLUDE local dataset / generated artifacts
+include-ml/dataset/
+include-ml/test_dataset/
+include-ml/keypoints/
+include-ml/keypoints_test/
+include-ml/venv/
+include-ml/models/
+
+# INCLUDE temporary split files
+include-ml/train_test_paths/include_selected_*.txt
+include-ml/train_test_paths/include_test_temp.txt
+
+# Avatar assets
 avatar/animations/*.glb
 avatar/animations/*.fbx
 
 # OS/editor
 .DS_Store
 .vscode/
-
-# Dataset files
-recognition-ml/data/raw/
-recognition-ml/data/processed/
-recognition-ml/data/features/
-recognition-ml/venv312/
-# Python virtual environment
-venv312/
-
-# Generated ML features
-recognition-ml/data/features/
-recognition-ml/data/features_stratified/
-
-# Personal recordings/features - never commit
-recognition-ml/data/personal_raw/
-recognition-ml/data/personal_features/
