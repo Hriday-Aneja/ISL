@@ -1,0 +1,16 @@
+{
+  "name": "isl-bridge-signaling-server",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Minimal Socket.IO signaling server for ISL Bridge's WebRTC video call. Connects two peers; carries no audio/video and no AI/application logic.",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.1",
+    "socket.io": "^4.8.1"
+  }
+}
