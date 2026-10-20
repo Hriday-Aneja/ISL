@@ -38,7 +38,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from custom_common import (DEFAULT_DATA_DIR, INCLUDE_ROOT, MAX_POSITION_EMBEDDINGS, read_json, write_json)
+from custom_common import (CORRECTED_KEYPOINTS_DIRNAME, DEFAULT_DATA_DIR, INCLUDE_ROOT,
+                           MAX_POSITION_EMBEDDINGS, PREPROCESSING_VERSION, read_json, write_json)
 
 
 def parse_args():
@@ -51,6 +52,8 @@ def parse_args():
     p.add_argument("--take_gap", type=int, default=1, help="take mode: takes discarded between blocks")
     p.add_argument("--min_pose_rate", type=float, default=0.5, help="drop clips with pose found in fewer frames")
     p.add_argument("--min_any_hand_rate", type=float, default=0.1, help="drop clips where no hand is ever found")
+    p.add_argument("--recompute_membership", action="store_true",
+                   help="ignore an existing splits.csv and recompute the split assignment")
     return p.parse_args()
 
 
@@ -115,6 +118,32 @@ def assign_take(df, gap):
     return out
 
 
+def reuse_existing_membership(df, splits_path):
+    existing = pd.read_csv(splits_path, keep_default_na=False)
+    required = {"uid", "signer", "label", "split", "source_path"}
+    missing = required - set(existing.columns)
+    if missing:
+        raise SystemExit(f"cannot safely reuse {splits_path}: missing columns {sorted(missing)}")
+    if existing.uid.duplicated().any():
+        raise SystemExit(f"cannot safely reuse {splits_path}: duplicate UIDs")
+    if not set(existing.split).issubset({"train", "val", "test"}):
+        raise SystemExit(f"cannot safely reuse {splits_path}: invalid split name")
+    manifest_by_uid = df.set_index("uid")
+    unknown = sorted(set(existing.uid) - set(manifest_by_uid.index))
+    if unknown:
+        raise SystemExit(f"cannot safely reuse {splits_path}: UIDs absent from manifest: {unknown[:6]}")
+    for _, row in existing.iterrows():
+        manifest_row = manifest_by_uid.loc[row.uid]
+        for field in ("signer", "label", "source_path"):
+            if str(manifest_row[field]) != str(row[field]):
+                raise SystemExit(f"cannot safely reuse {splits_path}: {field} changed for {row.uid}")
+    if set(existing.uid) != set(df.uid):
+        missing = sorted(set(df.uid) - set(existing.uid))
+        raise SystemExit(f"cannot safely reuse {splits_path}: membership does not cover filtered manifest; missing {missing[:6]}")
+    assignments = existing.set_index("uid")["split"]
+    return df.assign(split=df.uid.map(assignments))
+
+
 def main():
     args = parse_args()
     manifest = args.data_dir / "manifest.csv"
@@ -142,7 +171,20 @@ def main():
     for k, v in reasons.items():
         say(f"  dropped {len(v)} ({k}): {v[:6]}{' ...' if len(v) > 6 else ''}")
 
-    if args.mode == "group":
+    existing_splits = args.data_dir / "splits.csv"
+    if existing_splits.is_file() and not args.recompute_membership:
+        existing_meta_path = args.data_dir / "dataset_meta.json"
+        if existing_meta_path.is_file():
+            existing_meta = read_json(existing_meta_path)
+            if existing_meta.get("mode") != args.mode:
+                raise SystemExit(f"{existing_splits} was created with mode={existing_meta.get('mode')}; "
+                                 f"use --recompute_membership to request mode={args.mode}")
+            if existing_meta.get("val_signers", []) != args.val_signers or existing_meta.get("test_signers", []) != args.test_signers:
+                raise SystemExit(f"{existing_splits} signer holdouts do not match the requested split configuration; "
+                                 "use --recompute_membership to change them")
+        df = reuse_existing_membership(df, existing_splits)
+        say(f"reused existing split membership from {existing_splits}")
+    elif args.mode == "group":
         df["split"] = assign_group(df)
     elif args.mode == "signer":
         df["split"] = assign_signer(df, args.val_signers, args.test_signers)
@@ -186,6 +228,21 @@ def main():
             say(f"WARNING: only {totals.get(s, 0)} {s} clips for {len(labels)} classes -> accuracy on this split is "
                 f"very noisy; one clip moves it by {100 / max(totals.get(s, 0), 1):.1f} points.")
 
+    # Resolve every selected manifest row to the corrected JSON before any output is removed.
+    corrected_dir = args.data_dir / CORRECTED_KEYPOINTS_DIRNAME
+    if not corrected_dir.is_dir():
+        raise SystemExit(f"corrected keypoints directory not found: {corrected_dir}")
+    corrected_paths = {}
+    for _, row in df.iterrows():
+        path = corrected_dir / f"{row.uid}.json"
+        if not path.is_file():
+            raise SystemExit(f"corrected JSON missing for {row.uid}: {path}")
+        payload = read_json(path)
+        if payload.get("uid") != row.uid or payload.get("x_aspect_corrected") is not True:
+            raise SystemExit(f"corrected JSON metadata invalid for {row.uid}: {path}")
+        corrected_paths[row.uid] = path
+    df["corrected_json_path"] = df.uid.map(corrected_paths)
+
     # ---- write splits ---------------------------------------------------
     for s in ("train", "val", "test"):
         d = args.data_dir / f"{args.dataset}_{s}_keypoints"
@@ -193,7 +250,7 @@ def main():
             shutil.rmtree(d)  # never leave stale files from a previous split behind
         d.mkdir(parents=True)
         for _, r in df[df.split == s].iterrows():
-            shutil.copy(r.json_path, d / Path(r.json_path).name)
+            shutil.copy(r.corrected_json_path, d / Path(r.corrected_json_path).name)
     df[["uid", "signer", "label", "split", "n_frames", "fps_effective", "source_path"]].to_csv(
         args.data_dir / "splits.csv", index=False)
     write_json(INCLUDE_ROOT / "label_maps" / f"label_map_{args.dataset}.json", label_map)
@@ -210,6 +267,8 @@ def main():
             "max_frames": max_frames, "max_frame_len": min(MAX_POSITION_EMBEDDINGS, math.ceil(max_frames * 1.1)),
             "train_fps": round(fps_vals[len(fps_vals) // 2], 2),
             "flip_horizontal": ext["flip_horizontal"], "target_fps": ext["target_fps"],
+            "preprocessing_version": PREPROCESSING_VERSION,
+            "keypoints_source": CORRECTED_KEYPOINTS_DIRNAME,
             "val_signers": args.val_signers, "test_signers": args.test_signers}
     write_json(args.data_dir / "dataset_meta.json", meta)
     (args.data_dir / "split_report.txt").write_text("\n".join(lines), encoding="utf-8")

@@ -32,7 +32,8 @@ import mediapipe as mp
 import numpy as np
 import torch
 
-from custom_common import DEFAULT_CHECKPOINT, FRAME_HEIGHT, FRAME_WIDTH, ROOT, INCLUDE_ROOT  # sets sys.path + shims
+from custom_common import (ASPECT_REFERENCE_HEIGHT, ASPECT_REFERENCE_WIDTH, DEFAULT_CHECKPOINT, FRAME_HEIGHT,
+                           FRAME_WIDTH, PREPROCESSING_VERSION, ROOT, INCLUDE_ROOT, correct_x_aspect)  # sets sys.path + shims
 from custom_model import load_checkpoint
 
 MODEL_PATH = ROOT / "models" / "transformer_small" / "transformer.pth"  # original INCLUDE checkpoint
@@ -124,19 +125,24 @@ def resample_to_fps(frames, times, fps):
     return [frames[i] for i in nearest]
 
 
-def prepare_sequence(frames, sequence_length):
-    """Return the model input, shape (1, sequence_length, 134): interpolate, x*1920 / y*1080, zero-pad at the END."""
+def prepare_sequence(frames, sequence_length, frame_width, frame_height):
+    """Match dataset.py: interpolate, correct x once, scale to 1920x1080, then pad."""
     pose = interpolate(np.stack([f[0] for f in frames]))
     hand1 = interpolate(np.stack([f[1] for f in frames]))
     hand2 = interpolate(np.stack([f[2] for f in frames]))
+    pose[:, :, 0] = correct_x_aspect(pose[:, :, 0], frame_width, frame_height)
+    hand1[:, :, 0] = correct_x_aspect(hand1[:, :, 0], frame_width, frame_height)
+    hand2[:, :, 0] = correct_x_aspect(hand2[:, :, 0], frame_width, frame_height)
     scale = np.array([FRAME_WIDTH, FRAME_HEIGHT], dtype=np.float32)
     data = np.concatenate([(pose * scale).reshape(len(frames), 50), (hand1 * scale).reshape(len(frames), 42),
                            (hand2 * scale).reshape(len(frames), 42)], axis=1).astype(np.float32)
     if len(data) > sequence_length:
         data = data[-sequence_length:]
-    elif len(data) < sequence_length:
+    valid_length = min(len(data), sequence_length)
+    attention_mask = torch.arange(sequence_length) < valid_length
+    if len(data) < sequence_length:
         data = np.pad(data, ((0, sequence_length - len(data)), (0, 0)))
-    return torch.from_numpy(data).unsqueeze(0)
+    return torch.from_numpy(data).unsqueeze(0), attention_mask.unsqueeze(0)
 
 
 def clip_diagnostics(frames):
@@ -152,7 +158,8 @@ def save_capture_features(path, frames, model_input, cam_width, cam_height, cam_
     np.savez(path, pose=pose, hand1=hand1, hand2=hand2, model_input=model_input.squeeze(0).cpu().numpy(),
              cam_width=cam_width, cam_height=cam_height, cam_fps=cam_fps, measured_fps=measured_fps,
              raw_frame_count=raw_count, frame_width_used_for_scaling=FRAME_WIDTH,
-             frame_height_used_for_scaling=FRAME_HEIGHT,
+             frame_height_used_for_scaling=FRAME_HEIGHT, preprocessing_version=PREPROCESSING_VERSION,
+             aspect_reference_width=ASPECT_REFERENCE_WIDTH, aspect_reference_height=ASPECT_REFERENCE_HEIGHT,
              top_predictions=np.array([f"{label}:{conf:.6f}" for label, conf in top]))
 
 
@@ -206,10 +213,11 @@ def main():
     actual_height = int(camera.get(cv2.CAP_PROP_FRAME_HEIGHT))
     actual_fps = camera.get(cv2.CAP_PROP_FPS)
     aspect = actual_width / actual_height if actual_height else 0.0
-    print(f"Actual capture: {actual_width}x{actual_height} @ {actual_fps:.1f} fps (aspect {aspect:.4f}, 16:9 = {16 / 9:.4f})")
+    correction_factor = (aspect / (16 / 9)) if aspect else 0.0
+    print(f"Actual capture: {actual_width}x{actual_height} @ {actual_fps:.1f} fps "
+          f"(aspect {aspect:.4f}, x correction factor {correction_factor:.4f})")
     if abs(aspect - 16 / 9) > CAM_ASPECT_TOLERANCE:
-        print("WARNING: capture is not 16:9; dataset.py scales x by 1920 and y by 1080, so geometry will be distorted "
-              "unless the training clips had the same aspect ratio.")
+        print("  webcam x coordinates will be corrected to the training 16:9 reference before scaling")
     CAPTURES_DIR.mkdir(exist_ok=True)
 
     def classify(clip_frames, clip_times):
@@ -218,9 +226,11 @@ def main():
         measured_fps = (raw_count - 1) / duration if duration > 0 else 0.0
         frames = resample_to_fps(clip_frames, clip_times, resample_fps) if resample_fps else clip_frames
         stats, _, _, _ = clip_diagnostics(frames)
-        model_input = prepare_sequence(frames, sequence_length).to(device)
+        model_input, attention_mask = prepare_sequence(frames, sequence_length, actual_width, actual_height)
+        model_input = model_input.to(device)
+        attention_mask = attention_mask.to(device)
         with torch.inference_mode():
-            probabilities = torch.softmax(model(model_input), dim=-1)[0]
+            probabilities = torch.softmax(model(model_input, attention_mask=attention_mask), dim=-1)[0]
         values, indices = torch.topk(probabilities, k=min(5, len(labels)))
         top = [(labels[int(i)], float(v)) for v, i in zip(values.cpu(), indices.cpu())]
         label, conf = top[0]

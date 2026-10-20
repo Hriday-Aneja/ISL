@@ -27,15 +27,28 @@ class DeterministicEvalTransformer(Transformer):
     applies only while training. state_dicts are interchangeable with the
     original class in both directions."""
 
-    def forward(self, x):
+    def forward(self, x, attention_mask=None):
+        if attention_mask is None:
+            attention_mask = torch.ones(x.shape[:2], dtype=torch.bool, device=x.device)
+        if attention_mask.shape != x.shape[:2]:
+            raise ValueError(f"attention_mask shape {attention_mask.shape} does not match input {x.shape[:2]}")
+        if not attention_mask.any(dim=1).all():
+            raise ValueError("attention_mask must contain at least one valid frame per sequence")
+        extended_mask = (1.0 - attention_mask[:, None, None, :].to(dtype=x.dtype)) * -10000.0
         x = self.l1(x)
         x = self.embedding(x)
         for layer in self.layers:
-            x = layer(x)[0]
-        x = torch.max(x, dim=1).values
+            x = layer(x, attention_mask=extended_mask)[0]
+        x = masked_max_pool(x, attention_mask)
         x = F.dropout(x, p=0.2, training=self.training)
         x = self.l2(x)
         return x
+
+
+def masked_max_pool(x, attention_mask):
+    """Pool only valid query positions, leaving padded queries out of logits."""
+    invalid = ~attention_mask.to(dtype=torch.bool).unsqueeze(-1)
+    return x.masked_fill(invalid, torch.finfo(x.dtype).min).max(dim=1).values
 
 
 def build_model(size, n_classes, device):
@@ -85,7 +98,7 @@ def predict_loader(model, loader, device):
     model.eval()
     uids, y_true, probs = [], [], []
     for batch in loader:
-        logits = model(batch["data"].to(device))
+        logits = model(batch["data"].to(device), attention_mask=batch["attention_mask"].to(device))
         probs.append(torch.softmax(logits, dim=-1).cpu().numpy())
         y_true.append(batch["label"].numpy() if torch.is_tensor(batch["label"]) else np.asarray(batch["label"]))
         uids += list(batch["uid"])
@@ -102,6 +115,10 @@ def crop_collate(max_frame_len):
     def collate(items):
         batch = default_collate(items)
         batch["data"] = batch["data"][:, :max_frame_len, :]
+        lengths = batch["length"].to(dtype=torch.long)
+        if (lengths < 1).any() or (lengths > max_frame_len).any():
+            raise ValueError(f"invalid sequence lengths for collate: {lengths.tolist()}")
+        batch["attention_mask"] = torch.arange(max_frame_len).unsqueeze(0) < lengths.unsqueeze(1)
         return batch
     return collate
 

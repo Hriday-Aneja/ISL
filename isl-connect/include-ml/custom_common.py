@@ -16,6 +16,10 @@ DEFAULT_RAW_ROOT = ROOT / "raw_dataset"
 DEFAULT_DATA_DIR = ROOT / "custom_data"
 DEFAULT_MODEL_DIR = ROOT / "models" / "custom_scratch"
 DEFAULT_CHECKPOINT = DEFAULT_MODEL_DIR / "custom_best.pth"
+CORRECTED_KEYPOINTS_DIRNAME = "keypoints_all_aspect_corrected"
+PREPROCESSING_VERSION = "custom-aspect-corrected-v1"
+ASPECT_REFERENCE_WIDTH = 16
+ASPECT_REFERENCE_HEIGHT = 9
 
 # dataset.py scales every normalized x/y by these constants for ALL clips.
 FRAME_WIDTH = 1920
@@ -24,6 +28,14 @@ POSE_LANDMARKS = 25
 HAND_LANDMARKS = 21
 FEATURE_DIM = POSE_LANDMARKS * 2 + HAND_LANDMARKS * 2 * 2  # 134
 MAX_POSITION_EMBEDDINGS = 256  # TransformerConfig default; hard upper bound on clip length
+
+
+def correct_x_aspect(x, width, height):
+    """Apply the dataset's single x correction to normalized coordinates."""
+    if width <= 0 or height <= 0:
+        raise ValueError(f"frame dimensions must be positive, got {width}x{height}")
+    factor = (width / height) / (ASPECT_REFERENCE_WIDTH / ASPECT_REFERENCE_HEIGHT)
+    return x * factor
 
 
 def apply_numpy_shims():

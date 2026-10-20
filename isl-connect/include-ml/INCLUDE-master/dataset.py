@@ -118,6 +118,7 @@ class KeypointsDataset(data.Dataset):
             .astype(np.float32)
         )
         final_data = np.concatenate((pose, h1, h2), -1)
+        valid_length = final_data.shape[0]
         final_data = np.pad(
             final_data,
             ((0, self.max_frame_len - final_data.shape[0]), (0, 0)),
@@ -126,6 +127,7 @@ class KeypointsDataset(data.Dataset):
         return {
             "uid": row.uid,
             "data": torch.FloatTensor(final_data),
+            "length": valid_length,
             "label": self.label_map[label],
             "lablel_string": label,
         }

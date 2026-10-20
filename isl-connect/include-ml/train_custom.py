@@ -26,7 +26,7 @@ import torch.nn.functional as F
 from torch.utils import data
 
 from custom_common import (DEFAULT_DATA_DIR, DEFAULT_MODEL_DIR, FRAME_HEIGHT, FRAME_WIDTH, INCLUDE_ROOT,
-                           MAX_POSITION_EMBEDDINGS, read_json, signer_from_uid, write_json)
+                           MAX_POSITION_EMBEDDINGS, PREPROCESSING_VERSION, read_json, signer_from_uid, write_json)
 from custom_model import build_model, crop_collate, load_checkpoint, predict_loader, summarize
 from dataset import KeypointsDataset  # INCLUDE-master
 from utils import AverageMeter, seed_everything  # INCLUDE-master
@@ -98,6 +98,8 @@ def main():
                  "input_size": 134, "max_frame_len": int(max_len), "frame_width": FRAME_WIDTH, "frame_height": FRAME_HEIGHT,
                  "flip_horizontal": bool(meta_ds["flip_horizontal"]), "train_fps": float(meta_ds["train_fps"]),
                  "target_fps": float(meta_ds["target_fps"]), "split_mode": meta_ds["mode"],
+                 "preprocessing_version": meta_ds.get("preprocessing_version", PREPROCESSING_VERSION),
+                 "keypoints_source": meta_ds.get("keypoints_source", "unknown"),
                  "counts": meta_ds["counts"], "seed": int(args.seed), "augmentations": bool(use_augs),
                  "deterministic_eval_dropout": True}
 
@@ -109,7 +111,7 @@ def main():
         for batch in train_loader:
             x, y = batch["data"].to(device), batch["label"].to(device)
             optimizer.zero_grad()
-            logits = model(x)
+            logits = model(x, attention_mask=batch["attention_mask"].to(device))
             loss = F.cross_entropy(logits, y, label_smoothing=args.label_smoothing)
             loss.backward()
             optimizer.step()
@@ -121,7 +123,7 @@ def main():
         with torch.no_grad():
             for batch in val_loader:
                 x, y = batch["data"].to(device), batch["label"].to(device)
-                logits = model(x)
+                logits = model(x, attention_mask=batch["attention_mask"].to(device))
                 vl.update(F.cross_entropy(logits, y).item(), len(y))
                 vcorrect += int((logits.argmax(1) == y).sum())
                 vseen += len(y)
