@@ -443,7 +443,7 @@ export function CommunicationRoom() {
               sidebarOpen={sidebarOpen}
               showSignRecognition={role === 'isl'}
               recognizingSigns={recognizingSigns}
-              showAvatar={role === 'hearing'}
+              showAvatar={role === 'isl'}
               avatarVisible={avatarVisible}
               onToggleMic={call.toggleMicrophone}
               onToggleCamera={call.toggleCamera}
@@ -486,7 +486,7 @@ export function CommunicationRoom() {
           onChangeTab={setSidebarTab}
           toolsContent={(
             <div className="flex min-h-0 flex-1 flex-col">
-              {role === 'hearing' && avatarVisible && (
+              {role === 'isl' && avatarVisible && (
                 <div className="h-48 shrink-0 border-b border-room-border">
                   <AvatarPanel
                     signs={avatar.signs}
