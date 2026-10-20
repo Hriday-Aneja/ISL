@@ -1,10 +1,30 @@
 import type { SignId } from '../types';
 
-// Canonical phrase -> sign sequence. Keys are already normalized (see
-// normalize() below): lowercase, no punctuation, single spaces.
 const PHRASE_TO_SIGNS: Record<string, SignId[]> = {
   hello: ['HELLO'],
   hi: ['HELLO'],
+  hey: ['HELLO'],
+  daughter: ['DAUGHTER'],
+  daughters: ['DAUGHTER'],
+  doctor: ['DOCTOR'],
+  doctors: ['DOCTOR'],
+  happy: ['HAPPY'],
+  house: ['HOUSE'],
+  houses: ['HOUSE'],
+  home: ['HOUSE'],
+  lawyer: ['LAWYER'],
+  lawyers: ['LAWYER'],
+  parent: ['PARENT'],
+  parents: ['PARENT'],
+  sad: ['SAD'],
+  student: ['STUDENT'],
+  students: ['STUDENT'],
+  teacher: ['TEACHER'],
+  teachers: ['TEACHERS'],
+  'train station': ['TRAIN_STATION'],
+  'railway station': ['TRAIN_STATION'],
+  waiter: ['WAITER'],
+  waiters: ['WAITER'],
   'thank you': ['THANK_YOU'],
   thanks: ['THANK_YOU'],
   please: ['PLEASE'],
@@ -37,14 +57,22 @@ const PHRASE_TO_SIGNS: Record<string, SignId[]> = {
   "i'm fine": ['I', 'FINE'],
   'what is your name': ['YOUR', 'NAME'],
   "what's your name": ['YOUR', 'NAME'],
+  water: ['WATER'],
+  food: ['FOOD'],
+  help: ['HELP'],
+  emergency: ['EMERGENCY'],
+  pain: ['PAIN'],
+  washroom: ['WASHROOM'],
+  name: ['NAME'],
 };
 
 function normalize(input: string): string {
   return input
     .toLowerCase()
-    .trim()
-    .replace(/[?.!,]/g, '')
-    .replace(/\s+/g, ' ');
+    .replace(/train-station/g, 'train station')
+    .replace(/[?.!,;:"()[\]{}]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 export interface PhraseMapResult {
@@ -53,24 +81,74 @@ export interface PhraseMapResult {
   signs: SignId[];
 }
 
-/**
- * Maps a free-form transcript (from the Web Speech API) onto the closest
- * known phrase in PHRASE_TO_SIGNS. Tries an exact match first, then a
- * substring match against known phrases so slightly longer utterances
- * ("um, I need water please") still resolve.
- */
+const SORTED_PHRASE_ENTRIES: Array<{
+  phrase: string;
+  tokens: string[];
+  signs: SignId[];
+}> = Object.entries(PHRASE_TO_SIGNS)
+  .map(([phrase, signs]) => ({
+    phrase,
+    tokens: phrase.split(' '),
+    signs,
+  }))
+  .sort((a, b) => b.tokens.length - a.tokens.length || b.phrase.length - a.phrase.length);
+
 export function mapPhraseToSigns(rawText: string): PhraseMapResult {
   const normalized = normalize(rawText);
-
-  if (PHRASE_TO_SIGNS[normalized]) {
-    return { matched: true, phrase: normalized, signs: PHRASE_TO_SIGNS[normalized] };
+  if (!normalized) {
+    return { matched: false, phrase: '', signs: [] };
   }
 
-  const knownPhrases = Object.keys(PHRASE_TO_SIGNS).sort((a, b) => b.length - a.length);
-  for (const phrase of knownPhrases) {
-    if (normalized.includes(phrase)) {
-      return { matched: true, phrase, signs: PHRASE_TO_SIGNS[phrase] };
+  if (PHRASE_TO_SIGNS[normalized]) {
+    return {
+      matched: true,
+      phrase: normalized,
+      signs: [...PHRASE_TO_SIGNS[normalized]],
+    };
+  }
+
+  const words = normalized.split(' ').filter(Boolean);
+  const collectedSigns: SignId[] = [];
+  const matchedPhrases: string[] = [];
+
+  let i = 0;
+  while (i < words.length) {
+    let matchedEntry: (typeof SORTED_PHRASE_ENTRIES)[number] | null = null;
+
+    for (const entry of SORTED_PHRASE_ENTRIES) {
+      const len = entry.tokens.length;
+      if (i + len > words.length) continue;
+
+      let allMatch = true;
+      for (let j = 0; j < len; j++) {
+        const cleanWord = words[i + j].replace(/^[^a-z0-9']+|[^a-z0-9']+$/g, '');
+        if (cleanWord !== entry.tokens[j]) {
+          allMatch = false;
+          break;
+        }
+      }
+
+      if (allMatch) {
+        matchedEntry = entry;
+        break;
+      }
     }
+
+    if (matchedEntry) {
+      collectedSigns.push(...matchedEntry.signs);
+      matchedPhrases.push(matchedEntry.phrase);
+      i += matchedEntry.tokens.length;
+    } else {
+      i += 1;
+    }
+  }
+
+  if (collectedSigns.length > 0) {
+    return {
+      matched: true,
+      phrase: matchedPhrases.join(' '),
+      signs: collectedSigns,
+    };
   }
 
   return { matched: false, phrase: normalized, signs: [] };

@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Mic, MicOff, AlertTriangle } from 'lucide-react';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 import { useTextToSpeech } from '../../hooks/useTextToSpeech';
 import type { useAvatarPlayer } from '../../hooks/useAvatarPlayer';
 import { mapPhraseToSigns } from '../../utils/phraseMapper';
+import { AvatarPanel } from './AvatarPanel';
 import { MessageCard } from './MessageCard';
 import { DebugPanel } from './DebugPanel';
 import type { SignId } from '../../types';
@@ -11,20 +12,10 @@ import type { SignId } from '../../types';
 interface SpeechPanelProps {
   onSendToAvatar: (text: string, signs: SignId[]) => void;
   onLiveTranscript: (text: string) => void;
-  /** Text injected from the quick-phrase / keyboard input flow, treated
-   * exactly like a finished spoken utterance. `nonce` forces re-processing
-   * even if the same phrase is sent twice in a row. */
   externalInput?: { text: string; nonce: number } | null;
   debugMode?: boolean;
-  /** Lifted up to CommunicationRoom (instead of owned here) so the shared
-   * call stage can also render the avatar's mini-pane from the same
-   * playback state. The hook itself — timing, playSigns(), completion — is
-   * untouched; only where it's instantiated moved up one level. */
   avatar: ReturnType<typeof useAvatarPlayer>;
-  /** The ISL user's translated sentence, received over the call. */
   receivedMessage?: string;
-  /** Rendered inside the floating translation panel over the call video
-   * (which supplies the frame and title) instead of as a standalone card. */
   embedded?: boolean;
 }
 
@@ -43,12 +34,14 @@ export function SpeechPanel({
   const [mappedSigns, setMappedSigns] = useState<SignId[]>([]);
   const [matched, setMatched] = useState<boolean | null>(null);
   const lastSentTranscriptRef = useRef('');
+  const processedFinalLengthRef = useRef(0);
 
-  // Integration point: microphone -> speech recognition -> text -> phrase/
-  // sign mapping -> avatar. processUtterance() is the single place that
-  // turns finished text (from either live speech or the keyboard/quick-
-  // phrase input) into a sign sequence and hands it to the avatar player.
-  const processUtterance = (text: string) => {
+  const onSendToAvatarRef = useRef(onSendToAvatar);
+  onSendToAvatarRef.current = onSendToAvatar;
+  const playSignsRef = useRef(avatar.playSigns);
+  playSignsRef.current = avatar.playSigns;
+
+  const processUtterance = useCallback((text: string) => {
     const trimmed = text.trim();
     if (!trimmed) return;
     const result = mapPhraseToSigns(trimmed);
@@ -57,16 +50,32 @@ export function SpeechPanel({
     setMatched(result.matched);
 
     if (result.matched && result.signs.length > 0) {
-      avatar.playSigns(result.signs);
+      playSignsRef.current(result.signs);
     }
-    onSendToAvatar(trimmed, result.matched ? result.signs : []);
-  };
+    onSendToAvatarRef.current(trimmed, result.matched ? result.signs : []);
+  }, []);
 
   useEffect(() => {
     if (!externalInput) return;
     processUtterance(externalInput.text);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [externalInput?.nonce]);
+  }, [externalInput, processUtterance]);
+
+  useEffect(() => {
+    const fullFinal = state.finalTranscript.trim();
+    if (!fullFinal) {
+      processedFinalLengthRef.current = 0;
+      return;
+    }
+
+    if (fullFinal.length <= processedFinalLengthRef.current) return;
+
+    const newSegment = fullFinal.slice(processedFinalLengthRef.current).trim();
+    processedFinalLengthRef.current = fullFinal.length;
+
+    if (newSegment) {
+      processUtterance(newSegment);
+    }
+  }, [state.finalTranscript, processUtterance]);
 
   const liveTranscript = (state.finalTranscript + ' ' + state.interimTranscript).trim();
   const isListening = state.status === 'listening';
@@ -85,17 +94,31 @@ export function SpeechPanel({
   const handleToggleMic = () => {
     if (isListening) {
       stop();
-      if (state.finalTranscript.trim()) {
-        processUtterance(state.finalTranscript);
+      const fullFinal = state.finalTranscript.trim();
+      const unprocessedFinal =
+        fullFinal.length > processedFinalLengthRef.current
+          ? fullFinal.slice(processedFinalLengthRef.current).trim()
+          : '';
+      const remainingText = [unprocessedFinal, state.interimTranscript.trim()]
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+
+      processedFinalLengthRef.current = fullFinal.length;
+      if (remainingText) {
+        processUtterance(remainingText);
       }
     } else {
       reset();
+      processedFinalLengthRef.current = 0;
       setSentence('');
       setMappedSigns([]);
       setMatched(null);
       start();
     }
   };
+
+  const showAvatarStage = avatar.isPlaying || avatar.signs.length > 0;
 
   return (
     <div className={embedded ? 'flex min-h-0 flex-1 flex-col' : 'stage-panel'}>
@@ -111,6 +134,17 @@ export function SpeechPanel({
         </div>
       )}
 
+      {showAvatarStage && (
+        <div className="h-56 shrink-0 border-b border-room-border">
+          <AvatarPanel
+            signs={avatar.signs}
+            isPlaying={avatar.isPlaying}
+            onPlaybackComplete={avatar.handlePlaybackComplete}
+            showQueue
+          />
+        </div>
+      )}
+
       <div
         className={`flex items-center gap-2 border-room-border px-4 py-3 ${
           embedded ? 'order-last border-t' : 'border-b'
@@ -119,7 +153,7 @@ export function SpeechPanel({
         {!supported ? (
           <div className="flex flex-1 items-center gap-2 text-sm text-alert">
             <AlertTriangle size={16} />
-            Speech-to-text isn't supported in this browser. Try Chrome or Edge.
+            Speech-to-text isn't supported in this browser. Try Chrome or Edge, or use the keyboard button.
           </div>
         ) : (
           <button
