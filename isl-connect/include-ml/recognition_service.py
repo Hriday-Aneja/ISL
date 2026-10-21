@@ -66,6 +66,9 @@ class RecognitionService:
             "feature_size": int(self.meta["input_size"]),
             "train_fps": self.train_fps,
             "preprocessing_version": self.meta.get("preprocessing_version"),
+            # Additive field: whether training clips were mirrored before MediaPipe. Clients that
+            # send frames (e.g. the Chrome extension) must flip to match; older clients ignore it.
+            "flip_horizontal": self.meta.get("flip_horizontal"),
             "model": "DeterministicEvalTransformer",
             "device": str(self.device),
         }

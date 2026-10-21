@@ -62,3 +62,17 @@ avatar/animations/*.fbx
 # OS/editor
 .DS_Store
 .vscode/
+
+# Custom INCLUDE training data and outputs
+include-ml/raw_dataset/
+include-ml/custom_data/
+include-ml/captures/
+include-ml/new_captures/
+
+# Temporary comparison scripts
+include-ml/compare_features.py
+
+# Python cache
+include-ml/**/__pycache__/
+__pycache__/
+*.py[cod]

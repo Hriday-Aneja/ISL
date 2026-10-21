@@ -1,0 +1,125 @@
+{
+  "_comment": "Default sign configuration. Labels come from include-ml/INCLUDE-master/label_maps/label_map_custom.json. At runtime the checkpoint's own labels (sent in the service 'ready' message) are authoritative. 'verified' means the sign was checked in live testing. It is false for every sign because none has been verified yet; set it in the extension Options page after your own live testing. Only verified AND enabled signs are appended to the text box automatically; all others appear as one-click suggestions.",
+  "signs": {
+    "beautiful": {
+      "display": "beautiful",
+      "verified": false,
+      "enabled": false
+    },
+    "bird": {
+      "display": "bird",
+      "verified": false,
+      "enabled": false
+    },
+    "daughter": {
+      "display": "daughter",
+      "verified": false,
+      "enabled": false
+    },
+    "doctor": {
+      "display": "doctor",
+      "verified": false,
+      "enabled": false
+    },
+    "dog": {
+      "display": "dog",
+      "verified": false,
+      "enabled": false
+    },
+    "father": {
+      "display": "father",
+      "verified": false,
+      "enabled": false
+    },
+    "happy": {
+      "display": "happy",
+      "verified": false,
+      "enabled": false
+    },
+    "he": {
+      "display": "he",
+      "verified": false,
+      "enabled": false
+    },
+    "hello": {
+      "display": "hello",
+      "verified": false,
+      "enabled": false
+    },
+    "house": {
+      "display": "house",
+      "verified": false,
+      "enabled": false
+    },
+    "i": {
+      "display": "I",
+      "verified": false,
+      "enabled": false
+    },
+    "lawyer": {
+      "display": "lawyer",
+      "verified": false,
+      "enabled": false
+    },
+    "mother": {
+      "display": "mother",
+      "verified": false,
+      "enabled": false
+    },
+    "parent": {
+      "display": "parent",
+      "verified": false,
+      "enabled": false
+    },
+    "restaurant": {
+      "display": "restaurant",
+      "verified": false,
+      "enabled": false
+    },
+    "sad": {
+      "display": "sad",
+      "verified": false,
+      "enabled": false
+    },
+    "she": {
+      "display": "she",
+      "verified": false,
+      "enabled": false
+    },
+    "son": {
+      "display": "son",
+      "verified": false,
+      "enabled": false
+    },
+    "student": {
+      "display": "student",
+      "verified": false,
+      "enabled": false
+    },
+    "teacher": {
+      "display": "teacher",
+      "verified": false,
+      "enabled": false
+    },
+    "thankyou": {
+      "display": "thank you",
+      "verified": false,
+      "enabled": false
+    },
+    "trainstation": {
+      "display": "train station",
+      "verified": false,
+      "enabled": false
+    },
+    "waiter": {
+      "display": "waiter",
+      "verified": false,
+      "enabled": false
+    },
+    "you": {
+      "display": "you",
+      "verified": false,
+      "enabled": false
+    }
+  }
+}

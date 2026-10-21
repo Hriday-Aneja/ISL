@@ -3,9 +3,9 @@
 A two-way communication frontend connecting Indian Sign Language (ISL) users
 and hearing users, now with a **real two-person WebRTC video call** in the
 Communication Room. Camera, microphone, speech-to-text, text-to-speech, and
-the call itself are all real browser functionality. Sign recognition and the
-3D avatar are mocked behind swappable interfaces — see "Where your modules
-plug in" below.
+the call itself are all real browser functionality. Sign recognition uses the
+existing 24-class `include-ml` checkpoint; the 3D avatar remains mocked behind
+its swappable interface.
 
 The Communication Room only ever shows end users the **final translated
 sentence** — "You signed / 'I need water.'" and "You said / 'Call a
@@ -18,12 +18,25 @@ message card and in the transcript drawer. It's off by default.
 
 ## Run it
 
-The video call needs two things running side by side: the frontend, and the
-small signaling server that introduces the two peers to each other (see
+The prototype uses three processes: the Python recognition service, the
+small signaling server that introduces the two peers to each other, and the
+frontend. The signaling server introduces the two peers (see
 "Real two-person video calling" below — no audio/video ever passes through
 it).
 
-**1. Signaling server** (in one terminal):
+**1. Recognition service** (in one terminal, from the repository root):
+
+```powershell
+cd isl-connect/include-ml
+venv\Scripts\python.exe -m pip install -r requirements-service.txt
+venv\Scripts\python.exe recognition_service.py
+```
+
+This loads `models/custom_scratch/custom_best.pth` once and listens on
+`ws://127.0.0.1:8765`. Use `--device cuda` when appropriate, or override
+`--model`, `--host`, and `--port`.
+
+**2. Signaling server** (in another terminal):
 
 ```bash
 cd server
@@ -33,15 +46,15 @@ npm start
 
 This starts on `http://localhost:4000` by default (override with `PORT`).
 
-**2. Frontend** (in another terminal, from the project root):
+**3. Frontend** (in another terminal, from the project root):
 
 ```bash
 npm install
 npm run dev
 ```
 
-Optionally copy `.env.example` to `.env.local` if you're pointing the
-frontend at a signaling server that isn't on `localhost:4000`.
+Copy `.env.example` to `.env.local` if you need to change either the signaling
+URL or `VITE_RECOGNITION_SERVICE_URL`.
 
 Then open the printed local URL (usually `http://localhost:5173`) in **Chrome
 or Edge** — the Web Speech API (speech-to-text) only ships in Chromium
@@ -87,10 +100,13 @@ Wi-Fi), that's a NAT-traversal case that needs a TURN server — see
 
 ### 1. Sign-recognition model
 
-`src/services/mockRecognition.ts` exports `mockRecognizeSigns(frame?)`, which
-resolves to `{ signs: SignId[], confidence: number }`. Replace its body with
-a real call to your model — every caller (`CameraPanel.tsx`) only depends on
-that function shape, so nothing else needs to change.
+`src/services/recognition.ts` streams JPEG frames from the video element fed by
+the existing WebRTC local stream. `include-ml/recognition_service.py` reuses
+`live_inference.py` preprocessing and `custom_model.load_checkpoint`, then
+returns the checkpoint label, top-5 predictions, confidence, frame counts, and
+inference time. The panel maps the predicted label into the existing sentence
+and WebRTC data-channel flow. The old mock adapter remains only as historical
+reference and is no longer called.
 
 ### 2. 3D avatar
 
@@ -138,9 +154,8 @@ useVideoCall()  (src/hooks/useVideoCall.ts)
   the call to work across stricter networks — nothing else needs to change.
 - **One camera stream, two consumers.** `useVideoCall()` opens the camera
   and mic exactly once. `CameraPanel` (the "ISL User" panel) displays that
-  same stream and reads frames from it for `mockRecognizeSigns()` — when you
-  swap in the real recognition model, it keeps reading from this same
-  stream, so there's still only one `getUserMedia()` call in the whole app.
+  same stream and sends frames from it to the recognition service, so there's
+  still only one `getUserMedia()` call in the whole app.
   Speech-to-text is unaffected: the Web Speech API manages its own
   microphone access independently of `getUserMedia()`.
 - **Where the peer's video shows up:** the left panel (`CameraPanel`) is
@@ -169,7 +184,7 @@ useVideoCall()  (src/hooks/useVideoCall.ts)
 |---|---|
 | Two-person video/audio call | Real (`WebRTC` via `useVideoCall`, signaling in `/server`) |
 | Camera preview | Real (`getUserMedia`, shared with the call) |
-| Sign recognition | Mocked (`mockRecognizeSigns`) |
+| Sign recognition | Real (`include-ml/recognition_service.py` + existing checkpoint) |
 | Sign sequence → sentence | Real deterministic mapping |
 | Text-to-speech | Real (`SpeechSynthesis`) |
 | Microphone / speech-to-text | Real (`SpeechRecognition` / `webkitSpeechRecognition`) |
@@ -179,6 +194,27 @@ useVideoCall()  (src/hooks/useVideoCall.ts)
 | Call controls (mic/camera/speaker/end) | Real — control the actual call, not just UI state |
 | Manual text input (keyboard icon in call bar) | Real — types feed the same phrase-mapping pipeline as speech |
 | Developer/debug mode | Real toggle in Settings; off by default, no separate build |
+
+## ML validation and all-class testing
+
+Validate the Transformer masking and checkpoint-compatible model shapes:
+
+```powershell
+cd isl-connect/include-ml
+venv\Scripts\python.exe -m unittest test_padding_mask.py
+```
+
+Evaluate all 24 classes on the existing test split. The command prints
+per-class recall, every misclassified clip, and writes a confusion matrix:
+
+```powershell
+venv\Scripts\python.exe evaluate_custom.py --split test --device cpu
+```
+
+Live testing should capture one sign at a time, stop the capture, and use
+Developer mode to inspect top-5 labels, confidence, frame counts, and model
+latency. The integration does not claim accuracy or real-time performance;
+those must be measured from this evaluation and real capture testing.
 
 ## UI structure (Communication Room)
 

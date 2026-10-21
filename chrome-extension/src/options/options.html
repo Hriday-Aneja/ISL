@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Samvaad settings</title><link rel="stylesheet" href="options.css"></head>
+<body><main>
+<h1>Samvaad settings</h1>
+<section><h2>Recognition service</h2>
+<label>Service URL <input id="serviceUrl" type="text" spellcheck="false"></label>
+<p class="hint">Local addresses only (ws://127.0.0.1:8765 by default) so video never leaves this computer.</p>
+<label>Mirror frames before sending
+<select id="mirror"><option value="auto">Auto (use the checkpoint's flip_horizontal)</option><option value="on">Always mirror</option><option value="off">Never mirror</option></select></label>
+<label>Frames per second sent <input id="captureFps" type="number" min="1" max="30" step="1"></label>
+<label>Frame width (px) <input id="captureWidth" type="number" min="320" max="1920" step="10"></label>
+<label>JPEG quality (0.3-0.95) <input id="jpegQuality" type="number" min="0.3" max="0.95" step="0.05"></label></section>
+<section><h2>Filtering (uses the model's real output)</h2>
+<label>Minimum confidence for automatic adding <input id="confidenceThreshold" type="number" min="0" max="1" step="0.01"></label>
+<label>Minimum gap between top-1 and top-2 <input id="minMargin" type="number" min="0" max="1" step="0.01"></label>
+<p class="hint">0 disables a filter. No recommended values are shipped because none have been measured on live data yet.</p></section>
+<section><h2>Sending</h2>
+<label>When you press Send
+<select id="sendMode"><option value="chat">Fill the Meet chat box and press its send button (falls back to copying)</option><option value="fill">Only fill the Meet chat box</option><option value="clipboard">Only copy to clipboard</option></select></label></section>
+<section><h2>Signs</h2>
+<p class="hint">All 24 classes stay in the model. A prediction is added to the message automatically only if its sign is <b>Verified</b> and <b>Enabled</b> and passes the filters above. Tick Verified only after you have tested the sign live. Other predictions appear as one-click suggestions marked <i>unverified</i>.</p>
+<table><thead><tr><th>Model label</th><th>Shown as</th><th>Verified</th><th>Enabled</th></tr></thead><tbody id="signs"></tbody></table></section>
+<button id="save" type="button">Save</button> <span id="status" role="status"></span>
+</main><script type="module" src="options.js"></script></body></html>

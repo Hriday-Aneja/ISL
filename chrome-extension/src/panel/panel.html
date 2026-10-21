@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Samvaad</title>
+<link rel="stylesheet" href="panel.css">
+</head>
+<body>
+<button id="pill" class="pill" type="button" aria-label="Open Samvaad panel"><span id="pillDot" class="dot"></span>Samvaad</button>
+<main id="card" class="card" hidden>
+  <header>
+    <strong>Samvaad</strong><span id="platformLabel" class="muted"></span>
+    <span class="spacer"></span>
+    <span id="connDot" class="dot" title="Service connection"></span><span id="connText" class="small">Off</span>
+    <button id="collapseBtn" class="icon" type="button" aria-label="Collapse panel" title="Collapse">&minus;</button>
+  </header>
+  <section class="session">
+    <button id="sessionBtn" class="primary" type="button">Start recognition</button>
+    <button id="grantBtn" type="button" hidden>Grant camera access</button>
+  </section>
+  <div id="previewWrap" class="preview" hidden><video id="preview" autoplay muted playsinline></video><span id="recBadge" class="rec" hidden>REC</span></div>
+  <section id="recordRow" class="row" hidden>
+    <button id="recordBtn" type="button">Record sign</button>
+    <span id="clipInfo" class="small muted"></span>
+  </section>
+  <section id="resultCard" class="result" hidden aria-live="polite"></section>
+  <label for="text" class="small">Message (editable)</label>
+  <textarea id="text" rows="4" placeholder="Recognized signs appear here. Edit freely, then press Send."></textarea>
+  <div class="row">
+    <button id="sendBtn" class="primary" type="button">Send</button>
+    <button id="copyBtn" type="button">Copy</button>
+    <button id="clearBtn" type="button">Clear</button>
+  </div>
+  <p id="message" class="message" role="status" aria-live="polite"></p>
+  <footer class="small muted">Video is processed only by your local service. <a id="optionsLink" href="#">Settings</a></footer>
+</main>
+<script type="module" src="panel.js"></script>
+</body>
+</html>

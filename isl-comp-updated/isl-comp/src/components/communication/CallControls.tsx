@@ -127,7 +127,7 @@ export function CallControls({
           aria-label={recognizingSigns ? 'Reading signs' : 'Read signs'}
           aria-pressed={recognizingSigns}
           title={recognizingSigns ? 'Reading signs' : 'Read signs'}
-          disabled={!cameraOn || recognizingSigns}
+          disabled={!cameraOn}
           className={recognizingSigns ? 'room-icon-btn-active' : 'room-icon-btn'}
         >
           <ScanFace size={18} />

@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Samvaad</title><link rel="stylesheet" href="popup.css"></head>
+<body>
+<h1>Samvaad <small>ISL Connect</small></h1>
+<dl>
+  <dt>Meeting page</dt><dd id="page">Checking…</dd>
+  <dt>Recognition service</dt><dd id="conn"><span class="dot" id="connDot"></span><span id="connText">Off</span></dd>
+  <dt>Camera</dt><dd id="camera">Off</dd>
+</dl>
+<button id="toggle" type="button" class="primary" disabled>Start recognition</button>
+<button id="showPanel" type="button" disabled>Show / hide panel</button>
+<p id="msg" role="status" aria-live="polite"></p>
+<p class="foot"><a href="#" id="opts">Settings</a> · Nothing is sent unless you press Send in the panel.</p>
+<script type="module" src="popup.js"></script>
+</body></html>

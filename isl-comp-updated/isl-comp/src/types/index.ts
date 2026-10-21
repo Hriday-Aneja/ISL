@@ -3,6 +3,25 @@
 // language. Extend this list — and the label map in data/signMappings.ts —
 // as vocabulary grows.
 export type SignId =
+  | 'BEAUTIFUL'
+  | 'BIRD'
+  | 'DAUGHTER'
+  | 'FATHER'
+  | 'HAPPY'
+  | 'HE'
+  | 'HOUSE'
+  | 'LAWYER'
+  | 'MOTHER'
+  | 'PARENT'
+  | 'RESTAURANT'
+  | 'SAD'
+  | 'SHE'
+  | 'SON'
+  | 'STUDENT'
+  | 'TEACHER'
+  | 'TRAIN_STATION'
+  | 'WAITER'
+  | 'DOG'
   | 'HELLO'
   | 'THANK_YOU'
   | 'PLEASE'
@@ -91,4 +110,10 @@ export interface AvatarProps {
 export interface RecognitionResult {
   signs: SignId[];
   confidence: number;
+  debug?: {
+    frames?: number;
+    modelFrames?: number;
+    inferenceMs?: number;
+    top?: Array<{ label: string; confidence: number }>;
+  };
 }

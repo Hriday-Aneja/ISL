@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ScanFace, VideoOff } from 'lucide-react';
 import { useTextToSpeech } from '../../hooks/useTextToSpeech';
-import { mockRecognizeSigns } from '../../services/mockRecognition';
+import { openRecognitionSession, type RecognitionSession } from '../../services/recognition';
 import { signsToSentence } from '../../data/signMappings';
 import { MessageCard } from './MessageCard';
 import { DebugPanel } from './DebugPanel';
@@ -46,6 +46,10 @@ export function CameraPanel({
   const [detectedSigns, setDetectedSigns] = useState<SignId[]>([]);
   const [confidence, setConfidence] = useState<number | undefined>(undefined);
   const [sentence, setSentence] = useState('');
+  const [recognitionError, setRecognitionError] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<{ frames?: number; modelFrames?: number; inferenceMs?: number }>();
+  const sessionRef = useRef<RecognitionSession | null>(null);
+  const sessionPromiseRef = useRef<Promise<RecognitionSession> | null>(null);
   const lastRecognitionRequestRef = useRef(recognitionRequest);
 
   // The <video> element stays permanently mounted so the stream can be
@@ -60,23 +64,55 @@ export function CameraPanel({
     }
   }, [stream]);
 
-  // Integration point: camera frame -> recognition model -> signs -> sentence.
-  // Swap mockRecognizeSigns() for the real model call; everything downstream
-  // (signsToSentence, the MessageCard, TTS) stays the same. Still reads from
-  // this local <video> element — fed by the shared call stream, same as before.
+  const stopRecognition = async () => {
+    const session = sessionRef.current || (sessionPromiseRef.current ? await sessionPromiseRef.current : null);
+    sessionRef.current = null;
+    sessionPromiseRef.current = null;
+    if (!session) return;
+    try {
+      const result = await session.stop();
+      setDetectedSigns(result.signs);
+      setConfidence(result.confidence);
+      setDebugInfo(result.debug);
+      const text = signsToSentence(result.signs);
+      setSentence(text);
+      onNewSentence(text, result.signs);
+    } catch (error) {
+      setRecognitionError(error instanceof Error ? error.message : 'Recognition failed.');
+    } finally {
+      setRecognizing(false);
+      onRecognitionStatusChange?.(false);
+    }
+  };
+
   const runRecognition = async () => {
+    if (recognizing) {
+      await stopRecognition();
+      return;
+    }
+    if (!videoRef.current) return;
     setRecognizing(true);
     onRecognitionStatusChange?.(true);
+    setRecognitionError(null);
     setSentence('');
-    const result = await mockRecognizeSigns(videoRef.current);
-    setDetectedSigns(result.signs);
-    setConfidence(result.confidence);
-    const text = signsToSentence(result.signs);
-    setSentence(text);
-    setRecognizing(false);
-    onRecognitionStatusChange?.(false);
-    onNewSentence(text, result.signs);
+    const promise = openRecognitionSession(videoRef.current, (update) => {
+      if (update.status === 'error') setRecognitionError(update.message || 'Recognition service error.');
+      if (update.debug) setDebugInfo(update.debug);
+    });
+    sessionPromiseRef.current = promise;
+    try {
+      sessionRef.current = await promise;
+    } catch (error) {
+      setRecognizing(false);
+      onRecognitionStatusChange?.(false);
+      setRecognitionError(error instanceof Error ? error.message : 'Could not start recognition.');
+    }
   };
+
+  useEffect(() => () => {
+    sessionRef.current?.close();
+    sessionRef.current = null;
+  }, []);
 
   useEffect(() => {
     if (recognitionRequest === lastRecognitionRequestRef.current) return;
@@ -131,7 +167,7 @@ export function CameraPanel({
       >
         <button onClick={runRecognition} disabled={!isActive || recognizing} className="btn-primary flex-1">
           <ScanFace size={16} />
-          {recognizing ? 'Reading…' : 'Read my signs'}
+          {recognizing ? 'Stop reading' : 'Read my signs'}
         </button>
       </div>
 
@@ -149,6 +185,10 @@ export function CameraPanel({
           <ScanFace size={13} className="animate-pulse text-signal" />
           Reading your signs…
         </p>
+      )}
+
+      {recognitionError && (
+        <p className="border-b border-room-border px-4 py-2 text-xs text-alert">{recognitionError}</p>
       )}
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3.5">
@@ -178,13 +218,20 @@ export function CameraPanel({
         )}
 
         {debugMode && (
-          <DebugPanel
-            label="ISL recognition"
-            detectedSigns={detectedSigns}
-            confidence={confidence}
-            recognitionState={recognizing ? 'recognizing' : sentence ? 'done' : 'idle'}
-            tone="signal"
-          />
+          <>
+            <DebugPanel
+              label="ISL recognition"
+              detectedSigns={detectedSigns}
+              confidence={confidence}
+              recognitionState={recognizing ? 'recognizing' : sentence ? 'done' : 'idle'}
+              tone="signal"
+            />
+            {debugInfo && (
+              <p className="mt-2 font-mono text-[10px] text-room-text-soft/80">
+                frames={debugInfo.frames ?? '-'} model_frames={debugInfo.modelFrames ?? '-'} inference_ms={debugInfo.inferenceMs ?? '-'}
+              </p>
+            )}
+          </>
         )}
       </div>
     </div>
