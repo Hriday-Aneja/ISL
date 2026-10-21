@@ -1,7 +1,9 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><title>Samvaad camera access</title>
-<style>body{font:15px/1.5 system-ui,sans-serif;max-width:480px;margin:48px auto;padding:0 16px}button{font:inherit;padding:10px 16px;border-radius:8px;border:0;background:#1565c0;color:#fff;cursor:pointer}#out{margin-top:16px}</style></head>
-<body><h1>Allow camera for Samvaad</h1>
-<p>Samvaad reads your camera only after you press Start recognition, and sends frames only to the recognition service on this computer. Click below, then choose <b>Allow</b> in Chrome's prompt. This page releases the camera immediately.</p>
-<button id="go" type="button">Allow camera</button><p id="out" role="status"></p>
+<html lang="en"><head><meta charset="utf-8"><title>Samvaad device access</title>
+<style>body{font:15px/1.5 system-ui,sans-serif;max-width:480px;margin:48px auto;padding:0 16px}button{font:inherit;padding:10px 16px;border-radius:8px;border:0;background:#1565c0;color:#fff;cursor:pointer;margin-right:8px}#out{margin-top:16px}</style></head>
+<body><h1>Allow camera or microphone for Samvaad</h1>
+<p><b>Camera:</b> Samvaad reads your camera only after you press Start recognition, and sends frames only to the recognition service on this computer.</p>
+<p><b>Microphone:</b> only used if you choose "My microphone" on the Speech &rarr; Sign tab and press Start listening. By default recognition runs on-device.</p>
+<p>Click the button you need, then choose <b>Allow</b> in Chrome's prompt. This page releases the device immediately.</p>
+<button id="go" type="button">Allow camera</button><button id="goMic" type="button">Allow microphone</button><p id="out" role="status"></p>
 <script src="permissions.js"></script></body></html>

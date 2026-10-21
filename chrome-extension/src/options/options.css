@@ -5,3 +5,4 @@ section{border:1px solid var(--line);border-radius:10px;padding:8px 16px 12px;ma
 input[type=text],input[type=number],select{display:block;width:100%;margin-top:4px;padding:6px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:inherit}
 .hint{color:var(--muted);font-size:12px;margin:4px 0}table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:4px 6px;border-bottom:1px solid var(--line)}
 td input[type=text]{margin:0}button{padding:8px 18px;border-radius:8px;border:0;background:var(--accent);color:#fff;font:inherit;cursor:pointer}
+label.check{display:flex;gap:8px;align-items:flex-start}label.check input{margin-top:4px}

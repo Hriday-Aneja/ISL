@@ -65,13 +65,88 @@
     }
   }
 
+
+  // ---------- Live captions (speech -> sign) ----------
+  // Same caveat as the chat selectors above: Meet's DOM is not a public API and this has NOT been verified against the
+  // live Meet UI by the author. Structure assumed (from public Meet-caption scrapers): a region labelled "Captions";
+  // inside it one row per speaker turn, each row holding the speaker's avatar <img>, the speaker's name, then the
+  // caption text, which Meet rewrites in place while the person is still talking. Rows are found via their avatar
+  // images, so no obfuscated class names are used. If the layout is not recognised we report that instead of guessing.
+  const CAPTION_REGION_SELECTORS = ['[role="region"][aria-label="Captions"]', '[role="region"][aria-label*="aption" i]'];
+  const CAPTIONS_ON_SELECTORS = ['button[aria-label*="Turn off captions" i]'];
+  const CAPTIONS_OFF_SELECTORS = ['button[aria-label*="Turn on captions" i]'];
+  const MAX_ROWS = 8;
+  const MAX_TEXT = 2000;
+
+  function findCaptionRegion(root = document) {
+    for (const sel of CAPTION_REGION_SELECTORS) {
+      const el = root.querySelector(sel);
+      if (el) return el;
+    }
+    return null;
+  }
+
+  const rowIds = new WeakMap();
+  let nextRowId = 1;
+  const rowKey = (el) => { if (!rowIds.has(el)) rowIds.set(el, nextRowId++); return `r${rowIds.get(el)}`; };
+
+  function rowElements(region) {
+    const rows = [];
+    for (const img of region.querySelectorAll('img')) {
+      let node = img;
+      // climb while this subtree still holds only this one avatar: that subtree is the row
+      while (node.parentElement && node.parentElement !== region && node.parentElement.querySelectorAll('img').length === 1) node = node.parentElement;
+      if (!rows.includes(node)) rows.push(node);
+    }
+    return rows;
+  }
+
+  function parseRow(el) {
+    const controls = new Set(Array.from(el.querySelectorAll('button,[role="button"]')).map((b) => (b.innerText || b.textContent || '').trim()).filter(Boolean));
+    const lines = String(el.innerText || el.textContent || '').split(/\n+/).map((l) => l.trim()).filter((l) => l && !controls.has(l));
+    if (lines.length < 2) return { speaker: lines[0] || '', text: '' }; // a name with no words yet
+    return { speaker: lines[0], text: lines.slice(1).join(' ').slice(0, MAX_TEXT) };
+  }
+
+  /** @returns {{ state: 'no-region'|'watching'|'unrecognized-layout', rows: {key: string, speaker: string, text: string}[] }} */
+  function readCaptions(root = document) {
+    const region = findCaptionRegion(root);
+    if (!region) return { state: 'no-region', rows: [] };
+    const els = rowElements(region);
+    if (els.length === 0) {
+      const anyText = String(region.innerText || '').trim();
+      return { state: anyText ? 'unrecognized-layout' : 'watching', rows: [] }; // empty region = captions on, nobody speaking yet
+    }
+    const rows = els.slice(-MAX_ROWS).map((el) => ({ key: rowKey(el), ...parseRow(el) })).filter((r) => r.text);
+    return { state: 'watching', rows };
+  }
+
+  const anyMatch = (selectors, root = document) => selectors.map((s) => root.querySelector(s)).find(Boolean) || null;
+
+  async function enableCaptions() {
+    try {
+      if (anyMatch(CAPTIONS_ON_SELECTORS)) return { ok: true, detail: 'Captions are already on.' };
+      const btn = anyMatch(CAPTIONS_OFF_SELECTORS);
+      if (!btn) return { ok: false, detail: 'The captions button was not found. Turn captions on with the CC button in Meet.' };
+      btn.click();
+      await sleep(600);
+      return anyMatch(CAPTIONS_ON_SELECTORS) || findCaptionRegion()
+        ? { ok: true, detail: 'Captions turned on.' }
+        : { ok: true, detail: 'Asked Meet to turn captions on. If nothing appears, use the CC button in Meet.' };
+    } catch (err) {
+      return { ok: false, detail: `Could not turn captions on: ${err && err.message}` };
+    }
+  }
+
   globalThis.SamvaadPlatforms.register({
     id: 'meet',
     label: 'Google Meet',
     matches: (loc) => loc.hostname === 'meet.google.com',
     isMeetingPage: (loc) => loc.hostname === 'meet.google.com' && MEETING_PATH.test(loc.pathname),
     sendChat,
+    readCaptions,
+    enableCaptions,
     // exported for the fixture-based test only
-    _internals: { findChatInput, findSendButton, MEETING_PATH },
+    _internals: { findChatInput, findSendButton, MEETING_PATH, findCaptionRegion, rowElements, parseRow },
   });
 })();

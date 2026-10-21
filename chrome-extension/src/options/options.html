@@ -17,6 +17,17 @@
 <section><h2>Sending</h2>
 <label>When you press Send
 <select id="sendMode"><option value="chat">Fill the Meet chat box and press its send button (falls back to copying)</option><option value="fill">Only fill the Meet chat box</option><option value="clipboard">Only copy to clipboard</option></select></label></section>
+<section><h2>Speech &rarr; Sign</h2>
+<label>Listen to by default
+<select id="speechSource"><option value="captions">Meeting captions (other participants, via Meet's own captions)</option><option value="mic">My microphone</option></select></label>
+<label>Microphone language
+<select id="speechLang"><option value="en-IN">English (India)</option><option value="en-US">English (US)</option><option value="en-GB">English (UK)</option><option value="hi-IN">Hindi</option></select></label>
+<label class="check"><input id="speechLocalOnly" type="checkbox"> Microphone recognition must run on-device (never use Chrome's cloud speech service)</label>
+<p class="hint">On-device recognition needs a recent Chrome and a downloaded language pack; if it is unavailable Samvaad says so and does not start, rather than sending audio to a server. Untick only if you accept cloud recognition for the microphone. Meet captions are produced by Google Meet itself; Samvaad only reads them from the page.</p>
+<label class="check"><input id="autoSign" type="checkbox"> Sign new speech automatically (typing text and the per-line Sign button always work)</label>
+<label class="check"><input id="includeOwnCaptions" type="checkbox"> Also sign captions of my own speech (labelled "You" in an English Meet UI)</label>
+<label>Avatar speed
+<select id="avatarSpeed"><option value="0.75">0.75&times;</option><option value="1">1&times;</option><option value="1.25">1.25&times;</option><option value="1.5">1.5&times;</option><option value="2">2&times;</option></select></label></section>
 <section><h2>Signs</h2>
 <p class="hint">All 24 classes stay in the model. A prediction is added to the message automatically only if its sign is <b>Verified</b> and <b>Enabled</b> and passes the filters above. Tick Verified only after you have tested the sign live. Other predictions appear as one-click suggestions marked <i>unverified</i>.</p>
 <table><thead><tr><th>Model label</th><th>Shown as</th><th>Verified</th><th>Enabled</th></tr></thead><tbody id="signs"></tbody></table></section>

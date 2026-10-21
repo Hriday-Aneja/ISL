@@ -13,6 +13,10 @@
 //          mode: 'chat'  fill the platform's chat box and press its send button
 //                'fill'  only fill the chat box (the user presses the platform's own send)
 //          Must NEVER throw; report failure through { ok: false, detail } so the panel can fall back to the clipboard.
+//     readCaptions() -> { state, rows }     OPTIONAL (speech -> sign). Snapshot of the platform's live captions:
+//          state: 'no-region' (captions off / not found) | 'watching' | 'unrecognized-layout'
+//          rows:  [{ key, speaker, text }]  key must be stable for the same on-screen caption row between calls
+//     enableCaptions() -> Promise<{ ok, detail }>   OPTIONAL. Best-effort press of the platform's captions button.
 //   }
 (function () {
   const adapters = [];

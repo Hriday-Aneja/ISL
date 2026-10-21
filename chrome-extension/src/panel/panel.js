@@ -3,6 +3,7 @@ import { RecognitionClient, ClipState, ConnState } from '../lib/recognition-clie
 import { CameraSource } from '../lib/camera.js';
 import { loadSettings, loadDefaultSigns, resolveSigns } from '../lib/settings.js';
 import { evaluatePrediction, appendWord } from '../lib/filters.js';
+import { initSpeechTab } from './speech-tab.js';
 
 const $ = (id) => document.getElementById(id);
 const els = Object.fromEntries(['pill', 'pillDot', 'card', 'platformLabel', 'connDot', 'connText', 'collapseBtn', 'sessionBtn', 'grantBtn', 'previewWrap',
@@ -12,7 +13,7 @@ const platform = new URLSearchParams(location.search).get('platform') || 'unknow
 const S = {
   settings: null, defaults: null, signs: {}, client: null, camera: null,
   sessionActive: false, starting: false, expanded: false, mirror: true, mirrorWhy: '', captureTimer: null, clipTimer: null,
-  chatWaiters: new Map(), nextId: 1, cameraBlocked: false,
+  chatWaiters: new Map(), nextId: 1, cameraBlocked: false, tab: 'sign',
 };
 
 // ---------- relay to service worker ----------
@@ -25,6 +26,8 @@ function connectPort() {
 }
 const post = (msg) => { try { port && port.postMessage(msg); } catch { /* reconnecting */ } };
 setInterval(() => post({ type: 'ping' }), 20000);
+
+const speech = initSpeechTab({ $, post, isVisible: () => speechVisible(), onUnread: (n) => setUnread(n) });
 
 function currentStatus() {
   const c = S.client;
@@ -56,6 +59,8 @@ function onRelayMessage(msg) {
   } else if (msg.type === 'chat-result') {
     const w = S.chatWaiters.get(msg.id);
     if (w) { S.chatWaiters.delete(msg.id); w(msg); }
+  } else if (msg.type === 'captions-snapshot' || msg.type === 'captions-enable-result') {
+    speech.onRelay(msg);
   }
 }
 
@@ -67,7 +72,25 @@ function setExpanded(on) {
   els.card.hidden = !on;
   document.body.style.overflow = 'hidden';
   post({ type: 'resize', mode: on ? 'expanded' : 'collapsed' });
+  speech.onVisibility(speechVisible());
 }
+
+// ---------- tabs ----------
+const speechVisible = () => S.expanded && S.tab === 'speech';
+function selectTab(name, focus = false) {
+  S.tab = name;
+  for (const [id, key] of [['tabSign', 'sign'], ['tabSpeech', 'speech']]) {
+    const on = key === name;
+    $(id).setAttribute('aria-selected', String(on));
+    $(id).tabIndex = on ? 0 : -1;
+    if (on && focus) $(id).focus();
+  }
+  $('paneSign').hidden = name !== 'sign';
+  $('paneSpeech').hidden = name !== 'speech';
+  els.connDot.hidden = els.connText.hidden = name !== 'sign'; // the service connection only concerns sign recognition
+  speech.onVisibility(speechVisible());
+}
+function setUnread(n) { const b = $('tabBadge'); b.hidden = n === 0; b.textContent = String(n); }
 function renderControls() {
   const c = S.client;
   const clip = c ? c.clipState : ClipState.IDLE;
@@ -256,8 +279,15 @@ els.grantBtn.addEventListener('click', () => post({ type: 'open-permissions' }))
 els.sendBtn.addEventListener('click', onSend);
 els.copyBtn.addEventListener('click', async () => say((await copyText(els.text.value)) ? 'Copied to clipboard.' : 'Copy failed.', 'ok'));
 els.clearBtn.addEventListener('click', () => { els.text.value = ''; els.resultCard.hidden = true; say(''); els.text.focus(); });
+$('tabSign').addEventListener('click', () => selectTab('sign'));
+$('tabSpeech').addEventListener('click', () => selectTab('speech'));
+for (const id of ['tabSign', 'tabSpeech']) {
+  $(id).addEventListener('keydown', (e) => { // arrow keys move between tabs (WAI-ARIA tabs pattern)
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); selectTab(S.tab === 'sign' ? 'speech' : 'sign', true); }
+  });
+}
 els.optionsLink.addEventListener('click', (e) => { e.preventDefault(); window.open(chrome.runtime.getURL('src/options/options.html'), '_blank'); });
-addEventListener('pagehide', () => { teardown(); });
+addEventListener('pagehide', () => { teardown(); speech.stop(); });
 
 els.platformLabel.textContent = platform === 'meet' ? ' · Google Meet' : '';
 connectPort();

@@ -4,6 +4,9 @@ A Manifest V3 Chrome extension that lets an ISL signer use the **existing** Samv
 (`include-ml/recognition_service.py`, 24-class Transformer) during a Google Meet call. Recognized signs appear as editable
 text in a small panel; **nothing is ever sent until you press Send**.
 
+Version 0.2 adds the **second direction, Speech → Sign**: what other people say (read from Meet's live captions, or from your
+microphone) is shown as a transcript and played back by a signing avatar. See section 4.
+
 ```
 Meet tab                                                       your computer only
 ┌──────────────────────────────┐   JPEG frames over ws://127.0.0.1:8765   ┌──────────────────────────┐
@@ -20,7 +23,10 @@ Meet tab                                                       your computer onl
 | Item | Status |
 |---|---|
 | Extension code, popup, panel, options, camera, WebSocket client | Implemented |
-| Unit tests (17), syntax/manifest check | Pass |
+| Unit tests (47, incl. Speech → Sign logic), syntax/manifest check | Pass |
+| **Speech → Sign** (captions/mic/typed text → transcript → avatar), browser test in real Chromium against the **fake Meet page** (38 checks) | Pass |
+| Sign → Text in a real Meet call | Reported working by the project owner (Oct 2026); not re-verified here |
+| **Speech → Sign in real Google Meet** (caption scraping, real microphone, real H.264 avatar playback) | **Not tested**: needs a human in a real meeting |
 | Browser test in real Chromium against a **fake Meet page** + **real `recognition_service.py`** (27 checks) | Pass |
 | Python service protocol check (10 checks) with a **random-weight** checkpoint | Pass |
 | Existing Python test `test_padding_mask.py`, both React app builds | Pass |
@@ -100,6 +106,45 @@ python ../chrome-extension/tools/protocol_check.py --url ws://127.0.0.1:8765
 Whether (a) the panel appeared, (b) the camera prompt/permission flow worked, (c) **Send** posted to chat (or just filled it), and (d)
 which Meet UI language/version you used. Meet's chat selectors are the most likely thing to need a tweak (`src/content/platforms/meet.js`).
 
+## 4. Speech → Sign (captions or microphone → text → avatar)
+
+Open the **Speech → Sign** tab in the panel.
+
+1. Choose **Meeting captions** (other participants) or **My microphone**, then press **Start listening**.
+2. For captions: press **Turn on Meet captions** (or use Meet's CC button). Samvaad reads the caption text from the page; it does
+   not record meeting audio.
+3. Speech appears in the transcript once the words stop changing (about 1.5 s, 0.7 s after a full stop), then the avatar signs it.
+   The line above the transcript shows the caption live, before it is signed.
+4. Anything can also be typed into the box at the bottom. Each transcript line has a **Sign** button to replay it.
+
+```
+Meet captions (DOM) ──► content script ──► panel: CaptionTracker ─┐
+Microphone (Web Speech, on-device) ───────────────────────────────┼─► transcript ─► sign-mapper ─► avatar clips
+Typed text ───────────────────────────────────────────────────────┘                    (config/avatar-signs.json)
+```
+
+What you will see, and why:
+
+- **Words the avatar cannot sign are never hidden.** They stay in the transcript, underlined and listed under "Not covered by the avatar".
+  A sign that is in the phrase table but has no video clip is shown as a text card with its name. Only function words
+  (`a, an, the, is, are, am, was, were, be`; editable in `skipWords`) are left out without a flag.
+- **Coverage today is tiny.** Only 11 signs have a clip: daughter, doctor, happy, hello, house, lawyer, parent, sad, student,
+  train station, waiter. The phrase table maps 34 signs, so 23 of them (I, need, water, help, thank you, yes, no ...) currently show as text.
+  Adding coverage means adding a clip under `assets/avatar/` and one line in `clips` in `config/avatar-signs.json`.
+- **Order is English order**, except where a phrase entry reorders it (e.g. "where is the washroom" → WHERE WASHROOM). Nothing here
+  claims to implement ISL grammar.
+- **Backlog:** each clip is 2.5–6 s, so signing falls behind fast speech. Over 30 waiting signs, the oldest are dropped and the panel says how many.
+  Speed (0.75–2×) and **Clear** are in the panel.
+- **The avatar only runs while the Speech tab is open.** Lines that arrive while you are on the Sign → Text tab (or the panel is collapsed)
+  are kept with a Sign button and an unread badge instead of building a stale queue.
+- **Your own captions ("You")** are ignored unless enabled in Settings (the label is language-dependent).
+- **Microphone mode hears only this computer's microphone**, not other participants. It is for a hearing person next to you, for testing, or for demos.
+  Recognition runs **on-device** by default (needs a recent Chrome and a one-time language pack, installed from the panel). If on-device is
+  unavailable Samvaad stops with a message; it does **not** silently use Chrome's cloud speech service. Turning "must run on-device" off
+  in Settings allows cloud recognition for the microphone.
+- Nothing is stored: the transcript lives in the panel's memory and disappears when the panel closes.
+- Meet's captions are generated by Google Meet as part of the meeting; Samvaad adds no extra upload for them.
+
 ## Design
 
 - **Panel is an extension iframe**, not injected DOM. Meet's page CSP can't block its WebSocket or camera code, and key presses
@@ -122,11 +167,16 @@ which Meet UI language/version you used. Meet's chat selectors are the most like
 manifest.json
 config/default-signs.json            24 labels, all unverified
 src/background/service-worker.js     relay + badge
-src/content/content.js               platform-independent: mounts panel, brokers chat posting
+src/content/content.js               platform-independent: mounts panel, brokers chat posting, polls captions
 src/content/platforms/registry.js    adapter interface (documented at top of file)
-src/content/platforms/meet.js        Google Meet adapter  <-- all Meet-specific code
-src/panel/                           UI + session controller
-src/lib/                             recognition-client (WS protocol), camera, filters, settings
+src/content/platforms/meet.js        Google Meet adapter (chat + captions)  <-- all Meet-specific code
+src/panel/panel.js                   Sign -> Text session controller, tabs
+src/panel/speech-tab.js              Speech -> Sign tab (captions / mic / typed text, transcript, avatar stage)
+src/lib/                             recognition-client (WS protocol), camera, filters, settings,
+                                     caption-tracker (settles live captions), sign-mapper (text -> signs),
+                                     avatar-player (clip queue), speech-recognizer (on-device mic)
+config/avatar-signs.json             sign -> clip, labels, phrase table, skipWords
+assets/avatar/*.mp4                  the 11 avatar clips (copied from isl-comp/public/avatar-videos)
 src/popup/  src/options/  src/permissions/
 tests/                               node unit tests + tests/e2e (Chromium + fake Meet fixture)
 tools/                               check-syntax, make_fixture_checkpoint.py, protocol_check.py
@@ -147,11 +197,14 @@ Open questions for Zoom: its chat DOM, whether the web client's CSP/iframe rules
 cd isl-connect/chrome-extension
 npm install                  # only playwright-core, for the browser test
 npm run check                # syntax + manifest references
-npm test                     # 17 unit tests (protocol client incl. reconnect/races, filters, settings)
+npm test                     # 47 unit tests (protocol client, filters, settings, caption tracker, sign mapper, avatar queue, mic recognizer)
 
 # Browser test: loads the extension in Chromium, fake camera + fake Meet page, real service (start it first)
 xvfb-run -a env SERVICE_URL=ws://127.0.0.1:8765 node tests/e2e/run-e2e.mjs      # Linux headless
 # set CHROME_PATH to your Chromium/Chrome binary if it is not at /opt/pw-browsers/chromium-1194/chrome-linux/chrome
+
+# Speech -> Sign browser test (fake Meet page with a captions region; no recognition service needed)
+xvfb-run -a node tests/e2e/run-e2e-speech.mjs
 
 # Python
 cd ../include-ml && python -m unittest test_padding_mask
@@ -173,3 +226,14 @@ it for real recognition.
 - Chrome throttles timers in hidden tabs, so keep the Meet tab in the foreground while signing.
 - Icons are simple placeholders.
 - The `isl-connect/frontend` build needs `npm install` in `avatar/` as well (pre-existing; it imports `../../../avatar`).
+- **Speech → Sign: Meet's caption markup is an assumption.** `meet.js` finds the region labelled "Captions" and each speaker row by its avatar
+  image, following what public Meet-caption scrapers report. It has not been checked against live Meet. If the region exists but rows are not
+  recognised, the panel says so instead of guessing. Only `meet.js` needs to change then. Captions must be turned on in the meeting.
+- Meet rewrites captions while people speak, so signing starts about 1.5 s after the words stop changing, and continuous speech is flushed
+  every few seconds with the newest two words held back. A word Meet corrects after it was signed is not re-signed.
+- **The avatar clips look AI-generated** (a 3D character, with a small sparkle mark in the corner of each video). Whether each clip is a
+  correct ISL sign has not been checked; have an ISL signer review them before they are shown as ISL.
+- The avatar clips are H.264 `.mp4`. Chrome plays them; the Chromium builds used by Playwright cannot, so automated tests cover the queue
+  and the text fallback, not actual video playback.
+- The speech-to-sign phrase table is the one from the web app (`isl-comp`), including its choices such as "home" → HOUSE. Review it with an ISL signer.
+- Microphone permission for an extension iframe is requested through `src/permissions/permissions.html` ("Allow microphone"), the same way as the camera; not exercised in a real prompt.

@@ -15,25 +15,62 @@
     <span id="connDot" class="dot" title="Service connection"></span><span id="connText" class="small">Off</span>
     <button id="collapseBtn" class="icon" type="button" aria-label="Collapse panel" title="Collapse">&minus;</button>
   </header>
-  <section class="session">
-    <button id="sessionBtn" class="primary" type="button">Start recognition</button>
-    <button id="grantBtn" type="button" hidden>Grant camera access</button>
-  </section>
-  <div id="previewWrap" class="preview" hidden><video id="preview" autoplay muted playsinline></video><span id="recBadge" class="rec" hidden>REC</span></div>
-  <section id="recordRow" class="row" hidden>
-    <button id="recordBtn" type="button">Record sign</button>
-    <span id="clipInfo" class="small muted"></span>
-  </section>
-  <section id="resultCard" class="result" hidden aria-live="polite"></section>
-  <label for="text" class="small">Message (editable)</label>
-  <textarea id="text" rows="4" placeholder="Recognized signs appear here. Edit freely, then press Send."></textarea>
-  <div class="row">
-    <button id="sendBtn" class="primary" type="button">Send</button>
-    <button id="copyBtn" type="button">Copy</button>
-    <button id="clearBtn" type="button">Clear</button>
+  <div class="tabs" role="tablist" aria-label="Direction">
+    <button id="tabSign" class="tab" role="tab" type="button" aria-selected="true" aria-controls="paneSign">Sign &rarr; Text</button>
+    <button id="tabSpeech" class="tab" role="tab" type="button" aria-selected="false" aria-controls="paneSpeech" tabindex="-1">Speech &rarr; Sign<span id="tabBadge" class="badge" hidden></span></button>
   </div>
-  <p id="message" class="message" role="status" aria-live="polite"></p>
-  <footer class="small muted">Video is processed only by your local service. <a id="optionsLink" href="#">Settings</a></footer>
+
+  <div id="paneSign" class="tabpanel" role="tabpanel" aria-labelledby="tabSign">
+    <section class="session">
+      <button id="sessionBtn" class="primary" type="button">Start recognition</button>
+      <button id="grantBtn" type="button" hidden>Grant camera access</button>
+    </section>
+    <div id="previewWrap" class="preview" hidden><video id="preview" autoplay muted playsinline></video><span id="recBadge" class="rec" hidden>REC</span></div>
+    <section id="recordRow" class="row" hidden>
+      <button id="recordBtn" type="button">Record sign</button>
+      <span id="clipInfo" class="small muted"></span>
+    </section>
+    <section id="resultCard" class="result" hidden aria-live="polite"></section>
+    <label for="text" class="small">Message (editable)</label>
+    <textarea id="text" rows="4" placeholder="Recognized signs appear here. Edit freely, then press Send."></textarea>
+    <div class="row">
+      <button id="sendBtn" class="primary" type="button">Send</button>
+      <button id="copyBtn" type="button">Copy</button>
+      <button id="clearBtn" type="button">Clear</button>
+    </div>
+    <p id="message" class="message" role="status" aria-live="polite"></p>
+  </div>
+
+  <div id="paneSpeech" class="tabpanel" role="tabpanel" aria-labelledby="tabSpeech" hidden>
+    <section class="row">
+      <select id="srcSelect" aria-label="Listen to"><option value="captions">Meeting captions</option><option value="mic">My microphone</option></select>
+      <button id="listenBtn" class="primary" type="button">Start listening</button>
+    </section>
+    <section id="helpRow" class="row wrap">
+      <button id="capOnBtn" type="button">Turn on Meet captions</button>
+      <button id="installBtn" type="button" hidden>Install on-device speech</button>
+      <button id="micGrantBtn" type="button" hidden>Grant microphone access</button>
+    </section>
+    <p id="speechMessage" class="message" role="status" aria-live="polite"></p>
+    <div id="stage" class="stage" data-sign="" data-mode="text">
+      <video id="avatarVideo" muted playsinline preload="auto" aria-label="Sign avatar"></video>
+      <div id="stageCard" class="stage-card idle"><strong id="stageText">Avatar ready</strong><small id="stageSub"></small></div>
+    </div>
+    <div class="row small">
+      <span id="stageInfo" class="muted grow" role="status" aria-live="polite">Not listening</span>
+      <select id="speedSelect" aria-label="Avatar speed"><option value="0.75">0.75&times;</option><option value="1">1&times;</option><option value="1.25">1.25&times;</option><option value="1.5">1.5&times;</option><option value="2">2&times;</option></select>
+      <button id="skipBtn" type="button" title="Stop signing and clear the queue">Clear</button>
+    </div>
+    <label class="small row"><input id="autoSign" type="checkbox"> Sign new speech automatically</label>
+    <p id="liveLine" class="live small muted" aria-live="off"></p>
+    <ol id="turns" class="turns" aria-label="Transcript" aria-live="polite"></ol>
+    <form id="typeForm" class="row" autocomplete="off">
+      <input id="typeInput" type="text" placeholder="Type something to sign" aria-label="Type text to sign">
+      <button id="typeBtn" class="primary" type="submit">Sign</button>
+    </form>
+  </div>
+
+  <footer class="small muted">Video and microphone audio are processed on this computer. <a id="optionsLink" href="#">Settings</a></footer>
 </main>
 <script type="module" src="panel.js"></script>
 </body>

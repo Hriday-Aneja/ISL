@@ -1,10 +1,12 @@
 import { loadSettings, saveSettings, loadDefaultSigns, resolveSigns, validateServiceUrl, DEFAULT_SETTINGS } from '../lib/settings.js';
 const $ = (id) => document.getElementById(id);
-const FIELDS = ['serviceUrl', 'mirror', 'captureFps', 'captureWidth', 'jpegQuality', 'confidenceThreshold', 'minMargin', 'sendMode'];
+const FIELDS = ['serviceUrl', 'mirror', 'captureFps', 'captureWidth', 'jpegQuality', 'confidenceThreshold', 'minMargin', 'sendMode', 'speechSource', 'speechLang', 'avatarSpeed'];
+const CHECKS = ['speechLocalOnly', 'autoSign', 'includeOwnCaptions'];
 
 (async () => {
   const [settings, defaults] = await Promise.all([loadSettings(), loadDefaultSigns()]);
   for (const f of FIELDS) $(f).value = settings[f];
+  for (const f of CHECKS) $(f).checked = settings[f];
   const labels = Object.keys(defaults.signs);
   const signs = resolveSigns(labels, defaults, settings.signOverrides);
   const body = $('signs');
@@ -23,6 +25,7 @@ const FIELDS = ['serviceUrl', 'mirror', 'captureFps', 'captureWidth', 'jpegQuali
   $('save').addEventListener('click', async () => {
     const next = { ...DEFAULT_SETTINGS };
     for (const f of FIELDS) next[f] = $(f).value;
+    for (const f of CHECKS) next[f] = $(f).checked;
     const check = validateServiceUrl(next.serviceUrl);
     if (!check.ok) { $('status').textContent = check.error; return; }
     next.signOverrides = {};

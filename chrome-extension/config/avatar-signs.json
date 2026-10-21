@@ -1,0 +1,296 @@
+{
+  "_comment": "Speech -> Sign configuration. Ported from isl-comp (phraseMapper.ts, signMappings.ts, AvatarPanel.tsx). clips: sign ID -> avatar video relative to the extension root; a sign with no clip is shown as a text card, never silently skipped. phrases: lowercase phrase -> sign sequence; the longest matching phrase wins. skipWords: function words that are not signed and not flagged as missing.",
+  "skipWords": [
+    "a",
+    "an",
+    "the",
+    "is",
+    "are",
+    "am",
+    "was",
+    "were",
+    "be"
+  ],
+  "clips": {
+    "DAUGHTER": "assets/avatar/daughter.mp4",
+    "DOCTOR": "assets/avatar/doctor.mp4",
+    "HAPPY": "assets/avatar/happy.mp4",
+    "HELLO": "assets/avatar/hello.mp4",
+    "HOUSE": "assets/avatar/house.mp4",
+    "LAWYER": "assets/avatar/lawyer.mp4",
+    "PARENT": "assets/avatar/parent.mp4",
+    "SAD": "assets/avatar/sad.mp4",
+    "STUDENT": "assets/avatar/student.mp4",
+    "TRAIN_STATION": "assets/avatar/train-station.mp4",
+    "WAITER": "assets/avatar/waiter.mp4"
+  },
+  "labels": {
+    "BEAUTIFUL": "Beautiful",
+    "BIRD": "Bird",
+    "DAUGHTER": "Daughter",
+    "FATHER": "Father",
+    "HAPPY": "Happy",
+    "HE": "He",
+    "HOUSE": "House",
+    "LAWYER": "Lawyer",
+    "MOTHER": "Mother",
+    "PARENT": "Parent",
+    "RESTAURANT": "Restaurant",
+    "SAD": "Sad",
+    "SHE": "She",
+    "SON": "Son",
+    "STUDENT": "Student",
+    "TEACHER": "Teacher",
+    "TRAIN_STATION": "Train station",
+    "WAITER": "Waiter",
+    "DOG": "Dog",
+    "HELLO": "Hello",
+    "THANK_YOU": "Thank you",
+    "PLEASE": "Please",
+    "SORRY": "Sorry",
+    "YES": "Yes",
+    "NO": "No",
+    "I": "I",
+    "YOU": "You",
+    "MY": "My",
+    "YOUR": "Your",
+    "NEED": "Need",
+    "WATER": "Water",
+    "FOOD": "Food",
+    "HELP": "Help",
+    "DOCTOR": "Doctor",
+    "TEACHERS": "Teachers",
+    "EMERGENCY": "Emergency",
+    "PAIN": "Pain",
+    "STOP": "Stop",
+    "GOODBYE": "Goodbye",
+    "FINE": "Fine",
+    "WHERE": "Where",
+    "WASHROOM": "Washroom",
+    "NAME": "Name",
+    "HOW": "How",
+    "ME": "Me"
+  },
+  "phrases": {
+    "hello": [
+      "HELLO"
+    ],
+    "hi": [
+      "HELLO"
+    ],
+    "hey": [
+      "HELLO"
+    ],
+    "daughter": [
+      "DAUGHTER"
+    ],
+    "daughters": [
+      "DAUGHTER"
+    ],
+    "doctor": [
+      "DOCTOR"
+    ],
+    "doctors": [
+      "DOCTOR"
+    ],
+    "happy": [
+      "HAPPY"
+    ],
+    "house": [
+      "HOUSE"
+    ],
+    "houses": [
+      "HOUSE"
+    ],
+    "home": [
+      "HOUSE"
+    ],
+    "lawyer": [
+      "LAWYER"
+    ],
+    "lawyers": [
+      "LAWYER"
+    ],
+    "parent": [
+      "PARENT"
+    ],
+    "parents": [
+      "PARENT"
+    ],
+    "sad": [
+      "SAD"
+    ],
+    "student": [
+      "STUDENT"
+    ],
+    "students": [
+      "STUDENT"
+    ],
+    "teacher": [
+      "TEACHER"
+    ],
+    "teachers": [
+      "TEACHER"
+    ],
+    "train station": [
+      "TRAIN_STATION"
+    ],
+    "railway station": [
+      "TRAIN_STATION"
+    ],
+    "waiter": [
+      "WAITER"
+    ],
+    "waiters": [
+      "WAITER"
+    ],
+    "thank you": [
+      "THANK_YOU"
+    ],
+    "thanks": [
+      "THANK_YOU"
+    ],
+    "please": [
+      "PLEASE"
+    ],
+    "sorry": [
+      "SORRY"
+    ],
+    "yes": [
+      "YES"
+    ],
+    "no": [
+      "NO"
+    ],
+    "i need water": [
+      "I",
+      "NEED",
+      "WATER"
+    ],
+    "i want water": [
+      "I",
+      "NEED",
+      "WATER"
+    ],
+    "please give me water": [
+      "I",
+      "NEED",
+      "WATER"
+    ],
+    "can i have water": [
+      "I",
+      "NEED",
+      "WATER"
+    ],
+    "i need food": [
+      "I",
+      "NEED",
+      "FOOD"
+    ],
+    "i want food": [
+      "I",
+      "NEED",
+      "FOOD"
+    ],
+    "i am hungry": [
+      "I",
+      "NEED",
+      "FOOD"
+    ],
+    "i need help": [
+      "I",
+      "NEED",
+      "HELP"
+    ],
+    "help me": [
+      "HELP",
+      "ME"
+    ],
+    "please help me": [
+      "HELP",
+      "ME"
+    ],
+    "call a doctor": [
+      "DOCTOR",
+      "EMERGENCY"
+    ],
+    "i need a doctor": [
+      "DOCTOR",
+      "EMERGENCY"
+    ],
+    "this is an emergency": [
+      "EMERGENCY"
+    ],
+    "where is the washroom": [
+      "WHERE",
+      "WASHROOM"
+    ],
+    "where is the bathroom": [
+      "WHERE",
+      "WASHROOM"
+    ],
+    "where is the toilet": [
+      "WHERE",
+      "WASHROOM"
+    ],
+    "i am in pain": [
+      "I",
+      "PAIN"
+    ],
+    "i am in a lot of pain": [
+      "I",
+      "PAIN"
+    ],
+    "stop": [
+      "STOP"
+    ],
+    "goodbye": [
+      "GOODBYE"
+    ],
+    "bye": [
+      "GOODBYE"
+    ],
+    "how are you": [
+      "HOW",
+      "YOU",
+      "FINE"
+    ],
+    "i am fine": [
+      "I",
+      "FINE"
+    ],
+    "i'm fine": [
+      "I",
+      "FINE"
+    ],
+    "what is your name": [
+      "YOUR",
+      "NAME"
+    ],
+    "what's your name": [
+      "YOUR",
+      "NAME"
+    ],
+    "water": [
+      "WATER"
+    ],
+    "food": [
+      "FOOD"
+    ],
+    "help": [
+      "HELP"
+    ],
+    "emergency": [
+      "EMERGENCY"
+    ],
+    "pain": [
+      "PAIN"
+    ],
+    "washroom": [
+      "WASHROOM"
+    ],
+    "name": [
+      "NAME"
+    ]
+  }
+}

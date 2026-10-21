@@ -11,6 +11,13 @@ export const DEFAULT_SETTINGS = Object.freeze({
   mirror: 'auto',                    // 'auto' (use checkpoint flip_horizontal) | 'on' | 'off'
   sendMode: 'chat',                  // 'chat' | 'fill' | 'clipboard'
   signOverrides: {},                 // { label: { verified?: bool, enabled?: bool, display?: string } }
+  // ---- Speech -> Sign ----
+  speechSource: 'captions',          // 'captions' (Meet's live captions: other participants) | 'mic' (this computer's microphone)
+  speechLang: 'en-IN',               // microphone recognition language (BCP-47)
+  speechLocalOnly: true,             // microphone recognition must run on-device; never fall back to Chrome's cloud service
+  autoSign: true,                    // avatar signs new speech automatically (typed text and the Sign button always work)
+  avatarSpeed: 1,                    // 0.5-2 playback rate of the avatar clips
+  includeOwnCaptions: false,         // also sign Meet captions labelled "You" (your own speech)
 });
 
 const LOOPBACK = new Set(['127.0.0.1', 'localhost', '[::1]', '::1']);
@@ -24,6 +31,7 @@ export function validateServiceUrl(value) {
   return { ok: true, url: url.toString().replace(/\/$/, '') };
 }
 
+const bool = (v, dflt) => (typeof v === 'boolean' ? v : v === 'true' ? true : v === 'false' ? false : dflt);
 const clamp = (n, lo, hi, dflt) => (Number.isFinite(Number(n)) ? Math.min(hi, Math.max(lo, Number(n))) : dflt);
 
 export function normalizeSettings(raw = {}) {
@@ -39,6 +47,12 @@ export function normalizeSettings(raw = {}) {
     mirror: ['auto', 'on', 'off'].includes(raw.mirror) ? raw.mirror : d.mirror,
     sendMode: ['chat', 'fill', 'clipboard'].includes(raw.sendMode) ? raw.sendMode : d.sendMode,
     signOverrides: raw.signOverrides && typeof raw.signOverrides === 'object' ? raw.signOverrides : {},
+    speechSource: ['captions', 'mic'].includes(raw.speechSource) ? raw.speechSource : d.speechSource,
+    speechLang: /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/.test(String(raw.speechLang || '')) ? String(raw.speechLang) : d.speechLang,
+    speechLocalOnly: bool(raw.speechLocalOnly, d.speechLocalOnly),
+    autoSign: bool(raw.autoSign, d.autoSign),
+    avatarSpeed: clamp(raw.avatarSpeed, 0.5, 2, d.avatarSpeed),
+    includeOwnCaptions: bool(raw.includeOwnCaptions, d.includeOwnCaptions),
   };
 }
 
@@ -75,5 +89,10 @@ export async function saveSettings(settings) {
 
 export async function loadDefaultSigns() {
   const res = await fetch(chrome.runtime.getURL('config/default-signs.json'));
+  return res.json();
+}
+
+export async function loadAvatarConfig() {
+  const res = await fetch(chrome.runtime.getURL('config/avatar-signs.json'));
   return res.json();
 }
