@@ -21,6 +21,20 @@
   ::selection {
     background: #cfe9e4;
   }
+
+  /* Landing page sits on a dark surface, so its headings and focus ring
+     must not inherit the light-theme colours above. */
+  .landing h1,
+  .landing h2,
+  .landing h3 {
+    @apply text-cream;
+  }
+  .landing :focus-visible {
+    outline-color: #ffb547;
+  }
+  .landing ::selection {
+    background: rgba(255, 181, 71, 0.35);
+  }
 }
 
 @layer components {
@@ -73,5 +87,18 @@
   }
   .stage-panel {
     @apply flex h-full flex-col overflow-hidden rounded-lg border border-room-border bg-room-surface shadow-stage;
+  }
+}
+
+/* Respect reduced-motion: stop every landing animation and show the first
+   caption statically. */
+@media (prefers-reduced-motion: reduce) {
+  .landing *,
+  .landing *::before,
+  .landing *::after {
+    animation: none !important;
+  }
+  .landing [data-cycle='0'] {
+    opacity: 1 !important;
   }
 }
