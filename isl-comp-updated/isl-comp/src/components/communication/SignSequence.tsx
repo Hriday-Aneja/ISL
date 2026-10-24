@@ -19,7 +19,7 @@ export function SignSequence({
       : 'bg-voice-soft border-voice/30 text-voice-deep';
 
   const activeToneClasses =
-    tone === 'signal' ? 'bg-signal border-signal text-white' : 'bg-voice border-voice text-ink';
+    tone === 'signal' ? 'bg-signal border-signal text-[#06231d]' : 'bg-voice border-voice text-ink';
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
@@ -32,7 +32,7 @@ export function SignSequence({
           >
             {SIGN_LABELS[sign] ?? sign}
           </span>
-          {i < signs.length - 1 && <ArrowRight size={12} className="text-ink-soft/50" />}
+          {i < signs.length - 1 && <ArrowRight size={12} className="text-room-text-soft/50" />}
         </div>
       ))}
     </div>

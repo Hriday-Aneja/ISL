@@ -4,35 +4,22 @@
 
 @layer base {
   html {
-    background-color: #f7f8f5;
+    background-color: #0a0c16;
+    color-scheme: dark;
   }
   body {
-    @apply bg-paper text-ink font-body antialiased;
+    @apply bg-night text-cream font-body antialiased;
   }
   h1,
   h2,
   h3 {
-    @apply font-display text-ink;
+    @apply font-display text-cream;
   }
   :focus-visible {
-    outline: 2px solid #0f766e;
+    outline: 2px solid #ffb547;
     outline-offset: 2px;
   }
   ::selection {
-    background: #cfe9e4;
-  }
-
-  /* Landing page sits on a dark surface, so its headings and focus ring
-     must not inherit the light-theme colours above. */
-  .landing h1,
-  .landing h2,
-  .landing h3 {
-    @apply text-cream;
-  }
-  .landing :focus-visible {
-    outline-color: #ffb547;
-  }
-  .landing ::selection {
     background: rgba(255, 181, 71, 0.35);
   }
 }
@@ -40,7 +27,7 @@
 @layer components {
   /* ---------- shared surfaces ---------- */
   .card {
-    @apply bg-white border border-line rounded-md shadow-panel;
+    @apply bg-night-card border border-white/10 rounded-md shadow-stage;
   }
   .sign-chip {
     @apply font-body text-[11px] font-semibold tracking-wide uppercase px-2 py-1 rounded-sm border;
@@ -48,39 +35,39 @@
 
   /* ---------- buttons ---------- */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-sm px-4 py-2.5 text-sm font-medium transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed;
   }
   .btn-primary {
-    @apply btn bg-signal text-white hover:bg-signal-deep;
+    @apply btn bg-voice text-[#1A1204] shadow-[0_8px_28px_rgba(255,181,71,0.25)] hover:-translate-y-0.5 hover:bg-voice-deep;
   }
   .btn-secondary {
-    @apply btn bg-white text-ink border border-line hover:bg-paper-dim;
+    @apply btn bg-white/[0.04] text-room-text border border-white/15 hover:bg-white/[0.08];
   }
   .btn-voice {
-    @apply btn bg-voice text-ink hover:bg-voice-deep hover:text-white;
+    @apply btn bg-voice text-[#1A1204] shadow-[0_8px_28px_rgba(255,181,71,0.25)] hover:-translate-y-0.5 hover:bg-voice-deep;
   }
   .btn-danger {
     @apply btn bg-alert text-white hover:bg-[#c23f3f];
   }
   .btn-room-secondary {
-    @apply btn bg-white/[0.06] text-room-text border border-white/10 hover:bg-white/[0.1];
+    @apply btn bg-white/[0.05] text-room-text border border-white/15 hover:bg-white/[0.1];
   }
   .icon-btn {
-    @apply inline-flex items-center justify-center w-11 h-11 rounded-sm border border-line bg-white text-ink-soft hover:text-ink hover:bg-paper-dim transition-colors duration-150;
+    @apply inline-flex items-center justify-center w-11 h-11 rounded-xl border border-white/10 bg-white/[0.04] text-room-text-soft hover:text-room-text hover:bg-white/[0.08] transition-colors duration-150;
   }
   .icon-btn-active {
-    @apply icon-btn bg-signal-soft border-signal/40 text-signal-deep;
+    @apply icon-btn bg-signal/15 border-signal/40 text-signal;
   }
   .icon-btn-danger-active {
-    @apply icon-btn bg-alert-soft border-alert/40 text-alert;
+    @apply icon-btn bg-alert/15 border-alert/40 text-alert;
   }
 
   /* ---------- Communication Room: dark, immersive shell ---------- */
   .room-icon-btn {
-    @apply inline-flex items-center justify-center w-11 h-11 rounded-sm border border-white/10 bg-white/[0.04] text-room-text-soft hover:text-room-text hover:bg-white/[0.08] transition-colors duration-150;
+    @apply inline-flex items-center justify-center w-11 h-11 rounded-xl border border-white/10 bg-white/[0.04] text-room-text-soft hover:text-room-text hover:bg-white/[0.08] transition-colors duration-150;
   }
   .room-icon-btn-active {
-    @apply room-icon-btn bg-signal/20 border-signal/40 text-white;
+    @apply room-icon-btn bg-signal/15 border-signal/40 text-signal;
   }
   .room-icon-btn-danger {
     @apply room-icon-btn bg-alert/15 border-alert/50 text-[#ff9a90] hover:bg-alert hover:text-white hover:border-alert;

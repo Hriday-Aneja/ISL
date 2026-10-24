@@ -278,19 +278,27 @@ export function CommunicationRoom() {
 
   if (ended) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-room-bg px-6 text-center">
-        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-signal/15 text-signal">
+      <div className="relative flex min-h-screen flex-col items-center justify-center gap-5 overflow-hidden bg-room-bg px-6 text-center">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-24 -top-24 h-[360px] w-[360px] animate-blob-drift rounded-full bg-signal opacity-[0.16] blur-[100px]"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-24 -left-24 h-[320px] w-[320px] animate-blob-drift rounded-full bg-voice opacity-[0.14] blur-[100px] [animation-delay:-6s]"
+        />
+        <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-signal/15 text-signal">
           <ShieldCheck size={22} />
         </span>
-        <div>
-          <h1 className="font-display text-2xl font-semibold text-room-text">Session ended</h1>
+        <div className="relative">
+          <h1 className="relative font-display text-3xl font-bold tracking-tight text-room-text">Session ended</h1>
           <p className="mt-2 max-w-sm text-sm text-room-text-soft">
             Camera, microphone, and the call have been stopped. The transcript from this session
             is no longer being recorded.
           </p>
         </div>
-        <div className="flex gap-3">
-          <Link to="/" className="room-icon-btn h-auto w-auto px-4 py-2.5 text-sm font-medium">
+        <div className="relative flex gap-3">
+          <Link to="/" className="room-icon-btn h-auto w-auto rounded-full px-5 py-2.5 text-sm font-semibold">
             Back to home
           </Link>
           <button onClick={handleStartNewSession} className="btn-primary">
@@ -355,15 +363,17 @@ export function CommunicationRoom() {
       ref={roomRef}
       className="flex h-screen flex-col overflow-hidden bg-room-bg supports-[height:100dvh]:h-dvh"
     >
-      <div className="flex h-14 shrink-0 items-center justify-between border-b border-room-border bg-room-surface px-3 sm:px-4">
+      <div className="flex h-14 shrink-0 items-center justify-between border-b border-room-border bg-room-surface/90 px-3 backdrop-blur-md sm:px-4">
         <div className="flex items-center gap-3">
           <Link to="/" className="room-icon-btn h-9 w-9" aria-label="Back to home" title="Back to home">
             <ArrowLeft size={16} />
           </Link>
           <div className="leading-tight">
             <p className="flex items-center gap-2 text-sm font-semibold text-room-text">
-              <Hand size={15} className="text-signal" />
-              SAMVAAD
+              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-voice text-[#1A1204]">
+                <Hand size={13} strokeWidth={2.4} />
+              </span>
+              <span className="font-display text-base font-bold tracking-tight">Samvaad</span>
             </p>
             <p className="max-w-[36vw] truncate text-[11px] text-room-text-soft">
               Room {call.roomId} · {ROLE_LABEL[role]} · {displayName || 'Guest'}

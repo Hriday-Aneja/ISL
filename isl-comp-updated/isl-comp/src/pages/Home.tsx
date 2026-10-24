@@ -1,16 +1,21 @@
 import { Link } from 'react-router-dom';
 import {
+  ArrowLeftRight,
   ArrowRight,
-  Check,
-  MessageCircle,
-  Mic,
-  PersonStanding,
-  Type,
-  Video,
-  Volume2,
+  ChevronDown,
+  Globe,
+  GraduationCap,
+  Link2,
+  Scale,
+  Stethoscope,
+  UtensilsCrossed,
   Waypoints,
+  Play,
+  Video,
 } from 'lucide-react';
 import { HeroOrb } from '../components/landing/HeroOrb';
+import { LandingShell } from '../components/landing/LandingShell';
+import { CountUp, Reveal } from '../components/landing/Reveal';
 import { SIGN_LABELS } from '../data/signMappings';
 
 const SIGN_WORDS = Array.from(new Set(Object.values(SIGN_LABELS)));
@@ -21,32 +26,7 @@ const gradientText =
 
 export function Home() {
   return (
-    <div className="landing relative min-h-screen overflow-hidden bg-night font-dm text-cream">
-      {/* Background: dotted grid + drifting colour glows */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.1)_1px,transparent_1px)] [background-size:30px_30px]"
-        style={{
-          WebkitMaskImage:
-            'radial-gradient(ellipse 75% 65% at 70% 30%, #000 25%, transparent 80%)',
-          maskImage: 'radial-gradient(ellipse 75% 65% at 70% 30%, #000 25%, transparent 80%)',
-        }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-32 -top-32 h-[520px] w-[520px] animate-blob-drift rounded-full bg-mint opacity-[0.22] blur-[100px]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -left-36 top-[520px] h-[420px] w-[420px] animate-blob-drift rounded-full bg-saffron opacity-[0.18] blur-[100px] [animation-delay:-6s]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute left-[38%] top-[280px] h-[360px] w-[360px] animate-blob-drift rounded-full bg-[#7C6CFF] opacity-[0.18] blur-[100px] [animation-delay:-3s]"
-      />
-
-      <LandingNav />
-
+    <LandingShell>
       {/* Hero */}
       <section className="relative mx-auto grid max-w-[1312px] items-center gap-10 px-6 pb-20 pt-10 lg:grid-cols-2 lg:px-16">
         <div>
@@ -160,96 +140,363 @@ export function Home() {
         </div>
       </section>
 
-      {/* Flow preview */}
-      <section className="relative mx-auto max-w-[1312px] border-t border-white/[0.08] px-6 py-20 lg:px-16">
-        <h2 className="font-bricolage text-3xl font-bold tracking-tight">How the room works</h2>
-        <p className="mt-2 max-w-xl text-mist">
-          Two directions run in the same session, side by side.
-        </p>
+      {/* Features */}
+      <section className={`${WRAP} py-24`}>
+        <Reveal>
+          <SectionHead
+            eyebrow="Features"
+            title={
+              <>
+                <span className={gradientText}>Everything a conversation </span>
+                <span className="text-saffron">needs</span>
+              </>
+            }
+            sub="Built around one idea: both people should be able to speak in the language they already use."
+          />
+        </Reveal>
 
-        <div className="mt-10 grid gap-6 sm:grid-cols-2">
-          <FlowCard
-            tone="mint"
-            title="ISL → Hearing"
-            steps={[
-              { icon: Video, label: 'Camera' },
-              { icon: Waypoints, label: 'Sign recognition' },
-              { icon: Type, label: 'Sentence' },
-              { icon: Volume2, label: 'Speech' },
-            ]}
-          />
-          <FlowCard
-            tone="saffron"
-            title="Hearing → ISL"
-            steps={[
-              { icon: Mic, label: 'Microphone' },
-              { icon: Type, label: 'Speech-to-text' },
-              { icon: Waypoints, label: 'Phrase mapping' },
-              { icon: PersonStanding, label: 'Avatar' },
-            ]}
-          />
+        <div className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <Reveal className="lg:col-span-2">
+            <FeatureCard
+              icon={ArrowLeftRight}
+              tone="mint"
+              title="Two-way, one room"
+              text="The signer is captioned and the speaker is signed back to, in the same session. Nobody has to wait for the other."
+            >
+              <div className="mt-6 space-y-3">
+                <div className="flex items-end gap-3">
+                  <span className="rounded-full bg-mint/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-mint">
+                    Signed
+                  </span>
+                  <p className="rounded-2xl rounded-bl-md bg-white/[0.07] px-4 py-2.5 text-[15px] text-cream">
+                    Hello, doctor. I need help.
+                  </p>
+                </div>
+                <div className="flex flex-row-reverse items-end gap-3">
+                  <span className="rounded-full bg-saffron/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-saffron">
+                    Spoken
+                  </span>
+                  <p className="rounded-2xl rounded-br-md bg-saffron px-4 py-2.5 text-[15px] font-medium text-[#1A1204]">
+                    Please sit down. What is the pain?
+                  </p>
+                </div>
+              </div>
+            </FeatureCard>
+          </Reveal>
+
+          <Reveal delay={0.1}>
+            <FeatureCard
+              icon={Video}
+              tone="saffron"
+              title="A signing avatar"
+              text="Spoken words become a sequence of signs, played back one by one by an avatar."
+            >
+              <div className="mt-6 flex flex-wrap gap-2">
+                {['Hello', 'Doctor', 'Thank you'].map((w, i) => (
+                  <span
+                    key={w}
+                    className={`inline-flex items-center gap-1.5 rounded-[10px] px-3 py-1.5 text-xs font-semibold uppercase tracking-wide ${
+                      i === 0 ? 'bg-saffron text-[#1A1204]' : 'bg-white/[0.06] text-mist'
+                    }`}
+                  >
+                    <Play size={11} fill="currentColor" /> {w}
+                  </span>
+                ))}
+              </div>
+            </FeatureCard>
+          </Reveal>
+
+          <Reveal>
+            <FeatureCard
+              icon={Link2}
+              tone="mint"
+              title="Join with a link"
+              text="Open a room and send the link. The other person joins straight from their browser."
+            >
+              <p className="mt-6 truncate rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 font-mono text-xs text-mist">
+                samvaad / room / <span className="text-mint">ab12-cd34</span>
+              </p>
+            </FeatureCard>
+          </Reveal>
+
+          <Reveal delay={0.1}>
+            <FeatureCard
+              icon={Globe}
+              tone="saffron"
+              title="Works with Google Meet"
+              text="A Chrome extension adds sign captions to the video calls you already use."
+            />
+          </Reveal>
+
+          <Reveal delay={0.2}>
+            <FeatureCard
+              icon={Waypoints}
+              tone="mint"
+              title="One shared vocabulary"
+              text="Every sign has a single ID across recognition, phrase mapping and avatar playback."
+            >
+              <div className="mt-6 flex flex-wrap gap-2">
+                {['HELLO', 'WATER', 'HELP'].map((id) => (
+                  <code
+                    key={id}
+                    className="rounded-md border border-white/15 bg-white/[0.07] px-2 py-1 font-mono text-xs text-saffron"
+                  >
+                    {id}
+                  </code>
+                ))}
+              </div>
+            </FeatureCard>
+          </Reveal>
         </div>
-
-        <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm text-mist">
-          {['Runs in your browser', 'Two-way, sign ⇄ speech', 'Works with Google Meet'].map((t) => (
-            <li key={t} className="inline-flex items-center gap-1.5">
-              <Check size={15} className="text-mint" /> {t}
-            </li>
-          ))}
-        </ul>
       </section>
 
-      <footer className="relative mx-auto flex max-w-[1312px] flex-wrap justify-between gap-3 border-t border-white/[0.08] px-6 py-8 text-sm text-mist lg:px-16">
-        <span>© SAMVAAD · संवाद, meaning “dialogue”</span>
-        <span>Indian Sign Language, in real time</span>
-      </footer>
+      {/* Stats */}
+      <section className={`${WRAP} pb-24`}>
+        <Reveal>
+          <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[28px] border border-white/10 bg-white/10 lg:grid-cols-4">
+            <BigStat label="signs mapped">
+              <CountUp to={SIGN_COUNT} />
+            </BigStat>
+            <BigStat label="directions of translation">
+              <CountUp to={2} />
+            </BigStat>
+            <BigStat label="shared vocabulary">
+              <CountUp to={1} />
+            </BigStat>
+            <BigStat label="in your browser">
+              <span className="text-saffron">Live</span>
+            </BigStat>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* Use cases */}
+      <section className={`${WRAP} pb-24`}>
+        <Reveal>
+          <SectionHead
+            eyebrow="Made for real moments"
+            title={
+              <>
+                <span className={gradientText}>Where a shared language </span>
+                <span className="text-saffron">matters</span>
+              </>
+            }
+            sub="The vocabulary is built around everyday places, where being understood is not optional."
+          />
+        </Reveal>
+
+        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {USE_CASES.map((u, i) => (
+            <Reveal key={u.title} delay={i * 0.08}>
+              <div className="group h-full rounded-[22px] border border-white/10 bg-night-card p-6 transition-all duration-300 hover:-translate-y-2 hover:border-saffron/40 hover:shadow-glass">
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-saffron/15 text-saffron transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110">
+                  <u.icon size={22} />
+                </span>
+                <h3 className="mt-5 font-bricolage text-xl font-semibold text-cream">{u.title}</h3>
+                <p className="mt-2 text-[15px] leading-relaxed text-mist">{u.text}</p>
+                <div className="mt-5 flex flex-wrap gap-1.5">
+                  {u.signs.map((s) => (
+                    <span
+                      key={s}
+                      className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs text-mist"
+                    >
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className={`${WRAP} pb-24`}>
+        <div className="mx-auto max-w-3xl">
+          <Reveal>
+            <SectionHead
+              eyebrow="FAQ"
+              title={
+                <>
+                  <span className={gradientText}>Questions, </span>
+                  <span className="text-saffron">answered</span>
+                </>
+              }
+            />
+          </Reveal>
+          <div className="mt-12 space-y-3">
+            {FAQS.map((f, i) => (
+              <Reveal key={f.q} delay={i * 0.05}>
+                <details className="group rounded-2xl border border-white/10 bg-night-card px-6 py-5 open:border-mint/30">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bricolage text-lg font-semibold text-cream [&::-webkit-details-marker]:hidden">
+                    {f.q}
+                    <ChevronDown
+                      size={20}
+                      className="flex-none text-mist transition-transform duration-300 group-open:rotate-180 group-open:text-mint"
+                    />
+                  </summary>
+                  <p className="mt-3 text-[15px] leading-relaxed text-mist">{f.a}</p>
+                </details>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Closing call to action */}
+      <section className={`${WRAP} pb-24`}>
+        <Reveal>
+          <div className="relative overflow-hidden rounded-[36px] border border-white/10 bg-gradient-to-br from-[#2a1f5c] via-[#171f48] to-[#0f2f33] px-8 py-20 text-center">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 animate-blob-drift rounded-full bg-saffron opacity-25 blur-[90px]"
+            />
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 animate-blob-drift rounded-full bg-mint opacity-25 blur-[90px] [animation-delay:-5s]"
+            />
+            <h2 className="relative mx-auto max-w-2xl font-bricolage text-[clamp(32px,4.4vw,56px)] font-bold leading-[1.04] tracking-[-0.035em]">
+              <span className={gradientText}>Start a conversation </span>
+              <span className="text-saffron">everyone can join.</span>
+            </h2>
+            <p className="relative mx-auto mt-5 max-w-lg text-lg text-mist">
+              Open a room, switch on your camera, and let the signs speak.
+            </p>
+            <div className="relative mt-9 flex flex-wrap justify-center gap-3.5">
+              <Link
+                to="/room"
+                className="relative inline-flex min-h-[54px] items-center gap-2.5 overflow-hidden rounded-full bg-saffron px-7 text-base font-semibold text-[#1A1204] shadow-[0_12px_44px_rgba(255,181,71,0.32)] transition-transform hover:-translate-y-0.5"
+              >
+                Start a conversation <ArrowRight size={18} strokeWidth={2.4} />
+                <span
+                  aria-hidden
+                  className="absolute left-[-60%] top-0 h-full w-[40%] animate-shine bg-gradient-to-r from-transparent via-white/55 to-transparent"
+                />
+              </Link>
+              <Link
+                to="/how-it-works"
+                className="inline-flex min-h-[54px] items-center rounded-full border border-white/20 bg-white/[0.04] px-7 text-base font-semibold text-cream transition-transform hover:-translate-y-0.5"
+              >
+                See how it works
+              </Link>
+            </div>
+          </div>
+        </Reveal>
+      </section>
+    </LandingShell>
+  );
+}
+
+const WRAP = 'relative mx-auto max-w-[1312px] px-6 lg:px-16';
+
+const USE_CASES = [
+  {
+    icon: Stethoscope,
+    title: 'Healthcare',
+    text: 'Describe symptoms and understand a doctor, without waiting for an interpreter.',
+    signs: ['Doctor', 'Pain', 'Emergency', 'Help'],
+  },
+  {
+    icon: GraduationCap,
+    title: 'Education',
+    text: 'Let a teacher and a student follow the same lesson in real time.',
+    signs: ['Teacher', 'Student', 'Name', 'Please'],
+  },
+  {
+    icon: UtensilsCrossed,
+    title: 'Everyday places',
+    text: 'Order, ask and thank people in restaurants and shops.',
+    signs: ['Restaurant', 'Waiter', 'Food', 'Water'],
+  },
+  {
+    icon: Scale,
+    title: 'Public services',
+    text: 'Ask for directions and get help at stations, offices and counters.',
+    signs: ['Lawyer', 'Train station', 'Where', 'Washroom'],
+  },
+];
+
+const FAQS = [
+  {
+    q: 'Do I need any special equipment?',
+    a: 'No. A webcam and a microphone in a modern browser are enough. Everything runs in the browser, so there is nothing to install to try a room.',
+  },
+  {
+    q: 'Which sign language does SAMVAAD use?',
+    a: `Indian Sign Language (ISL). It currently maps ${SIGN_COUNT} signs, and every sign shares one ID across recognition, phrase mapping and avatar playback, so the vocabulary can keep growing.`,
+  },
+  {
+    q: 'Can I use it on a video call?',
+    a: 'Yes. The project includes a Chrome extension that adds sign captions to Google Meet, alongside the standalone communication room.',
+  },
+  {
+    q: 'How does the other person join?',
+    a: 'Open a room and share its link. They join from their own browser and the two of you are connected in the same session.',
+  },
+  {
+    q: 'Is it ready for everyday use?',
+    a: 'SAMVAAD is a working prototype. The camera, microphone, speech-to-text and text-to-speech flows are live, and the trained recognition model and the full 3D avatar are the pieces still being plugged in.',
+  },
+];
+
+function SectionHead({
+  eyebrow,
+  title,
+  sub,
+}: {
+  eyebrow: string;
+  title: React.ReactNode;
+  sub?: string;
+}) {
+  return (
+    <div className="mx-auto max-w-2xl text-center">
+      <span className="inline-block rounded-full border border-mint/35 bg-mint/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-mint">
+        {eyebrow}
+      </span>
+      <h2 className="mt-5 font-bricolage text-[clamp(32px,4.4vw,54px)] font-bold leading-[1.04] tracking-[-0.035em]">
+        {title}
+      </h2>
+      {sub && <p className="mt-5 text-lg leading-relaxed text-mist">{sub}</p>}
     </div>
   );
 }
 
-function LandingNav() {
+function FeatureCard({
+  icon: Icon,
+  tone,
+  title,
+  text,
+  children,
+}: {
+  icon: typeof Globe;
+  tone: 'mint' | 'saffron';
+  title: string;
+  text: string;
+  children?: React.ReactNode;
+}) {
+  const iconTone = tone === 'mint' ? 'bg-mint/15 text-mint' : 'bg-saffron/15 text-saffron';
   return (
-    <header className="relative z-30 mx-auto grid max-w-[1312px] grid-cols-[1fr_auto] items-center px-6 py-6 sm:grid-cols-[1fr_auto_1fr] lg:px-16">
-      <Link to="/" className="flex items-center gap-3">
-        <span className="flex h-[42px] w-[42px] items-center justify-center rounded-[13px] bg-saffron text-[#1A1204] shadow-[0_8px_28px_rgba(255,181,71,0.35)]">
-          <MessageCircle size={22} strokeWidth={2.2} />
-        </span>
-        <span className="font-bricolage text-2xl font-bold tracking-tight text-cream">
-          Samvaad
-        </span>
-        <span className="font-deva text-lg text-saffron">संवाद</span>
-      </Link>
+    <div className="group h-full rounded-[22px] border border-white/10 bg-night-card p-7 transition-all duration-300 hover:-translate-y-2 hover:border-white/25 hover:shadow-glass">
+      <span
+        className={`flex h-12 w-12 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110 ${iconTone}`}
+      >
+        <Icon size={22} />
+      </span>
+      <h3 className="mt-5 font-bricolage text-xl font-semibold text-cream">{title}</h3>
+      <p className="mt-2 text-[15px] leading-relaxed text-mist">{text}</p>
+      {children}
+    </div>
+  );
+}
 
-      <nav className="hidden gap-1.5 rounded-full border border-white/10 bg-white/5 p-1.5 backdrop-blur-xl sm:flex">
-        <Link
-          to="/"
-          className="rounded-full px-[18px] py-2 text-sm text-cream transition-colors hover:bg-white/[0.08]"
-        >
-          Home
-        </Link>
-        <Link
-          to="/how-it-works"
-          className="rounded-full px-[18px] py-2 text-sm text-[#B6BBCE] transition-colors hover:bg-white/[0.08] hover:text-cream"
-        >
-          How it works
-        </Link>
-        <Link
-          to="/room"
-          className="rounded-full px-[18px] py-2 text-sm text-[#B6BBCE] transition-colors hover:bg-white/[0.08] hover:text-cream"
-        >
-          Communication room
-        </Link>
-      </nav>
-
-      <div className="flex justify-end">
-        <Link
-          to="/room"
-          className="inline-flex min-h-[44px] items-center rounded-full border border-white/20 bg-white/[0.04] px-[22px] text-[15px] font-semibold text-cream transition-transform hover:-translate-y-0.5"
-        >
-          Launch app
-        </Link>
-      </div>
-    </header>
+function BigStat({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="bg-night px-6 py-10 text-center">
+      <p className="font-bricolage text-[clamp(40px,5vw,64px)] font-bold leading-none tracking-[-0.04em] text-cream">
+        {children}
+      </p>
+      <p className="mt-3 text-sm text-mist">{label}</p>
+    </div>
   );
 }
 
@@ -258,37 +505,6 @@ function Stat({ value, label }: { value: string; label: string }) {
     <div>
       <p className="font-bricolage text-[34px] font-bold tracking-tight text-cream">{value}</p>
       <p className="mt-0.5 text-sm text-mist">{label}</p>
-    </div>
-  );
-}
-
-function FlowCard({
-  title,
-  steps,
-  tone,
-}: {
-  title: string;
-  tone: 'mint' | 'saffron';
-  steps: { icon: typeof Video; label: string }[];
-}) {
-  const dot = tone === 'mint' ? 'bg-mint' : 'bg-saffron';
-  return (
-    <div className="rounded-[22px] border border-white/10 bg-night-card p-6 transition-transform duration-300 hover:-translate-y-1.5">
-      <div className="mb-5 flex items-center gap-2.5">
-        <span className={`h-2.5 w-2.5 rounded-full ${dot}`} />
-        <p className="font-bricolage text-lg font-semibold text-cream">{title}</p>
-      </div>
-      <div className="flex flex-wrap items-center gap-2">
-        {steps.map((step, i) => (
-          <div key={step.label} className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 rounded-[10px] border border-white/10 bg-white/[0.05] px-3 py-2 text-xs text-mist">
-              <step.icon size={13} />
-              {step.label}
-            </div>
-            {i < steps.length - 1 && <ArrowRight size={12} className="text-white/30" />}
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

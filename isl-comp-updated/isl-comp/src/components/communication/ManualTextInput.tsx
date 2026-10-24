@@ -24,19 +24,19 @@ export function ManualTextInput({ onSubmit, onClose }: ManualTextInputProps) {
 
   return (
     <div
-      className="fixed inset-0 z-40 flex items-end justify-center bg-ink/30 px-4 pb-24 sm:items-center sm:pb-4"
+      className="fixed inset-0 z-40 flex items-end justify-center bg-black/60 px-4 pb-24 backdrop-blur-sm sm:items-center sm:pb-4"
       onClick={onClose}
       role="presentation"
     >
       <div
-        className="w-full max-w-md animate-fade-up rounded-md border border-line bg-white shadow-panel"
+        className="w-full max-w-md animate-fade-up rounded-2xl border border-room-border bg-room-surface text-room-text shadow-stage"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-label="Type a message"
       >
-        <div className="flex items-center justify-between border-b border-line px-4 py-3">
-          <p className="text-sm font-medium text-ink">Type a message</p>
-          <button onClick={onClose} className="icon-btn h-8 w-8" aria-label="Close">
+        <div className="flex items-center justify-between border-b border-room-border px-4 py-3">
+          <p className="text-sm font-medium text-room-text">Type a message</p>
+          <button onClick={onClose} className="room-icon-btn h-8 w-8" aria-label="Close">
             <X size={15} />
           </button>
         </div>
@@ -54,14 +54,14 @@ export function ManualTextInput({ onSubmit, onClose }: ManualTextInputProps) {
               value={value}
               onChange={(e) => setValue(e.target.value)}
               placeholder="e.g. I need water"
-              className="flex-1 rounded-sm border border-line bg-paper px-3 py-2 text-sm text-ink outline-none focus-visible:border-voice"
+              className="flex-1 rounded-xl border border-room-border bg-black/20 px-3 py-2 text-sm text-room-text outline-none placeholder:text-room-text-soft/60 focus-visible:border-voice/60"
             />
             <button type="submit" className="btn-voice px-3.5" aria-label="Send message">
               <Send size={16} />
             </button>
           </form>
 
-          <p className="mb-2 mt-4 text-xs font-medium uppercase tracking-wide text-ink-soft">
+          <p className="mb-2 mt-4 text-xs font-medium uppercase tracking-wide text-room-text-soft">
             Quick phrases
           </p>
           <div className="flex flex-wrap gap-1.5">
@@ -69,7 +69,7 @@ export function ManualTextInput({ onSubmit, onClose }: ManualTextInputProps) {
               <button
                 key={phrase}
                 onClick={() => submit(phrase)}
-                className="rounded-sm border border-line bg-paper px-2.5 py-1 text-xs text-ink-soft transition-colors hover:border-voice/40 hover:bg-voice-soft hover:text-voice-deep"
+                className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-room-text-soft transition-colors hover:border-voice/40 hover:bg-voice-soft hover:text-voice"
               >
                 {phrase}
               </button>

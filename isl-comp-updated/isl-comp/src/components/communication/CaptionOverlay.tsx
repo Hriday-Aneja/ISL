@@ -17,12 +17,12 @@ export function CaptionOverlay({ caption }: { caption: StageCaption | null }) {
   return (
     <div className="pointer-events-none absolute inset-x-3 bottom-20 z-20 flex justify-center px-2 sm:inset-x-6 sm:bottom-20 sm:px-0">
       <div
-        className={`max-w-[min(92%,48rem)] rounded-sm border-l-[3px] ${accent} bg-black/75 px-4 py-2.5 shadow-stage backdrop-blur-sm`}
+        className={`max-w-[min(92%,48rem)] rounded-2xl border border-white/10 border-l-[3px] ${accent} bg-room-bg/80 px-4 py-2.5 shadow-stage backdrop-blur-md`}
       >
-        <p className="text-[10px] font-medium uppercase tracking-wide text-white/60">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-room-text-soft">
           {caption.eyebrow}
         </p>
-        <p className="text-sm leading-snug text-white sm:text-base">“{caption.text}”</p>
+        <p className="font-display text-sm leading-snug text-room-text sm:text-base">“{caption.text}”</p>
       </div>
     </div>
   );
