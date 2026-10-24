@@ -94,6 +94,8 @@ export interface SpeechRecognitionState {
 
 export interface TextToSpeechState {
   status: 'idle' | 'speaking' | 'unsupported';
+  /** Id passed to speak(), so a list can show which item is being read. */
+  activeId?: string;
 }
 
 // The contract the future 3D avatar module must implement. The mock

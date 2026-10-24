@@ -89,11 +89,84 @@ call won't connect across stricter networks (e.g. mobile data, corporate
 Wi-Fi), that's a NAT-traversal case that needs a TURN server — see
 "Video calling architecture" below for where to add one.
 
+## Daily Translator
+
+`/daily` is a self-contained module for everyday situations. The person picks a
+situation (Healthcare, Shopping / Restaurant, College / Education, Workplace,
+Travel, Everyday Conversation, Emergency, or a Custom Situation they describe),
+then taps message cards, ISL signs, or lets the other person speak or type. All
+of it lands in one shared conversation.
+
+**What works**
+
+- Scenario picker and ready-made cards per scenario, with search across all
+  cards, favourites, recently used, and always-visible emergency phrases.
+- Custom cards: create, edit, delete. Saved in the browser's `localStorage`
+  (key `samvaad-daily-v1`) together with favourites, recents, settings and the
+  conversation. Samvaad has no accounts or database, so nothing is sent to a
+  server for storage.
+- "More suggestions": AI cards from the backend (`POST /api/daily/suggest`),
+  with built-in suggestions whenever AI is not configured or fails.
+- ISL Signs: the catalog in `src/data/isl_signs_catalog.csv` (248 signs, 15
+  categories), searchable, filterable, favouritable, and addable to the
+  conversation.
+- Speech to text (Web Speech API) into an editable box, typing as an
+  alternative, text to speech (`speechSynthesis`) for any message, repeat
+  speech, timestamps, "You" / "Other person" distinction, full-screen focus
+  mode, large-text and high-contrast options.
+
+**ISL sign media, and what is NOT claimed**
+
+Only signs that have a real video file under `public/avatar-videos/` (via
+`src/data/avatarVideos.ts`) can be played. Today that is 11 of the 248 catalog
+signs. Every other sign shows its name and is labelled "No video yet". The
+catalog has no descriptions, so none are shown. Nothing translates a sentence
+into ISL: "Signs in this message" is a plain word lookup against the catalog
+and says so. To make another sign playable, add its video to
+`public/avatar-videos/` and register it in `src/data/avatarVideos.ts` (the key
+is the upper-snake gloss, e.g. `THANK_YOU`).
+
+**Updating the sign catalog**
+
+Edit `src/data/isl_signs_catalog.csv` (columns `Category`, `Sign`), then run:
+
+```bash
+npm run signs:build
+```
+
+**AI suggestions (optional)**
+
+The Anthropic key lives only on the server:
+
+```bash
+cp server/.env.example server/.env   # then set ANTHROPIC_API_KEY
+npm run dev
+```
+
+Without a key the feature still works using built-in suggestions, and Settings
+shows that AI is not set up. `server/.env` is git-ignored. The server limits
+request size and frequency, treats the user's situation text as untrusted data,
+and never forwards upstream error bodies. Optional variables: `ANTHROPIC_MODEL`
+(default `claude-haiku-5-5`), `AI_TIMEOUT_MS`, `AI_RATE_LIMIT_PER_MIN`,
+`VITE_API_BASE_URL` (frontend, only if the API is not on the signaling host).
+
+**Tests**
+
+```bash
+npm run typecheck   # tsc
+npm test            # front-end unit tests + server endpoint tests
+npm run build
+```
+
+`tests/e2e/` holds an optional browser test (Python + Playwright) that drives
+the real page with mocked speech APIs; see the README there.
+
 ## Pages
 
 - `/` — Landing page
 - `/room` — Communication Room: create or join a call
 - `/room/:roomId` — Same room, pre-filled from a shared invite link
+- `/daily` — Daily Translator
 - `/how-it-works` — Explains both data flows
 
 ## Where your modules plug in

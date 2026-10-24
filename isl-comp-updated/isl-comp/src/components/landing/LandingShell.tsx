@@ -6,6 +6,7 @@ const NAV_LINKS = [
   { to: '/', label: 'Home' },
   { to: '/how-it-works', label: 'How it works' },
   { to: '/room', label: 'Communication room' },
+  { to: '/daily', label: 'Daily Translator' },
 ];
 
 const TEAM = ['Hriday', 'Anshu', 'Arnav', 'Aayush'];

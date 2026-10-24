@@ -89,3 +89,34 @@
     opacity: 1 !important;
   }
 }
+
+/* ---------- Daily Translator ---------- */
+
+/* Honour the OS "reduce motion" setting for the new page too. */
+@media (prefers-reduced-motion: reduce) {
+  .daily-root *,
+  .daily-root *::before,
+  .daily-root *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High-contrast option: pure white text and heavier white edges on the dark surfaces. */
+.daily-contrast .daily-surface {
+  border-color: #ffffff !important;
+}
+.daily-contrast .text-mist,
+.daily-contrast .text-room-text-soft {
+  color: #ffffff !important;
+}
+.daily-contrast input,
+.daily-contrast textarea,
+.daily-contrast select {
+  border-color: #ffffff !important;
+}
+.daily-contrast :focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 3px;
+}

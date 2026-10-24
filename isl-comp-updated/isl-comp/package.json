@@ -7,7 +7,11 @@
     "dev": "concurrently -k \"vite\" \"npm --prefix server start\"",
     "build": "vite build",
     "preview": "vite preview",
-    "postinstall": "npm --prefix server install"
+    "postinstall": "npm --prefix server install",
+    "signs:build": "node scripts/build-signs-catalog.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run test:web && npm --prefix server test",
+    "test:web": "node tests/run.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.462.0",

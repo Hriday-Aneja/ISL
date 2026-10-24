@@ -80,7 +80,12 @@ export function useSpeechRecognition() {
     };
 
     recognition.onerror = (event) => {
-      const fatal = event.error === 'not-allowed' || event.error === 'service-not-allowed' || event.error === 'audio-capture';
+      const fatal =
+        event.error === 'not-allowed' ||
+        event.error === 'service-not-allowed' ||
+        event.error === 'audio-capture' ||
+        event.error === 'network' ||
+        event.error === 'language-not-supported';
       if (fatal) shouldListenRef.current = false;
       setState((s) => ({
         ...s,
@@ -92,7 +97,11 @@ export function useSpeechRecognition() {
               ? 'Speech recognition is not allowed in this browser.'
               : event.error === 'audio-capture'
                 ? 'No microphone audio could be captured. Check your microphone and try again.'
-                : fatal
+                : event.error === 'network'
+                  ? 'Speech recognition needs an internet connection. Check your connection, or type instead.'
+                  : event.error === 'language-not-supported'
+                    ? 'This browser does not support speech recognition for this language.'
+                    : fatal
                   ? 'Speech recognition hit an error. Try again.'
                   : undefined,
       }));
