@@ -9,9 +9,20 @@
 // Rooms are capped at 2 participants (see MAX_PEERS_PER_ROOM).
 
 import express from 'express';
+
+// Optional local config. Reads server/.env (git-ignored) if present, so
+// ANTHROPIC_API_KEY never has to be typed into a shell history or committed.
+// Real environment variables always win over the file.
+try {
+  process.loadEnvFile(new URL('./.env', import.meta.url));
+} catch {
+  /* no .env file — that's fine */
+}
+
 import cors from 'cors';
 import { createServer } from 'node:http';
 import { Server } from 'socket.io';
+import { createDailyRouter } from './dailySuggest.js';
 
 const PORT = process.env.PORT || 4000;
 const MAX_PEERS_PER_ROOM = 2;
@@ -20,6 +31,9 @@ const ROOM_ID_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O/1/I to av
 const app = express();
 app.use(cors());
 app.get('/health', (_req, res) => res.json({ ok: true }));
+
+// Daily Translator: AI "More suggestions". The API key stays on this server.
+app.use('/api/daily', createDailyRouter());
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {

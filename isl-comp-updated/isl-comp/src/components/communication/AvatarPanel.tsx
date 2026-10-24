@@ -2,25 +2,16 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { PersonStanding } from 'lucide-react';
 import type { AvatarProps, SignId } from '../../types';
 import { SIGN_LABELS } from '../../data/signMappings';
+import { AVATAR_VIDEOS } from '../../data/avatarVideos';
+
+// Re-exported so existing imports from this module keep working.
+export { AVATAR_VIDEOS };
+
 
 interface AvatarPanelProps extends AvatarProps {
   showQueue?: boolean;
   compact?: boolean;
 }
-
-export const AVATAR_VIDEOS: Partial<Record<SignId, string>> = {
-  DAUGHTER: '/avatar-videos/daughter.mp4',
-  DOCTOR: '/avatar-videos/doctor.mp4',
-  HAPPY: '/avatar-videos/happy.mp4',
-  HELLO: '/avatar-videos/hello.mp4',
-  HOUSE: '/avatar-videos/house.mp4',
-  LAWYER: '/avatar-videos/lawyer.mp4',
-  PARENT: '/avatar-videos/parent.mp4',
-  SAD: '/avatar-videos/sad.mp4',
-  STUDENT: '/avatar-videos/student.mp4',
-  TRAIN_STATION: '/avatar-videos/train-station.mp4',
-  WAITER: '/avatar-videos/waiter.mp4',
-};
 
 export function AvatarPanel({
   signs,
