@@ -18,6 +18,7 @@
   <div class="tabs" role="tablist" aria-label="Direction">
     <button id="tabSign" class="tab" role="tab" type="button" aria-selected="true" aria-controls="paneSign">Sign &rarr; Text</button>
     <button id="tabSpeech" class="tab" role="tab" type="button" aria-selected="false" aria-controls="paneSpeech" tabindex="-1">Speech &rarr; Sign<span id="tabBadge" class="badge" hidden></span></button>
+    <button id="tabCards" class="tab" role="tab" type="button" aria-selected="false" aria-controls="paneCards" tabindex="-1">Cards</button>
   </div>
 
   <div id="paneSign" class="tabpanel" role="tabpanel" aria-labelledby="tabSign">
@@ -68,6 +69,43 @@
       <input id="typeInput" type="text" placeholder="Type something to sign" aria-label="Type text to sign">
       <button id="typeBtn" class="primary" type="submit">Sign</button>
     </form>
+  </div>
+
+  <div id="paneCards" class="tabpanel" role="tabpanel" aria-labelledby="tabCards" hidden>
+    <section id="cardGrid" class="card-groups" aria-label="Meeting cards"></section>
+    <label for="cardText" class="small">Message to send (editable)</label>
+    <textarea id="cardText" rows="3" maxlength="200" placeholder="Tap a card, or type your own message."></textarea>
+    <div class="row wrap">
+      <button id="cardSend" class="primary" type="button">Send</button>
+      <button id="cardCopy" type="button">Copy</button>
+      <button id="cardClear" type="button">Clear</button>
+      <button id="cardSave" type="button" title="Keep this message as a card">Save as card</button>
+    </div>
+    <label class="small row"><input id="cardsQuick" type="checkbox"> Send immediately when I tap a card</label>
+    <p id="cardsMessage" class="message" role="status" aria-live="polite"></p>
+
+    <div id="cardPreviewBox" hidden>
+      <div id="cardStage" class="stage" data-sign="" data-mode="text">
+        <video id="cardVideo" muted playsinline preload="auto" aria-label="Sign avatar preview"></video>
+        <div id="cardStageCard" class="stage-card idle"><strong id="cardStageText">Avatar ready</strong><small id="cardStageSub"></small></div>
+      </div>
+      <p class="note">Preview is shown only to you. Other participants do not see the avatar; they receive the text message.</p>
+    </div>
+
+    <section class="caps" aria-label="Meeting captions">
+      <div class="row wrap">
+        <strong class="grow">Meeting captions</strong>
+        <button id="capSmaller" type="button" aria-label="Smaller caption text" title="Smaller text">A&minus;</button>
+        <button id="capLarger" type="button" aria-label="Larger caption text" title="Larger text">A+</button>
+      </div>
+      <div class="row wrap">
+        <button id="capToggle" class="primary" type="button">Show captions</button>
+        <button id="capEnable" type="button">Turn on Meet captions</button>
+        <button id="capClear" type="button">Clear</button>
+      </div>
+      <p id="capStatus" class="message small" role="status" aria-live="polite"></p>
+      <ol id="capView" class="cap-view" aria-label="Captions" aria-live="off"></ol>
+    </section>
   </div>
 
   <footer class="small muted">Video and microphone audio are processed on this computer. <a id="optionsLink" href="#">Settings</a></footer>

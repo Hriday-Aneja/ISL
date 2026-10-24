@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Samvaad - ISL Connect",
-  "version": "0.2.0",
-  "description": "Recognize Indian Sign Language with your local Samvaad service and send reviewed text to your meeting chat; turn speech into text and a signing avatar.",
+  "version": "0.3.0",
+  "description": "Recognize Indian Sign Language with your local Samvaad service and send reviewed text to your meeting chat; turn speech into text and a signing avatar; send ready-made Meeting Cards and read captions.",
   "minimum_chrome_version": "116",
   "icons": {
     "16": "src/icons/icon16.png",

@@ -1,6 +1,8 @@
 // Settings + sign configuration. Pure functions are exported for tests; chrome.storage access is isolated
 // in loadSettings/saveSettings so everything else runs under Node.
 
+import { normalizeCustomCards, clampCaptionSize, CAPTION_SIZE } from './cards.js';
+
 export const DEFAULT_SETTINGS = Object.freeze({
   serviceUrl: 'ws://127.0.0.1:8765', // the local Python recognition_service.py default
   confidenceThreshold: 0,            // 0 = no confidence filtering (no verified value exists yet)
@@ -18,6 +20,10 @@ export const DEFAULT_SETTINGS = Object.freeze({
   autoSign: true,                    // avatar signs new speech automatically (typed text and the Sign button always work)
   avatarSpeed: 1,                    // 0.5-2 playback rate of the avatar clips
   includeOwnCaptions: false,         // also sign Meet captions labelled "You" (your own speech)
+  // ---- Meeting Cards ----
+  customCards: [],                   // user-made card texts (max 12), saved from the Cards tab
+  cardsQuickSend: false,             // false: tapping a card fills the message box; true: tapping a card sends it right away
+  cardsCaptionSize: CAPTION_SIZE.default, // px, text size of the readable captions view
 });
 
 const LOOPBACK = new Set(['127.0.0.1', 'localhost', '[::1]', '::1']);
@@ -53,6 +59,9 @@ export function normalizeSettings(raw = {}) {
     autoSign: bool(raw.autoSign, d.autoSign),
     avatarSpeed: clamp(raw.avatarSpeed, 0.5, 2, d.avatarSpeed),
     includeOwnCaptions: bool(raw.includeOwnCaptions, d.includeOwnCaptions),
+    customCards: normalizeCustomCards(raw.customCards),
+    cardsQuickSend: bool(raw.cardsQuickSend, d.cardsQuickSend),
+    cardsCaptionSize: raw.cardsCaptionSize === undefined ? d.cardsCaptionSize : clampCaptionSize(raw.cardsCaptionSize),
   };
 }
 
@@ -95,4 +104,15 @@ export async function loadDefaultSigns() {
 export async function loadAvatarConfig() {
   const res = await fetch(chrome.runtime.getURL('config/avatar-signs.json'));
   return res.json();
+}
+
+export async function loadCardsConfig() {
+  const res = await fetch(chrome.runtime.getURL('config/meeting-cards.json'));
+  return res.json();
+}
+
+/** Save only the Cards-related fields, leaving every other setting as the user last stored it. */
+export async function saveCardsSettings(patch) {
+  const current = await loadSettings();
+  return saveSettings({ ...current, ...patch });
 }

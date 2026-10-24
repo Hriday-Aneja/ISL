@@ -20,6 +20,7 @@
 
 </div>
 
+
 ---
 
 ## 1. Introduction
@@ -55,7 +56,7 @@ Inference runs **locally** (a Python WebSocket service on `127.0.0.1`), and call
 |---|---|---|---|
 | 1 | **Daily Translator** | `isl-comp-updated/isl-comp` | Live captions from signs, speech/typed replies, text-to-speech, two-person video call |
 | 2 | **ISL Avatar** | web app, extension, `isl-connect/avatar` | Sign clip playback for speech→sign; Three.js FBX avatar renderer |
-| 3 | **Meeting Companion** | `chrome-extension/` | Google Meet panel: sign→text chat, speech→sign avatar |
+| 3 | **Meeting Cards** | `chrome-extension/` | Google Meet panel: ready-made message cards, typed replies, readable captions, sign→text chat, speech→sign avatar |
 | 4 | **Learning Mode** | — | Lessons, demonstrations, quizzes, dictionary, camera practice (see [roadmap](#15-roadmap)) |
 
 ---
@@ -107,9 +108,31 @@ Converting a signing video into avatar motion (landmark → skeletal retargeting
 
 ---
 
-## 6. Module 3 — Meeting Companion (Chrome extension)
+## 6. Module 3 — Meeting Cards (Chrome extension)
 
-A **Manifest V3** extension (`chrome-extension/`, v0.2.0, Chrome ≥ 116, no build step) that adds a Samvaad panel to **Google Meet**. The panel runs inside an extension iframe, so Meet's page CSP cannot block the camera or WebSocket.
+A **Manifest V3** extension (`chrome-extension/`, v0.3.0, Chrome ≥ 116, no build step) for accessible online meetings. It adds a Samvaad panel to **Google Meet** for deaf, hard-of-hearing and non-speaking participants. The panel runs inside an extension iframe, so Meet's page CSP cannot block the camera or WebSocket.
+
+**Daily Translator is for face-to-face conversation; Meeting Cards is for online meetings.**
+
+### Meeting Cards tab
+
+A student in an online class who cannot speak opens the **Cards** tab, taps *"Could you please repeat that?"*, and the message is posted to the meeting chat. If Meet captions are on, the same tab shows them in large, readable text.
+
+| Capability | Details |
+|---|---|
+| **Ready-made cards** | 15 cards in three groups (*Understanding*, *Taking part*, *Quick replies*), defined in `config/meeting-cards.json` — e.g. "Could you please repeat that?", "Please speak slowly.", "I have a question.", "I didn't understand." |
+| **Tap → edit → Send** | Tapping a card fills an editable message box; nothing is shared until the user presses **Send** (or Ctrl/⌘+Enter) |
+| **Send immediately (optional)** | A checkbox lets a tap on a card send it straight away, for one-tap replies |
+| **Typed responses** | The same box accepts any typed message; it is shared the same way as a card |
+| **Sharing method** | Meet chat (send or fill) per the user's setting, with a clipboard fallback when the chat box can't be found |
+| **My cards** | **Save as card** keeps a typed message as a personal card (up to 12, 200 characters each, de-duplicated; stored in extension settings); cards can be removed |
+| **Readable captions** | **Show captions** reads Meet's live captions from the page into a large-text view with speaker names and **A− / A+** size controls (14–32 px, remembered). Growing captions update in place. Meeting audio is not recorded |
+| **Avatar preview** | Cards that map to signs get a ▶ preview played by the existing avatar player. It is shown **only to the user** |
+| **Shared captions** | The Cards and Speech → Sign tabs can read captions at the same time; stopping one does not stop the other |
+
+**About the avatar and other participants.** The preview plays inside the Samvaad panel on the user's own screen; other participants receive the *text* message. Showing the avatar to other participants would need a camera-stream replacement integration, which this extension does not include (see the [roadmap](#15-roadmap)). Only the 11 existing sign clips play as video; other signs in a preview appear as text cards, and a card whose words are not fully covered by the sign vocabulary gets no preview rather than a partial one.
+
+### Google Meet panel — Sign → Text and Speech → Sign
 
 | Capability | Details |
 |---|---|
@@ -123,9 +146,9 @@ A **Manifest V3** extension (`chrome-extension/`, v0.2.0, Chrome ≥ 116, no bui
 | **Resilience** | Reconnect with exponential back-off, frame dropping under back-pressure, mirror auto-detection from the checkpoint |
 | **Privacy** | Transcripts kept only in panel memory; camera and socket released on stop or on leaving the meeting |
 | **Extensible** | Platform adapter registry (`src/content/platforms/registry.js`) for adding further meeting platforms |
-| **Automated tests** | Node unit tests, syntax/manifest check, Playwright fake-Meet end-to-end test, Python protocol check |
+| **Automated tests** | Node unit tests (including Meeting Cards), syntax/manifest check, Playwright fake-Meet end-to-end tests (Speech → Sign and Cards), Python protocol check |
 
-Quick-reply messages, an expanded in-meeting avatar and Zoom support are on the [roadmap](#15-roadmap).
+An expanded in-meeting avatar, sharing the avatar with other participants, and Zoom support are on the [roadmap](#15-roadmap).
 
 ---
 
@@ -363,11 +386,11 @@ Samvaad/
     ├── src/
     │   ├── background/               # service worker
     │   ├── content/                  # content script + platforms/{registry,meet}.js
-    │   ├── panel/                    # Sign→Text tab, Speech→Sign tab
+    │   ├── panel/                    # Sign→Text, Speech→Sign and Cards tabs (cards-tab.js)
     │   ├── popup/ · options/ · permissions/
     │   └── lib/                      # recognition-client, camera, caption-tracker, sign-mapper,
-    │                                 # avatar-player, speech-recognizer, filters, settings
-    ├── config/                       # avatar-signs.json (clips + phrases), default-signs.json
+    │                                 # avatar-player, speech-recognizer, filters, settings, cards
+    ├── config/                       # avatar-signs.json (clips + phrases), default-signs.json, meeting-cards.json
     ├── assets/avatar/                # 11 avatar MP4 clips
     ├── tests/                        # unit tests + e2e/ (fake Meet page, Playwright)
     └── tools/                        # protocol_check.py, make_fixture_checkpoint.py, check-syntax.mjs
@@ -451,7 +474,7 @@ For two devices on one network, set `VITE_SIGNALING_SERVER_URL` to the host mach
 1. Keep the recognition service running.
 2. Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select the `chrome-extension/` folder (the one containing `manifest.json`).
 3. Join a Google Meet, click the **Samvaad** pill (bottom-left) → **Start recognition**, and allow the camera.
-4. Use the **Speech → Sign** tab for captions, microphone or typed input.
+4. Use the **Cards** tab for ready-made messages, typed replies and readable captions (no recognition service needed), and the **Speech → Sign** tab for captions, microphone or typed input.
 
 ### Optional components
 
@@ -482,6 +505,8 @@ cd isl-connect/frontend && npm install && npm run dev
 | Extension syntax / manifest check | `cd chrome-extension && npm run check` |
 | Extension unit tests | `npm test` |
 | Extension end-to-end (fake Meet page) | `npm install && npm run test:e2e` |
+| Meeting Cards end-to-end (fake Meet page) | `npm run test:e2e:cards` |
+| Speech → Sign end-to-end (fake Meet page) | `npm run test:e2e:speech` |
 | Service protocol check | `python chrome-extension/tools/protocol_check.py --url ws://127.0.0.1:8765` |
 
 ---
@@ -504,8 +529,9 @@ cd isl-connect/frontend && npm install && npm run dev
 - [ ] Serve personalised models from the fine-tuning pipeline
 - [ ] Integrate the sentence-generation model
 
-**Meeting Companion**
-- [ ] Quick-reply messages inside the panel
+**Meeting Cards**
+- [ ] Share the avatar with other participants (camera-stream integration, to be built and tested)
+- [ ] More card sets (classroom, interview, workplace) and in-place card editing
 - [ ] Expanded in-meeting avatar
 - [ ] Zoom Web and other platforms via the adapter registry
 - [ ] Chrome Web Store packaging

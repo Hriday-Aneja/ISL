@@ -17,7 +17,7 @@ for (const f of ['src/panel/panel.html', 'src/popup/popup.html', 'src/options/op
     if (!/^https?:/.test(ref) && !existsSync(join(root, dirname(f), ref))) { failed++; console.error(`MISSING ${ref} referenced by ${f}`); }
   }
 }
-for (const mod of ['panel.js', 'speech-tab.js']) {
+for (const mod of ['panel.js', 'speech-tab.js', 'cards-tab.js']) {
   for (const [, spec] of readFileSync(join(root, 'src/panel', mod), 'utf8').matchAll(/from '(\.[^']+)'/g)) if (!existsSync(join(root, 'src/panel', spec))) { failed++; console.error(`MISSING import ${spec} in ${mod}`); }
 }
 const avatar = JSON.parse(readFileSync(join(root, 'config/avatar-signs.json'), 'utf8'));

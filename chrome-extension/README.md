@@ -1,4 +1,4 @@
-# Samvaad Chrome Extension (Google Meet MVP)
+# Samvaad Chrome Extension (Google Meet) — Meeting Cards, Sign → Text, Speech → Sign
 
 A Manifest V3 Chrome extension that lets an ISL signer use the **existing** Samvaad recognition service
 (`include-ml/recognition_service.py`, 24-class Transformer) during a Google Meet call. Recognized signs appear as editable
@@ -237,3 +237,17 @@ it for real recognition.
   and the text fallback, not actual video playback.
 - The speech-to-sign phrase table is the one from the web app (`isl-comp`), including its choices such as "home" → HOUSE. Review it with an ISL signer.
 - Microphone permission for an extension iframe is requested through `src/permissions/permissions.html` ("Allow microphone"), the same way as the camera; not exercised in a real prompt.
+
+## 5. Meeting Cards (v0.3.0)
+
+Open the **Cards** tab in the panel. It works without the recognition service.
+
+1. Tap a card such as **"Could you please repeat that?"**. The text appears in the editable box (nothing is sent yet).
+2. Press **Send** (or Ctrl/⌘+Enter). The message goes to the Meet chat using your *send mode* setting (chat / fill / clipboard); if the chat box can't be found it is copied to the clipboard.
+3. Type any message in the same box to send a typed reply. **Save as card** keeps it under *My cards* (max 12).
+4. Tick **Send immediately when I tap a card** for one-tap replies.
+5. **Show captions** displays Meet's live captions in a large, readable view (A−/A+ to resize). Use **Turn on Meet captions** if they are off.
+6. A ▶ next to a card previews its sign in the panel. **Only you see this preview**; other participants receive the text. Sharing the avatar with other participants would need a camera-stream integration, which is not implemented.
+
+Cards are defined in `config/meeting-cards.json` (`id`, `text`, optional `signs`). Tests: `npm test` (unit, `tests/cards.test.mjs`) and `npm run test:e2e:cards` (real Chromium against the fake Meet page). Like the rest of this extension, Cards has been tested against the fake Meet page only, not against real Google Meet.
+
