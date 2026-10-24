@@ -23,7 +23,8 @@ const CHECKS = ['speechLocalOnly', 'autoSign', 'includeOwnCaptions'];
     body.appendChild(tr);
   }
   $('save').addEventListener('click', async () => {
-    const next = { ...DEFAULT_SETTINGS };
+    // Meeting Cards fields are managed in the panel's Cards tab, so keep whatever is stored.
+    const next = { ...DEFAULT_SETTINGS, customCards: settings.customCards, cardsQuickSend: settings.cardsQuickSend, cardsCaptionSize: settings.cardsCaptionSize };
     for (const f of FIELDS) next[f] = $(f).value;
     for (const f of CHECKS) next[f] = $(f).checked;
     const check = validateServiceUrl(next.serviceUrl);

@@ -1,0 +1,38 @@
+{
+  "_comment": "Ready-made Meeting Cards. Each card is a short message the user can send to the meeting chat (or copy). 'signs' is optional: sign IDs used for the on-panel avatar preview. A sign without a clip in avatar-signs.json is previewed as a text card. Cards without 'signs' fall back to the Speech -> Sign phrase table.",
+  "categories": [
+    {
+      "id": "understanding",
+      "label": "Understanding",
+      "cards": [
+        { "id": "repeat", "text": "Could you please repeat that?" },
+        { "id": "slow", "text": "Please speak slowly." },
+        { "id": "not-understood", "text": "I didn't understand." },
+        { "id": "explain-again", "text": "Could you explain that again, please?" },
+        { "id": "type-it", "text": "Could you please type that in the chat?" }
+      ]
+    },
+    {
+      "id": "participation",
+      "label": "Taking part",
+      "cards": [
+        { "id": "question", "text": "I have a question." },
+        { "id": "say-something", "text": "I would like to add something." },
+        { "id": "typing", "text": "Please wait, I am typing my reply." },
+        { "id": "text-only", "text": "I communicate by text. I will reply in the chat." },
+        { "id": "need-help", "text": "I need help.", "signs": ["I", "NEED", "HELP"] }
+      ]
+    },
+    {
+      "id": "quick",
+      "label": "Quick replies",
+      "cards": [
+        { "id": "hello", "text": "Hello.", "signs": ["HELLO"] },
+        { "id": "thanks", "text": "Thank you.", "signs": ["THANK_YOU"] },
+        { "id": "yes", "text": "Yes.", "signs": ["YES"] },
+        { "id": "no", "text": "No.", "signs": ["NO"] },
+        { "id": "sorry", "text": "Sorry.", "signs": ["SORRY"] }
+      ]
+    }
+  ]
+}

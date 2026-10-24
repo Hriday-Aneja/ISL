@@ -63,3 +63,20 @@ select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .note { font-size: 11px; color: var(--muted); }
 .grow { flex: 1; min-width: 0; }
 #srcSelect { flex: 1; min-width: 0; }
+
+/* ---- meeting cards ---- */
+.card-groups { display: flex; flex-direction: column; gap: 8px; }
+.card-cat { margin: 0; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.card-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.card-item { display: inline-flex; align-items: stretch; border: 1px solid var(--line); border-radius: 10px; background: var(--soft); overflow: hidden; max-width: 100%; }
+.card-item > button { border: 0; border-radius: 0; background: transparent; text-align: left; }
+.card-item > button.card-main { padding: 7px 10px; font-weight: 600; }
+.card-item > button.card-aux { padding: 0 8px; border-left: 1px solid var(--line); color: var(--muted); }
+.card-item:hover { border-color: var(--accent); }
+.card-item.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.caps { border-top: 1px solid var(--line); padding-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+.cap-view { list-style: none; margin: 0; padding: 0; min-height: 90px; max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; background: var(--soft); border-radius: 8px; padding: 8px; font-size: var(--cap-size, 18px); line-height: 1.35; }
+.cap-view .cap-who { display: block; font-size: 11px; color: var(--muted); }
+.cap-view li:last-child { font-weight: 600; }
+.cap-view:empty::before { content: "Captions will appear here."; font-size: 13px; color: var(--muted); }
+

@@ -4,6 +4,7 @@ import { CameraSource } from '../lib/camera.js';
 import { loadSettings, loadDefaultSigns, resolveSigns } from '../lib/settings.js';
 import { evaluatePrediction, appendWord } from '../lib/filters.js';
 import { initSpeechTab } from './speech-tab.js';
+import { initCardsTab } from './cards-tab.js';
 
 const $ = (id) => document.getElementById(id);
 const els = Object.fromEntries(['pill', 'pillDot', 'card', 'platformLabel', 'connDot', 'connText', 'collapseBtn', 'sessionBtn', 'grantBtn', 'previewWrap',
@@ -27,7 +28,19 @@ function connectPort() {
 const post = (msg) => { try { port && port.postMessage(msg); } catch { /* reconnecting */ } };
 setInterval(() => post({ type: 'ping' }), 20000);
 
-const speech = initSpeechTab({ $, post, isVisible: () => speechVisible(), onUnread: (n) => setUnread(n) });
+// Two tabs can read the meeting's captions (Speech -> Sign and Cards). Each one starts/stops them independently, so
+// 'captions-stop' only reaches the page once nobody needs the captions any more.
+const capUsers = new Set();
+function postFor(user) {
+  return (msg) => {
+    if (msg.type === 'captions-start') { capUsers.add(user); post(msg); }
+    else if (msg.type === 'captions-stop') { capUsers.delete(user); if (capUsers.size === 0) post(msg); }
+    else post(msg);
+  };
+}
+
+const speech = initSpeechTab({ $, post: postFor('speech'), isVisible: () => speechVisible(), onUnread: (n) => setUnread(n) });
+const cards = initCardsTab({ $, post: postFor('cards'), share: (text) => shareMessage(text), copyText: (t) => copyText(t) });
 
 function currentStatus() {
   const c = S.client;
@@ -61,6 +74,7 @@ function onRelayMessage(msg) {
     if (w) { S.chatWaiters.delete(msg.id); w(msg); }
   } else if (msg.type === 'captions-snapshot' || msg.type === 'captions-enable-result') {
     speech.onRelay(msg);
+    cards.onRelay(msg);
   }
 }
 
@@ -73,13 +87,15 @@ function setExpanded(on) {
   document.body.style.overflow = 'hidden';
   post({ type: 'resize', mode: on ? 'expanded' : 'collapsed' });
   speech.onVisibility(speechVisible());
+  cards.onVisibility(on && S.tab === 'cards');
 }
 
 // ---------- tabs ----------
 const speechVisible = () => S.expanded && S.tab === 'speech';
+const TABS = [['tabSign', 'sign'], ['tabSpeech', 'speech'], ['tabCards', 'cards']];
 function selectTab(name, focus = false) {
   S.tab = name;
-  for (const [id, key] of [['tabSign', 'sign'], ['tabSpeech', 'speech']]) {
+  for (const [id, key] of TABS) {
     const on = key === name;
     $(id).setAttribute('aria-selected', String(on));
     $(id).tabIndex = on ? 0 : -1;
@@ -87,8 +103,10 @@ function selectTab(name, focus = false) {
   }
   $('paneSign').hidden = name !== 'sign';
   $('paneSpeech').hidden = name !== 'speech';
+  $('paneCards').hidden = name !== 'cards';
   els.connDot.hidden = els.connText.hidden = name !== 'sign'; // the service connection only concerns sign recognition
   speech.onVisibility(speechVisible());
+  cards.onVisibility(S.expanded && name === 'cards');
 }
 function setUnread(n) { const b = $('tabBadge'); b.hidden = n === 0; b.textContent = String(n); }
 function renderControls() {
@@ -255,19 +273,26 @@ function askContent(msg, timeoutMs = 4000) {
   });
 }
 
+// Shares a message with the meeting: chat (send or fill) or clipboard, depending on the user's setting.
+// Returns { message, kind, sent } for the caller to display. Callers invoke it ONLY from a user action.
+async function shareMessage(text) {
+  const settings = S.settings || await loadSettings();
+  if (settings.sendMode !== 'clipboard') {
+    const res = await askContent({ type: 'chat-send', text, mode: settings.sendMode === 'fill' ? 'fill' : 'chat' });
+    if (res.ok) return { message: res.detail || 'Done.', kind: res.method === 'sent' ? 'ok' : '', sent: res.method === 'sent' };
+    const copied = await copyText(text);
+    return { message: `${res.detail} ${copied ? 'The text was copied to your clipboard; paste it into the chat.' : 'Copy failed; select the text and copy it manually.'}`, kind: 'error', sent: false };
+  }
+  return { message: (await copyText(text)) ? 'Copied. Paste it into the meeting chat.' : 'Copy failed; select the text and copy it manually.', kind: 'ok', sent: false };
+}
+
 // Sending is ALWAYS a direct result of the user pressing this button; predictions never reach this code path.
 async function onSend() {
   const text = els.text.value.trim();
   if (!text) { say('Nothing to send. Sign something or type a message first.'); return; }
-  const settings = S.settings || await loadSettings();
-  if (settings.sendMode !== 'clipboard') {
-    const res = await askContent({ type: 'chat-send', text, mode: settings.sendMode === 'fill' ? 'fill' : 'chat' });
-    if (res.ok) { say(res.detail || 'Done.', res.method === 'sent' ? 'ok' : ''); if (res.method === 'sent') els.text.value = ''; return; }
-    const copied = await copyText(text);
-    say(`${res.detail} ${copied ? 'The text was copied to your clipboard; paste it into the chat.' : 'Copy failed; select the text and copy it manually.'}`, 'error');
-    return;
-  }
-  say((await copyText(text)) ? 'Copied. Paste it into the meeting chat.' : 'Copy failed; select the text and copy it manually.', 'ok');
+  const r = await shareMessage(text);
+  say(r.message, r.kind);
+  if (r.sent) els.text.value = '';
 }
 
 // ---------- wiring ----------
@@ -281,13 +306,17 @@ els.copyBtn.addEventListener('click', async () => say((await copyText(els.text.v
 els.clearBtn.addEventListener('click', () => { els.text.value = ''; els.resultCard.hidden = true; say(''); els.text.focus(); });
 $('tabSign').addEventListener('click', () => selectTab('sign'));
 $('tabSpeech').addEventListener('click', () => selectTab('speech'));
-for (const id of ['tabSign', 'tabSpeech']) {
-  $(id).addEventListener('keydown', (e) => { // arrow keys move between tabs (WAI-ARIA tabs pattern)
-    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); selectTab(S.tab === 'sign' ? 'speech' : 'sign', true); }
+$('tabCards').addEventListener('click', () => selectTab('cards'));
+for (const [id] of TABS) {
+  $(id).addEventListener('keydown', (e) => { // arrow keys move between tabs, wrapping around (WAI-ARIA tabs pattern)
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    e.preventDefault();
+    const i = TABS.findIndex(([, key]) => key === S.tab);
+    selectTab(TABS[(i + (e.key === 'ArrowRight' ? 1 : TABS.length - 1)) % TABS.length][1], true);
   });
 }
 els.optionsLink.addEventListener('click', (e) => { e.preventDefault(); window.open(chrome.runtime.getURL('src/options/options.html'), '_blank'); });
-addEventListener('pagehide', () => { teardown(); speech.stop(); });
+addEventListener('pagehide', () => { teardown(); speech.stop(); cards.stop(); });
 
 els.platformLabel.textContent = platform === 'meet' ? ' · Google Meet' : '';
 connectPort();
