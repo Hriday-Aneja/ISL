@@ -33,8 +33,20 @@
         "https://meet.google.com/*"
       ],
       "js": [
+        "src/content/vcam-main.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "all_frames": false
+    },
+    {
+      "matches": [
+        "https://meet.google.com/*"
+      ],
+      "js": [
         "src/content/platforms/registry.js",
         "src/content/platforms/meet.js",
+        "src/content/vcam.js",
         "src/content/content.js"
       ],
       "run_at": "document_idle",

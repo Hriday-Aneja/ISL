@@ -11,28 +11,111 @@ const MAX_TURNS = 40;
 const KEEPALIVE_MS = 15000;
 
 export function initSpeechTab({ $, post, isVisible, onUnread }) {
-  const els = Object.fromEntries(['srcSelect', 'listenBtn', 'capOnBtn', 'installBtn', 'micGrantBtn', 'stage', 'avatarVideo', 'stageCard', 'stageText', 'stageSub', 'stageInfo', 'helpRow',
-    'speedSelect', 'skipBtn', 'autoSign', 'liveLine', 'turns', 'typeForm', 'typeInput', 'speechMessage'].map((id) => [id, $(id)]));
+  const elementIds = [
+    'srcSelect', 'listenBtn', 'capOnBtn', 'installBtn', 'micGrantBtn', 
+    'stage', 'avatarVideo', 'stageCard', 'stageText', 'stageSub', 
+    'stageInfo', 'helpRow', 'speedSelect', 'skipBtn', 'autoSign', 
+    'vcamToggle', 'vcamStatus', 'liveLine', 'turns', 'typeForm', 
+    'typeInput', 'speechMessage'
+  ];
+
+  // Safely grab elements so missing ones don't break the entire tab execution
+  const els = {};
+  for (const id of elementIds) {
+    els[id] = $(id);
+    if (!els[id]) {
+      console.warn(`[Speech Tab] Element with id "${id}" was not found in the DOM.`);
+    }
+  }
+
   const T = {
     settings: null, cfg: null, mapper: null, player: null, tracker: new CaptionTracker(), tick: null, keep: null,
-    listening: false, source: 'captions', mic: null, capState: null, turnData: new Map(), nextTurn: 1, nextId: 1, waiters: new Map(), unread: 0,
+    listening: false, source: 'captions', mic: null, capState: null, vcam: false, vcamAsked: false, vcamSent: null, vcamTimer: null, vcamPump: null, turnData: new Map(), nextTurn: 1, nextId: 1, waiters: new Map(), unread: 0,
   };
 
-  const say = (text, kind = '') => { els.speechMessage.textContent = text; els.speechMessage.className = `message ${kind}`.trim(); };
+  const say = (text, kind = '') => { 
+  if (els.speechMessage) {
+    els.speechMessage.textContent = text; 
+    els.speechMessage.className = `message ${kind}`.trim(); 
+  }
+};
 
   // ---------- avatar stage ----------
   function renderStage(st) {
     const cur = st.current;
-    els.stage.dataset.sign = cur ? cur.sign : '';
-    els.stage.dataset.mode = cur && !st.placeholder ? 'video' : 'text';
-    els.stageCard.className = `stage-card${cur ? '' : ' idle'}`;
-    els.stageText.textContent = !cur ? 'Avatar ready' : st.placeholder ? cur.label : '';
-    els.stageSub.textContent = cur && st.placeholder ? (st.failed ? 'the clip failed to load' : 'no avatar clip for this sign yet') : '';
+    if (els.stage) {
+      els.stage.dataset.sign = cur ? cur.sign : '';
+      els.stage.dataset.mode = cur && !st.placeholder ? 'video' : 'text';
+    }
+    if (els.stageCard) els.stageCard.className = `stage-card${cur ? '' : ' idle'}`;
+    if (els.stageText) els.stageText.textContent = !cur ? 'Avatar ready' : st.placeholder ? cur.label : '';
+    if (els.stageSub) els.stageSub.textContent = cur && st.placeholder ? (st.failed ? 'the clip failed to load' : 'no avatar clip for this sign yet') : '';
+    
     let info = cur ? `Signing: ${cur.label}` : (T.listening ? 'Waiting for speech' : 'Not listening');
     if (st.queued) info += ` · ${st.queued} waiting`;
     if (st.dropped) info += ` · skipped ${st.dropped} older sign${st.dropped === 1 ? '' : 's'} to catch up`;
-    els.stageInfo.textContent = info;
+    
+    if (els.stageInfo) els.stageInfo.textContent = info;
     for (const [id, d] of T.turnData) d.el.classList.toggle('playing', Boolean(cur && cur.turnId === id));
+    shareStage(st);
+  }
+
+  // ---------- share the avatar with the other participants (virtual camera) ----------
+  function shareStage(st) {
+    if (!T.vcam) return;
+    const cur = st.current;
+    const sig = cur ? `${cur.turnId}|${cur.sign}|${st.placeholder}` : '';
+    if (T.vcamSent && T.vcamSent.cur === cur && T.vcamSent.sig === sig) return;
+    T.vcamSent = { cur, sig };
+    if (!cur) post({ type: 'vcam-idle' });
+    else post({ type: 'vcam-play', hasClip: Boolean(cur.clip) && !st.placeholder, label: cur.label });
+  }
+
+  function setVcam(on) {
+    T.vcam = on;
+    T.vcamSent = null;
+    T.vcamAsked = on;
+    clearInterval(T.vcamTimer);
+    clearInterval(T.vcamPump);
+    T.vcamTimer = T.vcamPump = null;
+    if (els.vcamStatus) els.vcamStatus.hidden = !on;
+    post({ type: 'vcam-enable', on });
+    if (on) {
+      T.vcamTimer = setInterval(() => post({ type: 'vcam-enable', on: true }), 3000);
+      T.vcamPump = setInterval(pumpFrame, 1000 / 24);
+      if (T.player) shareStage({ current: T.player.current, placeholder: T.player.placeholder });
+    }
+  }
+
+  let pumping = false;
+  async function pumpFrame() {
+    const v = els.avatarVideo;
+    if (pumping || !T.vcam || !v || v.paused || v.ended || v.readyState < 2 || !v.videoWidth) return;
+    pumping = true;
+    try {
+      const bmp = await createImageBitmap(v);
+      try { parent.postMessage({ type: 'samvaad-vcam-frame', bitmap: bmp }, '*', [bmp]); } catch { bmp.close(); }
+    } catch { /* frame not ready */ }
+    pumping = false;
+  }
+
+  function onVcamResult(msg) {
+    if (T.vcam && msg.on && els.vcamStatus) {
+      els.vcamStatus.textContent = msg.hits
+        ? `Meet is using the avatar as your camera (picked up ${msg.hits}×). If others still see your face, turn the camera off and on again.`
+        : 'Waiting for Meet to pick it up: turn your Meet camera off, then on.';
+    }
+    if (!T.vcamAsked) return;
+    T.vcamAsked = false;
+    if (T.vcam && !msg.hooked) {
+      say('The meeting page is not ready for this yet. Reload the Meet tab once (the extension was updated), then turn this on again.', 'error');
+      if (els.vcamToggle) els.vcamToggle.checked = false;
+      setVcam(false);
+    } else if (msg.on) {
+      say('Sharing on: the avatar is now your camera in Meet. Turn your Meet camera off and on once so it switches. Others see the avatar; you see it here and in your own tile.', 'ok');
+    } else {
+      say('Sharing off. Turn your Meet camera off and on again to bring your real camera back.');
+    }
   }
 
   function enqueueTurn(id, signs) {
@@ -42,6 +125,7 @@ export function initSpeechTab({ $, post, isVisible, onUnread }) {
 
   // ---------- transcript ----------
   function renderTurn(id, speaker, map, text) {
+    if (!els.turns) return null;
     const li = document.createElement('li');
     li.className = 'turn';
     const who = document.createElement('div');
@@ -67,12 +151,18 @@ export function initSpeechTab({ $, post, isVisible, onUnread }) {
     li.append(who, words);
     if (map.signs.length === 0) addNote(li, 'No signs available for this text.');
     else if (map.unsigned.length) addNote(li, `Not covered by the avatar: ${map.unsigned.join(', ')}`);
+    
     els.turns.append(li);
     T.turnData.set(id, { el: li, map });
-    while (els.turns.children.length > MAX_TURNS) { const first = els.turns.firstElementChild; for (const [k, d] of T.turnData) if (d.el === first) T.turnData.delete(k); first.remove(); }
+    while (els.turns.children.length > MAX_TURNS) { 
+      const first = els.turns.firstElementChild; 
+      for (const [k, d] of T.turnData) if (d.el === first) T.turnData.delete(k); 
+      first.remove(); 
+    }
     els.turns.scrollTop = els.turns.scrollHeight;
     return li;
   }
+
   function addNote(li, text) { const n = document.createElement('div'); n.className = 'note'; n.textContent = text; li.append(n); }
 
   function addTurn(speaker, text, { force = false } = {}) {
@@ -81,31 +171,36 @@ export function initSpeechTab({ $, post, isVisible, onUnread }) {
     if (map.tokens.length === 0) return;
     const id = T.nextTurn++;
     const li = renderTurn(id, speaker, map, text);
-    if (map.signs.length === 0) return;
-    if (!isVisible()) { // the avatar is only driven while the user can see it; missed turns keep a Sign button
+    if (!li || map.signs.length === 0) return;
+    
+    if (!isVisible() && !T.vcam) {
       addNote(li, 'Arrived while this tab was hidden: press Sign to play it.');
       T.unread += 1;
       onUnread(T.unread);
-    } else if (force || els.autoSign.checked) enqueueTurn(id, map.signs);
+    } else if (force || (els.autoSign && els.autoSign.checked)) enqueueTurn(id, map.signs);
   }
 
   // ---------- listening ----------
   function setListening(on) {
     T.listening = on;
-    els.listenBtn.textContent = on ? 'Stop listening' : 'Start listening';
-    els.listenBtn.className = on ? '' : 'primary';
-    els.srcSelect.disabled = on;
-    if (!on) els.liveLine.textContent = '';
+    if (els.listenBtn) {
+      els.listenBtn.textContent = on ? 'Stop listening' : 'Start listening';
+      els.listenBtn.className = on ? '' : 'primary';
+    }
+    if (els.srcSelect) els.srcSelect.disabled = on;
+    if (!on && els.liveLine) els.liveLine.textContent = '';
     renderStage({ current: T.player && T.player.current, placeholder: T.player && T.player.placeholder, failed: false, queued: T.player ? T.player.queue.length : 0, dropped: 0 });
   }
 
-  function syncHelp() { els.capOnBtn.hidden = T.source !== 'captions' || T.capState === 'watching'; }
+  function syncHelp() { 
+    if (els.capOnBtn) els.capOnBtn.hidden = T.source !== 'captions' || T.capState === 'watching'; 
+  }
 
   function syncSourceUi() {
-    T.source = els.srcSelect.value;
+    if (els.srcSelect) T.source = els.srcSelect.value;
     syncHelp();
-    els.installBtn.hidden = true;
-    els.micGrantBtn.hidden = true;
+    if (els.installBtn) els.installBtn.hidden = true;
+    if (els.micGrantBtn) els.micGrantBtn.hidden = true;
   }
 
   const ownSpeaker = (s) => String(s || '').trim().toLowerCase() === 'you';
@@ -119,13 +214,13 @@ export function initSpeechTab({ $, post, isVisible, onUnread }) {
       const rows = (msg.rows || []).filter((r) => T.settings.includeOwnCaptions || !ownSpeaker(r.speaker));
       T.tracker.update(rows);
       const last = rows[rows.length - 1];
-      els.liveLine.textContent = last ? `${last.speaker ? `${last.speaker}: ` : ''}${last.text}` : '';
+      if (els.liveLine) els.liveLine.textContent = last ? `${last.speaker ? `${last.speaker}: ` : ''}${last.text}` : '';
       if (prev !== 'watching') say('Listening to Meet captions. Signs follow a moment after the words settle.', 'ok');
     } else {
-      T.tracker.update([]); // captions went away: flush whatever had already settled
+      T.tracker.update([]);
     }
     if (msg.state !== 'watching' && prev !== msg.state) {
-      els.liveLine.textContent = '';
+      if (els.liveLine) els.liveLine.textContent = '';
       if (msg.state === 'no-region') say('Meet captions not detected. Press "Turn on Meet captions" or use the CC button in Meet.');
       else if (msg.state === 'unrecognized-layout') say('Meet captions are on, but their layout was not recognised (Meet may have changed). Use the microphone or type text instead; see README, Known limitations.', 'error');
       else if (msg.state === 'unsupported') say('This meeting platform has no caption support yet.', 'error');
@@ -138,7 +233,7 @@ export function initSpeechTab({ $, post, isVisible, onUnread }) {
     T.capState = null;
     syncHelp();
     post({ type: 'captions-start' });
-    T.keep = setInterval(() => post({ type: 'captions-start' }), KEEPALIVE_MS); // idempotent; heals a restarted service worker
+    T.keep = setInterval(() => post({ type: 'captions-start' }), KEEPALIVE_MS);
     T.tick = setInterval(() => { for (const ev of T.tracker.tick()) addTurn(ev.speaker || 'Speaker', ev.text); }, 250);
     say('Looking for Meet captions…');
   }
@@ -148,13 +243,13 @@ export function initSpeechTab({ $, post, isVisible, onUnread }) {
     T.mic = new MicRecognizer({
       lang: T.settings.speechLang,
       localOnly: T.settings.speechLocalOnly,
-      onInterim: (t) => { els.liveLine.textContent = t ? `Hearing: ${t}` : ''; },
+      onInterim: (t) => { if (els.liveLine) els.liveLine.textContent = t ? `Hearing: ${t}` : ''; },
       onFinal: (t) => addTurn('Microphone', t),
       onState: () => {},
       onError: (e) => {
         say(e.message, 'error');
-        els.micGrantBtn.hidden = e.code !== 'permission';
-        els.installBtn.hidden = e.code !== 'needs-install';
+        if (els.micGrantBtn) els.micGrantBtn.hidden = e.code !== 'permission';
+        if (els.installBtn) els.installBtn.hidden = e.code !== 'needs-install';
         if (e.fatal) stopListening(true);
       },
     });
@@ -167,8 +262,8 @@ export function initSpeechTab({ $, post, isVisible, onUnread }) {
   async function startListening() {
     if (T.listening) return;
     T.settings = await loadSettings();
-    els.installBtn.hidden = true;
-    els.micGrantBtn.hidden = true;
+    if (els.installBtn) els.installBtn.hidden = true;
+    if (els.micGrantBtn) els.micGrantBtn.hidden = true;
     setListening(true);
     if (T.source === 'captions') startCaptions();
     else if (!(await startMic())) { if (T.listening && !T.mic) setListening(false); }
@@ -183,26 +278,31 @@ export function initSpeechTab({ $, post, isVisible, onUnread }) {
     if (!keepMessage) say('Stopped listening.');
   }
 
-  // ---------- wiring ----------
-  els.listenBtn.addEventListener('click', () => (T.listening ? stopListening() : startListening()));
-  els.srcSelect.addEventListener('change', syncSourceUi);
-  els.skipBtn.addEventListener('click', () => { if (T.player) T.player.clear(); });
-  els.speedSelect.addEventListener('change', () => { if (T.player) T.player.setSpeed(els.speedSelect.value); });
-  els.micGrantBtn.addEventListener('click', () => post({ type: 'open-permissions' }));
-  els.installBtn.addEventListener('click', async () => {
+  // ---------- Safe Event Listeners Wiring ----------
+  els.listenBtn?.addEventListener('click', () => (T.listening ? stopListening() : startListening()));
+  els.srcSelect?.addEventListener('change', syncSourceUi);
+  els.vcamToggle?.addEventListener('change', () => setVcam(els.vcamToggle.checked));
+  els.skipBtn?.addEventListener('click', () => { if (T.player) T.player.clear(); });
+  els.speedSelect?.addEventListener('change', () => { if (T.player) T.player.setSpeed(els.speedSelect.value); });
+  els.micGrantBtn?.addEventListener('click', () => post({ type: 'open-permissions' }));
+  
+  els.installBtn?.addEventListener('click', async () => {
     say('Downloading the on-device speech language pack…');
     const ok = await installOnDevice(T.settings ? T.settings.speechLang : 'en-IN');
     say(ok ? 'Language pack installed. Press Start listening.' : 'The language pack could not be installed. Allow cloud recognition in Settings, or try another language.', ok ? 'ok' : 'error');
-    if (ok) els.installBtn.hidden = true;
+    if (ok && els.installBtn) els.installBtn.hidden = true;
   });
-  els.capOnBtn.addEventListener('click', () => {
+
+  els.capOnBtn?.addEventListener('click', () => {
     const id = T.nextId++;
     const t = setTimeout(() => { T.waiters.delete(id); say('The meeting page did not respond. Use the CC button in Meet.', 'error'); }, 4000);
     T.waiters.set(id, (r) => { clearTimeout(t); say(r.detail || (r.ok ? 'Done.' : 'Failed.'), r.ok ? 'ok' : 'error'); });
     post({ type: 'captions-enable', id });
   });
-  els.typeForm.addEventListener('submit', (e) => {
+
+  els.typeForm?.addEventListener('submit', (e) => {
     e.preventDefault();
+    if (!els.typeInput) return;
     const text = els.typeInput.value.trim();
     if (!text) return;
     addTurn('Typed', text, { force: true });
@@ -214,11 +314,15 @@ export function initSpeechTab({ $, post, isVisible, onUnread }) {
       T.settings = await loadSettings();
       T.cfg = await loadAvatarConfig();
       T.mapper = createMapper(T.cfg);
-      T.player = new AvatarPlayer({ video: els.avatarVideo, onState: renderStage, speed: T.settings.avatarSpeed });
-      els.srcSelect.value = T.settings.speechSource;
-      els.autoSign.checked = T.settings.autoSign;
-      const speeds = Array.from(els.speedSelect.options).map((o) => o.value);
-      els.speedSelect.value = speeds.includes(String(T.settings.avatarSpeed)) ? String(T.settings.avatarSpeed) : '1';
+      if (els.avatarVideo) {
+        T.player = new AvatarPlayer({ video: els.avatarVideo, onState: renderStage, speed: T.settings.avatarSpeed });
+      }
+      if (els.srcSelect) els.srcSelect.value = T.settings.speechSource;
+      if (els.autoSign) els.autoSign.checked = T.settings.autoSign;
+      if (els.speedSelect) {
+        const speeds = Array.from(els.speedSelect.options).map((o) => o.value);
+        els.speedSelect.value = speeds.includes(String(T.settings.avatarSpeed)) ? String(T.settings.avatarSpeed) : '1';
+      }
       syncSourceUi();
       renderStage({ current: null, placeholder: false, failed: false, queued: 0, dropped: 0 });
     } catch (err) {
@@ -229,11 +333,12 @@ export function initSpeechTab({ $, post, isVisible, onUnread }) {
   return {
     onRelay(msg) {
       if (msg.type === 'captions-snapshot') onSnapshot(msg);
+      else if (msg.type === 'vcam-result') onVcamResult(msg);
       else if (msg.type === 'captions-enable-result') { const w = T.waiters.get(msg.id); if (w) { T.waiters.delete(msg.id); w(msg); } }
     },
     onVisibility(visible) {
-      if (visible) { T.unread = 0; onUnread(0); } else if (T.player) T.player.clear(); // nobody is watching: do not build a backlog
+      if (visible) { T.unread = 0; onUnread(0); } else if (T.player && !T.vcam) T.player.clear();
     },
-    stop() { if (T.listening) stopListening(true); if (T.player) T.player.clear(); },
+    stop() { if (T.vcam) setVcam(false); if (T.listening) stopListening(true); if (T.player) T.player.clear(); },
   };
 }

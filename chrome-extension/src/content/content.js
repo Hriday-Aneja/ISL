@@ -44,6 +44,7 @@
   }
 
   function unmountPanel() {
+    if (globalThis.SamvaadVcam) globalThis.SamvaadVcam.setEnabled(false); // no panel, no avatar camera
     if (host) host.remove();
     host = frame = null;
     mode = 'collapsed';
@@ -65,7 +66,13 @@
       else if (msg.type === 'chat-send') {
         const result = await adapter.sendChat(msg.text, msg.mode);
         try { port.postMessage({ type: 'chat-result', id: msg.id, ...result }); } catch { /* port closed */ }
-      } else if (msg.type === 'captions-start') startCaptions();
+      } else if (msg.type === 'vcam-enable') {
+        const V = globalThis.SamvaadVcam;
+        if (V) V.setEnabled(msg.on);
+        try { port.postMessage({ type: 'vcam-result', on: Boolean(V && V.isEnabled()), hooked: Boolean(V && V.isHooked()), hits: V ? V.hits() : 0 }); } catch { /* port closed */ }
+      } else if (msg.type === 'vcam-play') { if (globalThis.SamvaadVcam) globalThis.SamvaadVcam.play(msg); }
+      else if (msg.type === 'vcam-idle') { if (globalThis.SamvaadVcam) globalThis.SamvaadVcam.idle(); }
+      else if (msg.type === 'captions-start') startCaptions();
       else if (msg.type === 'captions-stop') stopCaptions();
       else if (msg.type === 'captions-enable') {
         const result = adapter.enableCaptions ? await adapter.enableCaptions() : { ok: false, detail: 'This platform cannot turn captions on from here.' };

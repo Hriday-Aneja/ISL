@@ -47,7 +47,10 @@ chrome.runtime.onConnect.addListener((port) => {
       }
     });
     port.onDisconnect.addListener(() => {
-      if (e.panel === port) { e.panel = null; e.status = null; setBadge(tabId, null); }
+      if (e.panel === port) {
+        e.panel = null; e.status = null; setBadge(tabId, null);
+        if (e.content) e.content.postMessage({ type: 'vcam-enable', on: false }); // panel gone: stop replacing the camera
+      }
     });
   }
 });

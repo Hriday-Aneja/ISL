@@ -7,8 +7,12 @@ import { initSpeechTab } from './speech-tab.js';
 import { initCardsTab } from './cards-tab.js';
 
 const $ = (id) => document.getElementById(id);
-const els = Object.fromEntries(['pill', 'pillDot', 'card', 'platformLabel', 'connDot', 'connText', 'collapseBtn', 'sessionBtn', 'grantBtn', 'previewWrap',
-  'preview', 'recBadge', 'recordRow', 'recordBtn', 'clipInfo', 'resultCard', 'text', 'sendBtn', 'copyBtn', 'clearBtn', 'message', 'optionsLink'].map((id) => [id, $(id)]));
+const els = Object.fromEntries([
+  'pill', 'pillDot', 'card', 'platformLabel', 'connDot', 'connText', 'collapseBtn', 
+  'sessionBtn', 'grantBtn', 'previewWrap', 'preview', 'recBadge', 'recordRow', 
+  'recordBtn', 'clipInfo', 'resultCard', 'text', 'sendBtn', 'copyBtn', 'clearBtn', 
+  'message', 'optionsLink'
+].map((id) => [id, $(id)]));
 
 const platform = new URLSearchParams(location.search).get('platform') || 'unknown';
 const S = {
@@ -16,6 +20,7 @@ const S = {
   sessionActive: false, starting: false, expanded: false, mirror: true, mirrorWhy: '', captureTimer: null, clipTimer: null,
   chatWaiters: new Map(), nextId: 1, cameraBlocked: false, tab: 'sign',
 };
+const TABS = [['tabSign', 'sign'], ['tabSpeech', 'speech'], ['tabCards', 'cards']];
 
 // ---------- relay to service worker ----------
 let port = null;
@@ -56,6 +61,7 @@ function currentStatus() {
     messageKind: els.message.className.replace('message', '').trim(),
   };
 }
+
 function publishStatus() {
   const st = currentStatus();
   els.pillDot.className = `dot ${st.sessionActive ? (st.conn === 'connected' ? 'ok' : 'warn') : ''}`;
@@ -80,6 +86,7 @@ function onRelayMessage(msg) {
 
 // ---------- UI helpers ----------
 function say(text, kind = '') { els.message.textContent = text; els.message.className = `message ${kind}`.trim(); publishStatus(); }
+
 function setExpanded(on) {
   S.expanded = on;
   els.pill.hidden = on;
@@ -92,7 +99,6 @@ function setExpanded(on) {
 
 // ---------- tabs ----------
 const speechVisible = () => S.expanded && S.tab === 'speech';
-const TABS = [['tabSign', 'sign'], ['tabSpeech', 'speech'], ['tabCards', 'cards']];
 function selectTab(name, focus = false) {
   S.tab = name;
   for (const [id, key] of TABS) {
@@ -108,7 +114,9 @@ function selectTab(name, focus = false) {
   speech.onVisibility(speechVisible());
   cards.onVisibility(S.expanded && name === 'cards');
 }
+
 function setUnread(n) { const b = $('tabBadge'); b.hidden = n === 0; b.textContent = String(n); }
+
 function renderControls() {
   const c = S.client;
   const clip = c ? c.clipState : ClipState.IDLE;
@@ -197,6 +205,7 @@ function startFrameLoop() {
     } finally { busy = false; }
   }, interval);
 }
+
 function stopFrameLoop() { clearInterval(S.captureTimer); S.captureTimer = null; }
 
 function toggleRecord() {
@@ -307,14 +316,18 @@ els.clearBtn.addEventListener('click', () => { els.text.value = ''; els.resultCa
 $('tabSign').addEventListener('click', () => selectTab('sign'));
 $('tabSpeech').addEventListener('click', () => selectTab('speech'));
 $('tabCards').addEventListener('click', () => selectTab('cards'));
-for (const [id] of TABS) {
-  $(id).addEventListener('keydown', (e) => { // arrow keys move between tabs, wrapping around (WAI-ARIA tabs pattern)
-    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-    e.preventDefault();
-    const i = TABS.findIndex(([, key]) => key === S.tab);
-    selectTab(TABS[(i + (e.key === 'ArrowRight' ? 1 : TABS.length - 1)) % TABS.length][1], true);
+for (const id of ['tabSign', 'tabSpeech', 'tabCards']) {
+  $(id).addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const current = TABS.findIndex(([, key]) => key === S.tab);
+      const direction = e.key === 'ArrowRight' ? 1 : -1;
+      const next = (current + direction + TABS.length) % TABS.length;
+      selectTab(TABS[next][1], true);
+    }
   });
 }
+
 els.optionsLink.addEventListener('click', (e) => { e.preventDefault(); window.open(chrome.runtime.getURL('src/options/options.html'), '_blank'); });
 addEventListener('pagehide', () => { teardown(); speech.stop(); cards.stop(); });
 
