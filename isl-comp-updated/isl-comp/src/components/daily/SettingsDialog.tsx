@@ -56,6 +56,36 @@ export function SettingsDialog({ settings, persistent, aiAvailable, onChange, on
           onToggle={() => onChange('autoSpeak', !settings.autoSpeak)}
         />
         <Switch
+          label="Speak cards in English"
+          description="Part of 'Speak my messages aloud'. Turn off to hear only Hindi."
+          checked={settings.speakEnglish}
+          onToggle={() => onChange('speakEnglish', !settings.speakEnglish)}
+        />
+        <Switch
+          label="Speak cards in Hindi (हिन्दी)"
+          description="Reads the Hindi version of a card out loud, after the English one. Needs a Hindi voice on your device."
+          checked={settings.speakHindi}
+          onToggle={() => onChange('speakHindi', !settings.speakHindi)}
+        />
+        <Switch
+          label="Show Hindi on cards"
+          description="Shows the Hindi text under each card and message."
+          checked={settings.showHindi}
+          onToggle={() => onChange('showHindi', !settings.showHindi)}
+        />
+        <Switch
+          label="Show Hindi only"
+          description="Hides English when a Hindi translation is available. English remains visible when no translation exists."
+          checked={settings.showHindiOnly}
+          onToggle={() => onChange('showHindiOnly', !settings.showHindiOnly)}
+        />
+        <Switch
+          label="Understand the other person in Hindi"
+          description="The microphone listens for Hindi speech instead of English."
+          checked={settings.listenHindi}
+          onToggle={() => onChange('listenHindi', !settings.listenHindi)}
+        />
+        <Switch
           label="Large text"
           description="Make conversation text bigger."
           checked={settings.largeText}
@@ -66,6 +96,12 @@ export function SettingsDialog({ settings, persistent, aiAvailable, onChange, on
           description="Stronger borders and darker text."
           checked={settings.highContrast}
           onToggle={() => onChange('highContrast', !settings.highContrast)}
+        />
+        <Switch
+          label="Automatic new cards"
+          description="After you use a card or the other person replies, new cards that fit the conversation are added. Your existing cards stay. Needs 'Use recent messages' below."
+          checked={settings.autoSuggest}
+          onToggle={() => onChange('autoSuggest', !settings.autoSuggest)}
         />
         <Switch
           label="Use recent messages for suggestions"

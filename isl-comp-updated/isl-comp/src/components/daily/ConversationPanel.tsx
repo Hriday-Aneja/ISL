@@ -17,6 +17,8 @@ interface ConversationPanelProps {
   onClear: () => void;
   onToggleLargeText: () => void;
   onDropCard: (text: string, source: MessageSource) => void;
+  showHindiOnly: boolean;
+  listenHindi?: boolean;
   /** Present on small screens, where the panel is a full-screen sheet. */
   onCloseSheet?: () => void;
 }
@@ -37,6 +39,8 @@ export function ConversationPanel({
   onClear,
   onToggleLargeText,
   onDropCard,
+  showHindiOnly,
+  listenHindi,
   onCloseSheet,
 }: ConversationPanelProps) {
   const listRef = useRef<HTMLDivElement | null>(null);
@@ -174,6 +178,7 @@ export function ConversationPanel({
               onSpeak={() => onSpeak(message)}
               onFocus={() => onFocus(message.id)}
               onOpenSign={onOpenSign}
+              showHindiOnly={showHindiOnly}
             />
           ))
         )}
@@ -185,7 +190,7 @@ export function ConversationPanel({
         </p>
       )}
 
-      <Composer onSend={onSend} />
+      <Composer onSend={onSend} listenHindi={listenHindi} />
     </div>
   );
 }

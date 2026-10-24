@@ -4,6 +4,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { ScenarioPicker } from '../components/daily/ScenarioPicker';
 import { EmergencyBar } from '../components/daily/EmergencyBar';
 import { CardsTab } from '../components/daily/CardsTab';
+import { AIAssistanceTab } from '../components/daily/AIAssistanceTab';
 import { SignsTab } from '../components/daily/SignsTab';
 import { SavedTab } from '../components/daily/SavedTab';
 import { SignDialog } from '../components/daily/SignDialog';
@@ -23,16 +24,19 @@ import {
   type MessageSource,
 } from '../lib/dailyStore';
 import { useDailyStore } from '../hooks/useDailyStore';
-import { useTextToSpeech } from '../hooks/useTextToSpeech';
+import { useTextToSpeech, type SpeechPart } from '../hooks/useTextToSpeech';
+import { useHindi } from '../hooks/useHindi';
+import { lookupHindi } from '../services/hindi';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { fetchAiStatus } from '../services/dailySuggestions';
 
-type Tab = 'cards' | 'signs' | 'saved';
+type Tab = 'cards' | 'signs' | 'saved' | 'ai';
 
 const TABS: Array<{ id: Tab; label: string }> = [
   { id: 'cards', label: 'Cards' },
   { id: 'signs', label: 'ISL Signs' },
   { id: 'saved', label: 'Saved' },
+  { id: 'ai', label: 'AI Assistance' },
 ];
 
 type EditorState =
@@ -58,18 +62,31 @@ export function DailyTranslator() {
   const [aiAvailable, setAiAvailable] = useState<boolean | null>(null);
   const [online, setOnline] = useState(typeof navigator === 'undefined' ? true : navigator.onLine);
   const [toast, setToast] = useState('');
+  // Set after every message so the Cards tab can fetch cards that fit the conversation.
+  const [autoTrigger, setAutoTrigger] = useState<{ id: string; replyTo?: string } | null>(null);
+  const [newAiCards, setNewAiCards] = useState(0);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigate = useNavigate();
   const { scenarioId } = useParams<{ scenarioId?: string }>();
   const routeScenario = SCENARIOS.some((item) => item.id === scenarioId)
     ? (scenarioId as ScenarioId)
     : null;
+  const previousScenario = useRef<ScenarioId | null | undefined>(undefined);
 
   const { settings } = state;
 
   useEffect(() => {
     document.title = 'Daily Translator — SAMVAAD';
   }, []);
+
+  useEffect(() => {
+    if (previousScenario.current !== undefined && previousScenario.current !== routeScenario) {
+      store.clearMessages();
+      setAutoTrigger(null);
+      setNewAiCards(0);
+    }
+    previousScenario.current = routeScenario;
+  }, [routeScenario, store.clearMessages]);
 
   // Is AI configured on the server? (Never exposes the key, only a yes/no.)
   useEffect(() => {
@@ -103,26 +120,46 @@ export function DailyTranslator() {
 
   // ---- sending ----------------------------------------------------------
 
+  /** What to read aloud for a message, following the English / Hindi switches. */
+  const speechParts = useCallback(
+    (text: string, textHi?: string): SpeechPart[] => {
+      const hi = textHi ?? lookupHindi(text);
+      const parts: SpeechPart[] = [];
+      if (settings.speakEnglish) parts.push({ text });
+      if (settings.speakHindi && hi) parts.push({ text: hi, lang: 'hi-IN' });
+      // Never stay silent because Hindi is missing or English is switched off.
+      return parts.length > 0 ? parts : [{ text }];
+    },
+    [settings.speakEnglish, settings.speakHindi]
+  );
+
   const speakMessage = useCallback(
     (message: DailyMessage) => {
       if (tts.state.status === 'speaking' && tts.state.activeId === message.id) tts.cancel();
-      else tts.speak(message.text, { id: message.id });
+      else tts.speakSequence(speechParts(message.text, message.textHi), { id: message.id });
     },
-    [tts]
+    [tts, speechParts]
   );
 
   const addToConversation = useCallback(
     (text: string, sender: MessageSender, source: MessageSource, signId?: string) => {
-      const message = store.addMessage({ sender, source, text, signId });
+      // Your own cards and signs get a Hindi line (built-in or already translated).
+      const textHi =
+        sender === 'me' && source !== 'sign' && (settings.showHindi || settings.speakHindi)
+          ? lookupHindi(text)
+          : undefined;
+      const message = store.addMessage({ sender, source, text, signId, textHi });
       if (!message) return null;
       // Cards and signs are things YOU show; speak them aloud if enabled. Other
       // people's words are already audible, so they are not read back.
       if (sender === 'me' && settings.autoSpeak && tts.supported && source !== 'typed') {
-        tts.speak(message.text, { id: message.id });
+        tts.speakSequence(speechParts(message.text, message.textHi), { id: message.id });
       }
+      // Every message (yours or theirs) is a cue for new, context-aware cards.
+      setAutoTrigger({ id: message.id, replyTo: sender === 'other' ? message.text : undefined });
       return message;
     },
-    [store, settings.autoSpeak, tts]
+    [store, settings.autoSpeak, settings.showHindi, settings.speakHindi, tts, speechParts]
   );
 
   const sendCard = useCallback(
@@ -164,6 +201,41 @@ export function DailyTranslator() {
     () => (settings.useConversationContext ? state.messages.slice(-6).map((m) => m.text) : []),
     [settings.useConversationContext, state.messages]
   );
+
+  const recentTagged = useMemo(
+    () =>
+      settings.useConversationContext
+        ? state.messages.slice(-6).map((m) => ({ from: m.sender === 'other' ? ('other' as const) : ('me' as const), text: m.text }))
+        : [],
+    [settings.useConversationContext, state.messages]
+  );
+
+  // Hindi for cards the app has no built-in translation for (your own, favourites).
+  const hindiWanted = settings.showHindi || settings.speakHindi;
+  const hindiTexts = useMemo(
+    () => [
+      ...state.customCards.map((c) => c.text),
+      ...state.favouriteCards.map((f) => f.text),
+      ...state.recents.map((r) => r.text),
+    ],
+    [state.customCards, state.favouriteCards, state.recents]
+  );
+  const hindiLookup = useHindi(hindiTexts, hindiWanted, aiAvailable === true && online);
+  const hindiFor = useCallback(
+    (text: string) => (settings.showHindi ? hindiLookup(text) : undefined),
+    [hindiLookup, settings.showHindi]
+  );
+
+  // A fresh batch of cards arrived: tell the user, since the list can be below the fold.
+  const onFreshCards = useCallback(
+    (count: number) => {
+      setNewAiCards((current) => current + count);
+      notify(`${count} new AI card${count === 1 ? '' : 's'} added — open AI Assistance`);
+    },
+    [notify]
+  );
+
+  const autoEnabled = settings.autoSuggest && settings.useConversationContext && aiAvailable === true && online;
 
   const speakingId = tts.state.status === 'speaking' ? tts.state.activeId ?? null : null;
 
@@ -225,6 +297,7 @@ export function DailyTranslator() {
                 collapsed={settings.emergencyCollapsed}
                 onToggle={() => store.setSetting('emergencyCollapsed', !settings.emergencyCollapsed)}
                 onSend={sendEmergency}
+                hindiFor={hindiFor}
               />
             )}
 
@@ -258,7 +331,10 @@ export function DailyTranslator() {
                       aria-selected={tab === t.id}
                       aria-controls={`daily-panel-${t.id}`}
                       tabIndex={tab === t.id ? 0 : -1}
-                      onClick={() => setTab(t.id)}
+                      onClick={() => {
+                        setTab(t.id);
+                        if (t.id === 'ai') setNewAiCards(0);
+                      }}
                       onKeyDown={(event) => {
                         const i = TABS.findIndex((x) => x.id === tab);
                         if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
@@ -273,7 +349,13 @@ export function DailyTranslator() {
                       }`}
                     >
                       {t.id === 'signs' && <Hand size={16} className="mr-1.5 inline -translate-y-px" aria-hidden />}
+                      {t.id === 'ai' && <span className="mr-1.5" aria-hidden>✦</span>}
                       {t.label}
+                      {t.id === 'ai' && newAiCards > 0 && (
+                        <span className="ml-1.5 rounded-full bg-voice px-2 py-0.5 text-xs text-[#1A1204]">
+                          {newAiCards}
+                        </span>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -285,6 +367,12 @@ export function DailyTranslator() {
                       state={state}
                       aiAvailable={aiAvailable}
                       recentTexts={recentTexts}
+                      recentTagged={recentTagged}
+                      hindiFor={hindiFor}
+                      showHindiOnly={settings.showHindiOnly}
+                      autoTrigger={autoTrigger}
+                      autoEnabled={autoEnabled}
+                      onFreshCards={onFreshCards}
                       situationName={situationName}
                       description={description}
                       descriptionToken={descriptionToken}
@@ -316,8 +404,29 @@ export function DailyTranslator() {
                       onOpenSign={openSign}
                       onUseSign={sendSign}
                       onToggleFavouriteSign={(sign) => store.toggleFavouriteSign(sign.id)}
+                      hindiFor={hindiFor}
                     />
                   )}
+                  <div className={tab === 'ai' ? undefined : 'hidden'}>
+                    <AIAssistanceTab
+                      scenario={scenario}
+                      scenarioLabel={scenario === 'custom' && situationName ? situationName : info.label}
+                      state={state}
+                      aiAvailable={aiAvailable}
+                      recentTexts={recentTexts}
+                      recentTagged={recentTagged}
+                      hindiFor={hindiFor}
+                      showHindiOnly={settings.showHindiOnly}
+                      autoTrigger={autoTrigger}
+                      autoEnabled={autoEnabled}
+                      description={description}
+                      descriptionToken={descriptionToken}
+                      onFreshCards={onFreshCards}
+                      onSend={sendCard}
+                      onToggleFavourite={store.toggleFavouriteCard}
+                      onCustomise={(text) => setEditor({ mode: 'create', text })}
+                    />
+                  </div>
                 </div>
               </>
             )}
@@ -339,6 +448,8 @@ export function DailyTranslator() {
               onClear={store.clearMessages}
               onToggleLargeText={() => store.setSetting('largeText', !settings.largeText)}
               onDropCard={sendCard}
+              listenHindi={settings.listenHindi}
+              showHindiOnly={settings.showHindiOnly}
             />
           </aside>
         </div>

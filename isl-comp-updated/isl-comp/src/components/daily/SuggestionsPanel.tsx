@@ -12,16 +12,33 @@ interface SuggestionsPanelProps {
   existingTexts: string[];
   /** Recent conversation texts; empty when the user turned context off. */
   recentTexts: string[];
+  /** Recent conversation with speakers, for context-aware cards. Empty when context is off. */
+  recentTagged?: Array<{ from: 'me' | 'other'; text: string }>;
   /** null while the status check is still running. */
   aiAvailable: boolean | null;
   /** Increment to fetch immediately (used after a custom description is submitted). */
   autoFetchToken?: number;
   /** For custom situations, suggestions need a description first. */
   needsDescription?: boolean;
-  renderCard: (text: string) => ReactNode;
+  /**
+   * Changes whenever a card is used or a message arrives. A new id makes the panel
+   * fetch cards that fit the conversation and ADD them on top; nothing is removed.
+   * `replyTo` is set when the other person just spoke or typed.
+   */
+  autoTrigger?: { id: string; replyTo?: string } | null;
+  /** Automatic cards on/off (AI available, context allowed, setting on). */
+  autoEnabled?: boolean;
+  onFreshCards?: (count: number) => void;
+  renderCard: (text: string, fresh: boolean) => ReactNode;
 }
 
-const MAX_ITEMS = 30;
+// Keep the panel compact: each automatic batch contributes six new cards and
+// the six most recent older cards remain visible beneath them.
+const MAX_ITEMS = 12;
+const AUTO_COUNT = 6;
+const AUTO_DELAY_MS = 700;
+
+type LoadMode = 'more' | 'fresh' | 'auto';
 
 export function SuggestionsPanel({
   scenarioId,
@@ -29,12 +46,17 @@ export function SuggestionsPanel({
   description,
   existingTexts,
   recentTexts,
+  recentTagged = [],
   aiAvailable,
   autoFetchToken = 0,
   needsDescription = false,
+  autoTrigger = null,
+  autoEnabled = false,
+  onFreshCards,
   renderCard,
 }: SuggestionsPanelProps) {
   const [items, setItems] = useState<string[]>([]);
+  const [freshTexts, setFreshTexts] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState('');
   const [source, setSource] = useState<'ai' | 'offline' | null>(null);
@@ -43,18 +65,22 @@ export function SuggestionsPanel({
   const controllerRef = useRef<AbortController | null>(null);
 
   // Always read the latest props inside the async loader.
-  const latest = useRef({ existingTexts, recentTexts, description, aiAvailable, items });
-  latest.current = { existingTexts, recentTexts, description, aiAvailable, items };
+  const latest = useRef({ existingTexts, recentTexts, recentTagged, description, aiAvailable, items, autoTrigger });
+  latest.current = { existingTexts, recentTexts, recentTagged, description, aiAvailable, items, autoTrigger };
+  // Kept in a ref so a new callback identity never re-runs the loaders below.
+  const onFreshRef = useRef(onFreshCards);
+  onFreshRef.current = onFreshCards;
 
   const load = useCallback(
-    async (fresh = false) => {
+    async (mode: LoadMode = 'more') => {
       controllerRef.current?.abort();
       const controller = new AbortController();
       controllerRef.current = controller;
       const id = ++requestRef.current;
       setLoading(true);
-      setExhausted(false);
+      if (mode !== 'auto') setExhausted(false);
       const current = latest.current;
+      const auto = mode === 'auto';
       try {
         const result = await getSuggestions(
           {
@@ -62,13 +88,28 @@ export function SuggestionsPanel({
             scenarioLabel,
             description: current.description,
             recent: current.recentTexts,
-            existing: [...current.existingTexts, ...(fresh ? [] : current.items)],
-            count: 8,
+            recentTagged: current.recentTagged,
+            replyTo: auto ? current.autoTrigger?.replyTo : undefined,
+            existing: [...current.existingTexts, ...(mode === 'fresh' ? [] : current.items)],
+            count: auto ? AUTO_COUNT : 8,
           },
           { aiAvailable: current.aiAvailable !== false, signal: controller.signal }
         );
         if (id !== requestRef.current) return;
-        setItems((prev) => [...(fresh ? [] : prev), ...result.suggestions].slice(0, MAX_ITEMS));
+
+        if (auto) {
+          // Built-in cards ignore the conversation, so never push them in automatically.
+          if (result.source !== 'ai' || result.suggestions.length === 0) return;
+          setItems((prev) => [...result.suggestions, ...prev].slice(0, MAX_ITEMS));
+          setFreshTexts(result.suggestions);
+          setSource('ai');
+          setNotice('');
+          onFreshRef.current?.(result.suggestions.length);
+          return;
+        }
+
+        setItems((prev) => [...(mode === 'fresh' ? [] : prev), ...result.suggestions].slice(0, MAX_ITEMS));
+        setFreshTexts([]);
         setSource(result.source);
         setNotice(result.notice ?? '');
         setExhausted(result.suggestions.length === 0);
@@ -82,12 +123,24 @@ export function SuggestionsPanel({
   );
 
   useEffect(() => {
-    if (autoFetchToken > 0) void load(true);
+    if (autoFetchToken > 0) void load('fresh');
   }, [autoFetchToken, load]);
+
+  // Fetch conversation-aware cards after each card use / reply. The trigger that
+  // was already there when this panel appeared is ignored (switching tabs or
+  // situations must not cost an AI call).
+  const mountedTrigger = useRef(autoTrigger?.id);
+  const triggerId = autoTrigger?.id;
+  useEffect(() => {
+    if (!autoEnabled || needsDescription || !triggerId || triggerId === mountedTrigger.current) return;
+    const timer = setTimeout(() => void load('auto'), AUTO_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [triggerId, autoEnabled, needsDescription, load]);
 
   useEffect(() => () => controllerRef.current?.abort(), []);
 
   const disabled = loading || needsDescription;
+  const fresh = new Set(freshTexts);
 
   return (
     <section aria-labelledby="more-suggestions-heading" className="space-y-3">
@@ -111,7 +164,7 @@ export function SuggestionsPanel({
         </div>
         <button
           type="button"
-          onClick={() => void load(false)}
+          onClick={() => void load('more')}
           disabled={disabled}
           className="btn-primary min-h-[48px] px-5 text-base"
         >
@@ -153,7 +206,18 @@ export function SuggestionsPanel({
         </div>
       )}
 
-      {items.length > 0 && <div className="space-y-2">{items.map((text) => <div key={text}>{renderCard(text)}</div>)}</div>}
+      {items.length > 0 && (
+        <div className="space-y-2">
+          <h4 className="font-display text-base font-semibold text-cream">
+            AI cards
+          </h4>
+          <div className="grid gap-2 md:grid-cols-2">
+          {items.map((text) => (
+            <div key={text}>{renderCard(text, fresh.has(text))}</div>
+          ))}
+          </div>
+        </div>
+      )}
 
       {exhausted && !loading && (
         <p role="status" className="text-sm text-mist">

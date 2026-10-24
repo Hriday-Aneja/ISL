@@ -74,6 +74,14 @@ export function FocusMode({ messages, startId, speakingId, ttsSupported, onSpeak
         >
           {message.text}
         </p>
+        {message.textHi && (
+          <p
+            lang="hi"
+            className="max-w-5xl break-words font-deva text-[clamp(1.75rem,6vw,4.5rem)] font-semibold leading-[1.2] opacity-90"
+          >
+            {message.textHi}
+          </p>
+        )}
         {message.source === 'sign' &&
           (sign?.videoSrc ? (
             <div className="w-full max-w-xl">

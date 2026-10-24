@@ -11,6 +11,7 @@ interface SavedTabProps {
   onOpenSign: (sign: IslSign) => void;
   onUseSign: (sign: IslSign) => void;
   onToggleFavouriteSign: (sign: IslSign) => void;
+  hindiFor?: (text: string) => string | undefined;
 }
 
 export function SavedTab({
@@ -20,6 +21,7 @@ export function SavedTab({
   onOpenSign,
   onUseSign,
   onToggleFavouriteSign,
+  hindiFor,
 }: SavedTabProps) {
   const favSigns = state.favouriteSigns
     .map((id) => getSignById(id))
@@ -29,6 +31,7 @@ export function SavedTab({
     <PhraseCard
       key={text}
       text={text}
+      hindi={hindiFor?.(text)}
       favourite={isFavouriteCard(state, text)}
       onSelect={() => onSend(text, 'card')}
       onToggleFavourite={() => onToggleFavourite(text)}

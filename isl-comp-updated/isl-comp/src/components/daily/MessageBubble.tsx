@@ -27,6 +27,7 @@ interface MessageBubbleProps {
   onSpeak: () => void;
   onFocus: () => void;
   onOpenSign: (sign: IslSign) => void;
+  showHindiOnly: boolean;
 }
 
 export function MessageBubble({
@@ -38,6 +39,7 @@ export function MessageBubble({
   onSpeak,
   onFocus,
   onOpenSign,
+  showHindiOnly,
 }: MessageBubbleProps) {
   const me = message.sender === 'me';
   const [showSigns, setShowSigns] = useState(false);
@@ -76,7 +78,14 @@ export function MessageBubble({
                 Other person
               </p>
             )}
-            <p className={`break-words font-body leading-snug ${textSize}`}>{message.text}</p>
+            {(!showHindiOnly || !message.textHi) && (
+              <p className={`break-words font-body leading-snug ${textSize}`}>{message.text}</p>
+            )}
+            {message.textHi && (
+              <p lang="hi" className={`mt-0.5 break-words font-deva font-semibold leading-snug opacity-80 ${textSize}`}>
+                {message.textHi}
+              </p>
+            )}
           </div>
           <div className="flex shrink-0 items-center gap-1 self-end pb-0.5">
             <span className={`text-[10px] ${me ? 'text-[#54715a]' : 'text-slate-400'}`}>

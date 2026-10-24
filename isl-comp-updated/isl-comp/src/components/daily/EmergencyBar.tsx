@@ -5,10 +5,11 @@ interface EmergencyBarProps {
   collapsed: boolean;
   onToggle: () => void;
   onSend: (text: string) => void;
+  hindiFor?: (text: string) => string | undefined;
 }
 
 /** Always-available emergency phrases: one tap sends (and speaks) the message. */
-export function EmergencyBar({ collapsed, onToggle, onSend }: EmergencyBarProps) {
+export function EmergencyBar({ collapsed, onToggle, onSend, hindiFor }: EmergencyBarProps) {
   return (
     <section
       aria-labelledby="emergency-heading"
@@ -42,6 +43,11 @@ export function EmergencyBar({ collapsed, onToggle, onSend }: EmergencyBarProps)
               className="min-h-[48px] rounded-sm border-2 border-alert/60 bg-night-card px-3.5 py-2 text-left text-base font-semibold text-cream transition-colors hover:bg-alert hover:text-white"
             >
               {phrase.text}
+              {hindiFor?.(phrase.text) && (
+                <span lang="hi" className="mt-0.5 block font-deva text-sm font-semibold opacity-80">
+                  {hindiFor(phrase.text)}
+                </span>
+              )}
             </button>
           ))}
         </div>

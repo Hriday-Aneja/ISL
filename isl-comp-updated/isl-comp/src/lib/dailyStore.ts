@@ -31,6 +31,8 @@ export interface DailyMessage {
   text: string;
   /** Catalog id when the message is an ISL sign. */
   signId?: string;
+  /** Hindi (Devanagari) version of `text`, when we have one. */
+  textHi?: string;
   timestamp: number;
 }
 
@@ -59,6 +61,18 @@ export interface DailySettings {
   highContrast: boolean;
   useConversationContext: boolean;
   emergencyCollapsed: boolean;
+  /** Show a Hindi line under cards and messages. */
+  showHindi: boolean;
+  /** Show Hindi instead of English wherever a translation is available. */
+  showHindiOnly: boolean;
+  /** Speak the English text of cards aloud (needs autoSpeak). */
+  speakEnglish: boolean;
+  /** Speak the Hindi text of cards aloud (needs autoSpeak). */
+  speakHindi: boolean;
+  /** Add new, context-aware cards automatically after each card or reply. */
+  autoSuggest: boolean;
+  /** Listen for the other person's speech in Hindi instead of English. */
+  listenHindi: boolean;
 }
 
 export interface DailyState {
@@ -76,6 +90,12 @@ export const DEFAULT_SETTINGS: DailySettings = {
   highContrast: false,
   useConversationContext: true,
   emergencyCollapsed: false,
+  showHindi: true,
+  showHindiOnly: false,
+  speakEnglish: true,
+  speakHindi: true,
+  autoSuggest: true,
+  listenHindi: false,
 };
 
 export function emptyState(): DailyState {
@@ -270,6 +290,7 @@ function parseMessage(v: unknown): DailyMessage | null {
     source: v.source as MessageSource,
     text: v.text,
     signId: isStr(v.signId) ? v.signId : undefined,
+    textHi: isStr(v.textHi) && v.textHi.trim() ? v.textHi.trim().slice(0, 600) : undefined,
     timestamp: v.timestamp,
   };
 }
@@ -302,6 +323,12 @@ export function parseState(raw: string | null): DailyState {
         highContrast: pick('highContrast'),
         useConversationContext: pick('useConversationContext'),
         emergencyCollapsed: pick('emergencyCollapsed'),
+        showHindi: pick('showHindi'),
+        showHindiOnly: pick('showHindiOnly'),
+        speakEnglish: pick('speakEnglish'),
+        speakHindi: pick('speakHindi'),
+        autoSuggest: pick('autoSuggest'),
+        listenHindi: pick('listenHindi'),
       },
     };
   } catch {

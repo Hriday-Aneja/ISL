@@ -2,7 +2,14 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import express from 'express';
-import { createDailyRouter, parseSuggestions, validateSuggestRequest } from '../dailySuggest.js';
+import {
+  createDailyRouter,
+  parseSuggestions,
+  parseSuggestionPairs,
+  parseTranslations,
+  validateSuggestRequest,
+  validateTranslateRequest,
+} from '../dailySuggest.js';
 
 // ---- fake Anthropic upstream ------------------------------------------------
 let upstream;
@@ -192,4 +199,94 @@ test('parseSuggestions and validateSuggestRequest edge cases', () => {
   assert.equal(v.value.count, 12);
   assert.deepEqual(v.value.recent, ['a', 'b']);
   assert.equal(v.value.scenario, 'S x');
+});
+
+test('suggest returns Hindi next to each card and passes the reply context to the model', async () => {
+  behaviour = {
+    status: 200,
+    delayMs: 0,
+    body: modelReply(
+      JSON.stringify([
+        { en: 'Yes, I am fine.', hi: 'हाँ, मैं ठीक हूँ।' },
+        { en: 'Please repeat that.', hi: 'please repeat' },
+        'Where is the doctor?',
+      ])
+    ),
+  };
+  await withApp(baseEnv(), async (base) => {
+    const res = await post(base, {
+      scenario: 'Healthcare',
+      recentTagged: [
+        { from: 'other', text: 'Are you okay?' },
+        { from: 'me', text: 'I need a doctor.' },
+        { from: 'bogus', text: 'x' },
+      ],
+      replyTo: 'Are you okay?',
+    });
+    assert.equal(res.status, 200);
+    const data = await res.json();
+    assert.deepEqual(data.suggestions, ['Yes, I am fine.', 'Please repeat that.', 'Where is the doctor?']);
+    // Hindi is only kept when it is really Devanagari; otherwise ''.
+    assert.deepEqual(data.hindi, ['हाँ, मैं ठीक हूँ।', '', '']);
+    const prompt = lastRequest.body.messages[0].content;
+    assert.match(prompt, /replyTo/);
+    assert.match(prompt, /Are you okay\?/);
+    assert.match(prompt, /"from":"other"/);
+    assert.match(lastRequest.body.system, /Devanagari/);
+  });
+});
+
+test('translate returns Hindi in order, validates input and hides the key', async () => {
+  behaviour = { status: 200, delayMs: 0, body: modelReply('["धन्यवाद।","bad"]') };
+  await withApp(baseEnv(), async (base) => {
+    const call = (body, raw) =>
+      fetch(`${base}/translate`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: raw ?? JSON.stringify(body),
+      });
+    const res = await call({ texts: ['Thank you.', 'Hello'] });
+    assert.equal(res.status, 200);
+    const text = await res.text();
+    assert.deepEqual(JSON.parse(text), { translations: ['धन्यवाद।', ''] });
+    assert.ok(!text.includes(KEY));
+    assert.match(lastRequest.body.messages[0].content, /<data>/);
+    assert.match(lastRequest.body.system, /untrusted/);
+
+    assert.equal((await call({})).status, 400);
+    assert.equal((await call({ texts: [] })).status, 400);
+    assert.equal((await call({ texts: ['ok', 5] })).status, 400);
+    assert.equal((await call(null, '{bad')).status, 400);
+  });
+  await withApp({}, async (base) => {
+    const res = await fetch(`${base}/translate`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ texts: ['Hi'] }),
+    });
+    assert.equal(res.status, 503);
+  });
+});
+
+test('translate with no usable Hindi maps to 502', async () => {
+  behaviour = { status: 200, delayMs: 0, body: modelReply('["no hindi here"]') };
+  await withApp(baseEnv(), async (base) => {
+    const res = await fetch(`${base}/translate`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ texts: ['Hi'] }),
+    });
+    assert.equal(res.status, 502);
+  });
+});
+
+test('pair and translation parsers', () => {
+  assert.deepEqual(parseSuggestionPairs('[{"en":"A","hi":"क"},"b"]'), [
+    { en: 'A', hi: 'क' },
+    { en: 'b', hi: '' },
+  ]);
+  assert.deepEqual(parseSuggestions('[{"en":"A","hi":"क"},{"en":"a"}]'), ['A']);
+  assert.deepEqual(parseTranslations('junk', 2), ['', '']);
+  assert.deepEqual(parseTranslations('["क"]', 2), ['क', '']);
+  assert.equal(validateTranslateRequest({ texts: ['a'.repeat(500)] }).value.texts[0].length, 200);
 });

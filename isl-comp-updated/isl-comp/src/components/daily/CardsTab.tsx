@@ -22,6 +22,15 @@ interface CardsTabProps {
   state: DailyState;
   aiAvailable: boolean | null;
   recentTexts: string[];
+  /** Recent messages with who said them, for context-aware cards. */
+  recentTagged: Array<{ from: 'me' | 'other'; text: string }>;
+  /** Hindi for a card's English text, when known. */
+  hindiFor: (text: string) => string | undefined;
+  showHindiOnly: boolean;
+  /** Set after every card/reply so new cards can be fetched automatically. */
+  autoTrigger: { id: string; replyTo?: string } | null;
+  autoEnabled: boolean;
+  onFreshCards: (count: number) => void;
   situationName: string;
   /** Submitted description for a custom situation. */
   description: string;
@@ -32,6 +41,7 @@ interface CardsTabProps {
   onNewCard: (initialText?: string) => void;
   onEditCard: (card: CustomCard) => void;
   onCustomise: (text: string) => void;
+  showAi?: boolean;
 }
 
 interface Result {
@@ -62,6 +72,12 @@ export function CardsTab({
   state,
   aiAvailable,
   recentTexts,
+  recentTagged,
+  hindiFor,
+  showHindiOnly,
+  autoTrigger,
+  autoEnabled,
+  onFreshCards,
   situationName,
   description,
   descriptionToken,
@@ -71,6 +87,7 @@ export function CardsTab({
   onNewCard,
   onEditCard,
   onCustomise,
+  showAi = false,
 }: CardsTabProps) {
   const [query, setQuery] = useState('');
   const [draftName, setDraftName] = useState(situationName);
@@ -117,6 +134,8 @@ export function CardsTab({
       key={`${source}-${cardKey(text)}`}
       text={text}
       eyebrow={eyebrow}
+      hindi={hindiFor(text)}
+      showHindiOnly={showHindiOnly}
       tone={mineCard ? 'mine' : source === 'suggestion' ? 'suggestion' : 'default'}
       favourite={isFavouriteCard(state, text)}
       onSelect={() => onSend(text, source)}
@@ -258,18 +277,24 @@ export function CardsTab({
             )}
           </section>
 
-          <SuggestionsPanel
+          {showAi && <SuggestionsPanel
             key={scenario}
             scenarioId={scenario}
             scenarioLabel={isCustom && situationName ? situationName : info.label}
             description={description}
             existingTexts={existingTexts}
             recentTexts={recentTexts}
+            recentTagged={recentTagged}
             aiAvailable={aiAvailable}
             autoFetchToken={descriptionToken}
             needsDescription={isCustom && !description}
-            renderCard={(text) => renderPreset(text, 'suggestion')}
-          />
+            autoTrigger={autoTrigger}
+            autoEnabled={autoEnabled}
+            onFreshCards={onFreshCards}
+            renderCard={(text, fresh) =>
+              renderPreset(text, 'suggestion', undefined, fresh ? 'New for this conversation' : undefined)
+            }
+          />}
         </>
       )}
     </div>

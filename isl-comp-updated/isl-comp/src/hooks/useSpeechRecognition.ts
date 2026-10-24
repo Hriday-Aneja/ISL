@@ -33,7 +33,7 @@ function getSpeechRecognitionCtor(): (new () => SpeechRecognitionLike) | null {
   return ctor ?? null;
 }
 
-export function useSpeechRecognition() {
+export function useSpeechRecognition(lang: string = 'en-IN') {
   const supported = typeof window !== 'undefined' && !!getSpeechRecognitionCtor();
   const [state, setState] = useState<SpeechRecognitionState>({
     status: supported ? 'idle' : 'unsupported',
@@ -45,6 +45,8 @@ export function useSpeechRecognition() {
   const restartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const finalizedPrefixRef = useRef('');
   const latestFinalRef = useRef('');
+  const langRef = useRef(lang);
+  langRef.current = lang;
 
   const start = useCallback(() => {
     const Ctor = getSpeechRecognitionCtor();
@@ -58,7 +60,7 @@ export function useSpeechRecognition() {
     const recognition = new Ctor();
     recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.lang = 'en-IN';
+    recognition.lang = langRef.current;
 
     recognition.onresult = (event) => {
       let interim = '';

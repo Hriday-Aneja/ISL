@@ -76,6 +76,7 @@ export function useDailyStore() {
       source: MessageSource;
       text: string;
       signId?: string;
+      textHi?: string;
     }): DailyMessage | null => {
       const text = input.text.trim();
       if (!text) return null;
@@ -86,6 +87,7 @@ export function useDailyStore() {
         source: input.source,
         text,
         signId: input.signId,
+        textHi: input.textHi?.trim() || undefined,
         timestamp: now,
       };
       dispatch({ type: 'add-message', message });

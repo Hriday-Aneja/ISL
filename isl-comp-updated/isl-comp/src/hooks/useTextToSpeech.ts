@@ -4,8 +4,26 @@ import type { TextToSpeechState } from '../types';
 export interface SpeakOptions {
   /** Identifies what is being read (exposed as state.activeId). */
   id?: string;
-  /** BCP-47 language tag, e.g. "en-IN". Omit to use the browser default. */
+  /** BCP-47 language tag, e.g. "en-IN" or "hi-IN". Omit to use the browser default. */
   lang?: string;
+}
+
+export interface SpeechPart {
+  text: string;
+  /** BCP-47 language tag; omit for the browser default. */
+  lang?: string;
+}
+
+/** Best installed voice for a language ("hi-IN" -> any hi-* voice), or undefined. */
+export function pickVoice(lang: string | undefined): SpeechSynthesisVoice | undefined {
+  if (!lang || typeof window === 'undefined' || !('speechSynthesis' in window)) return undefined;
+  const voices = window.speechSynthesis.getVoices();
+  const wanted = lang.toLowerCase();
+  const base = wanted.split('-')[0];
+  return (
+    voices.find((v) => v.lang.toLowerCase().replace('_', '-') === wanted) ??
+    voices.find((v) => v.lang.toLowerCase().replace('_', '-').split('-')[0] === base)
+  );
 }
 
 export function useTextToSpeech() {
@@ -17,28 +35,56 @@ export function useTextToSpeech() {
   // event can't clobber the state of the one that replaced it.
   const tokenRef = useRef(0);
 
-  const speak = useCallback(
-    (text: string, options: SpeakOptions = {}) => {
-      if (!supported || !text) return;
+  // Browsers load their voice list asynchronously; ask for it early so a Hindi
+  // voice is already known the first time a card is spoken.
+  useEffect(() => {
+    if (!supported) return;
+    window.speechSynthesis.getVoices();
+  }, [supported]);
+
+  /** Reads several parts one after another (e.g. English, then Hindi). */
+  const speakSequence = useCallback(
+    (parts: SpeechPart[], options: { id?: string } = {}) => {
+      const queue = parts.filter((p) => p.text.trim());
+      if (!supported || queue.length === 0) return;
       window.speechSynthesis.cancel();
       const token = ++tokenRef.current;
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.95;
-      if (options.lang) utterance.lang = options.lang;
       const current = () => token === tokenRef.current;
-      utterance.onstart = () => {
-        if (current()) setState({ status: 'speaking', activeId: options.id });
+
+      const speakAt = (index: number) => {
+        const part = queue[index];
+        const utterance = new SpeechSynthesisUtterance(part.text);
+        utterance.rate = 0.95;
+        if (part.lang) {
+          utterance.lang = part.lang;
+          const voice = pickVoice(part.lang);
+          if (voice) utterance.voice = voice;
+        }
+        utterance.onstart = () => {
+          if (current()) setState({ status: 'speaking', activeId: options.id });
+        };
+        const next = () => {
+          if (!current()) return;
+          if (index + 1 < queue.length) speakAt(index + 1);
+          else setState({ status: 'idle' });
+        };
+        utterance.onend = next;
+        utterance.onerror = next;
+        window.speechSynthesis.speak(utterance);
       };
-      utterance.onend = () => {
-        if (current()) setState({ status: 'idle' });
-      };
-      utterance.onerror = () => {
-        if (current()) setState({ status: 'idle' });
-      };
+
       setState({ status: 'speaking', activeId: options.id });
-      window.speechSynthesis.speak(utterance);
+      speakAt(0);
     },
     [supported]
+  );
+
+  const speak = useCallback(
+    (text: string, options: SpeakOptions = {}) => {
+      if (!text) return;
+      speakSequence([{ text, lang: options.lang }], { id: options.id });
+    },
+    [speakSequence]
   );
 
   const cancel = useCallback(() => {
@@ -54,5 +100,5 @@ export function useTextToSpeech() {
     };
   }, [supported]);
 
-  return { state, speak, cancel, supported };
+  return { state, speak, speakSequence, cancel, supported };
 }

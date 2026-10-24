@@ -13,6 +13,9 @@ interface PhraseCardProps {
   extra?: { label: string; icon: ReactNode; onClick: () => void };
   /** Small line above the text, e.g. the scenario in search results. */
   eyebrow?: string;
+  /** Hindi (Devanagari) version of the text, shown as a second line when present. */
+  hindi?: string;
+  showHindiOnly?: boolean;
   onDragStart?: (event: DragEvent<HTMLDivElement>) => void;
 }
 
@@ -35,6 +38,8 @@ export function PhraseCard({
   onToggleFavourite,
   extra,
   eyebrow,
+  hindi,
+  showHindiOnly = false,
   onDragStart,
 }: PhraseCardProps) {
   return (
@@ -51,7 +56,14 @@ export function PhraseCard({
         {eyebrow && (
           <span className="text-[11px] font-semibold uppercase tracking-wide text-mist">{eyebrow}</span>
         )}
-        <span className="text-base font-medium leading-snug text-cream">{text}</span>
+        {!showHindiOnly || !hindi ? (
+          <span className="text-base font-medium leading-snug text-cream">{text}</span>
+        ) : null}
+        {hindi && (
+          <span lang="hi" className="font-deva text-[15px] font-semibold leading-snug text-mist">
+            {hindi}
+          </span>
+        )}
       </button>
       <div className="flex shrink-0 items-center border-l border-white/15">
         {extra && (

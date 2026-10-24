@@ -5,6 +5,8 @@ import type { MessageSender, MessageSource } from '../../lib/dailyStore';
 
 interface ComposerProps {
   onSend: (text: string, sender: MessageSender, source: MessageSource) => void;
+  /** Listen for speech in Hindi instead of English. */
+  listenHindi?: boolean;
 }
 
 const MAX_MESSAGE_LENGTH = 500;
@@ -14,8 +16,8 @@ const MAX_MESSAGE_LENGTH = 500;
  * the text can always be corrected before it is sent: nothing recognised is
  * sent automatically.
  */
-export function Composer({ onSend }: ComposerProps) {
-  const { state, start, stop, reset, supported } = useSpeechRecognition();
+export function Composer({ onSend, listenHindi = false }: ComposerProps) {
+  const { state, start, stop, reset, supported } = useSpeechRecognition(listenHindi ? 'hi-IN' : 'en-IN');
   const [draft, setDraft] = useState('');
   const [sender, setSender] = useState<MessageSender>('other');
   const [fromSpeech, setFromSpeech] = useState(false);
