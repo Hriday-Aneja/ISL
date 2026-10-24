@@ -38,7 +38,7 @@ export function LocalVideoPiP({
   }, [stream]);
 
   return (
-    <div className="absolute right-3 top-3 z-10 w-[128px] overflow-hidden rounded-sm border border-white/15 bg-room-surface shadow-stage sm:right-4 sm:top-4 sm:w-[180px] lg:w-[210px]">
+    <div className="absolute right-3 top-3 z-10 w-[128px] overflow-hidden rounded-xl border border-white/15 bg-room-surface shadow-stage sm:right-4 sm:top-4 sm:w-[180px] lg:w-[210px]">
       <div className="relative aspect-video">
         <video
           ref={videoRef}

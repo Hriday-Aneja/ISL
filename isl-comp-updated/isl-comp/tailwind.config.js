@@ -9,30 +9,29 @@ export default {
         ink: '#17211F',
         'ink-soft': '#66736F',
         line: '#DDE4E1',
+        // Room accents: mint = the signer's side, saffron = the speaker's side.
         signal: {
-          DEFAULT: '#0F766E',
-          soft: '#E6F4F1',
-          deep: '#115E59',
+          DEFAULT: '#4DE3C1',
+          soft: 'rgba(77, 227, 193, 0.12)',
+          deep: '#7CEBD3',
         },
         voice: {
-          DEFAULT: '#D6A84B',
-          soft: '#FBF1DD',
-          deep: '#A87B26',
+          DEFAULT: '#FFB547',
+          soft: 'rgba(255, 181, 71, 0.12)',
+          deep: '#FFC96F',
         },
         alert: {
           DEFAULT: '#DC4C4C',
           soft: '#FBE7E7',
         },
-        // Immersive dark shell used only inside the Communication Room —
-        // the rest of the app (how-it-works) stays on the light `paper`
-        // surface above.
+        // Dark shell for the Communication Room, matching the landing page.
         room: {
-          bg: '#0E1513',
-          surface: '#152220',
-          raised: '#1C2B28',
-          border: '#263733',
-          text: '#EDF3F1',
-          'text-soft': '#9FB3AD',
+          bg: '#0A0C16',
+          surface: '#11152A',
+          raised: '#1A2040',
+          border: '#242B4A',
+          text: '#F4F1EA',
+          'text-soft': '#A7ADC2',
         },
         // Landing page palette (midnight + saffron + mint).
         night: {
@@ -45,33 +44,33 @@ export default {
         cream: '#F4F1EA',
       },
       fontFamily: {
-        display: ['"Manrope"', 'sans-serif'],
-        body: ['"Inter"', 'sans-serif'],
+        display: ['"Bricolage Grotesque"', 'sans-serif'],
+        body: ['"DM Sans"', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
         bricolage: ['"Bricolage Grotesque"', 'sans-serif'],
         dm: ['"DM Sans"', 'sans-serif'],
         deva: ['"Noto Sans Devanagari"', 'sans-serif'],
       },
       borderRadius: {
-        sm: '9px',
-        md: '14px',
-        lg: '20px',
+        sm: '10px',
+        md: '16px',
+        lg: '22px',
       },
       boxShadow: {
         panel: '0 1px 2px rgba(23,33,31,0.04), 0 1px 0 rgba(23,33,31,0.04)',
-        stage: '0 1px 2px rgba(0,0,0,0.2), 0 12px 32px -16px rgba(0,0,0,0.45)',
+        stage: '0 1px 2px rgba(0,0,0,0.3), 0 16px 40px -16px rgba(0,0,0,0.6)',
         float: '0 8px 24px -10px rgba(23,33,31,0.18)',
         orb: '0 50px 140px rgba(0,0,0,0.6), 0 0 0 1px rgba(77,227,193,0.08), 0 0 80px rgba(77,227,193,0.10)',
         glass: '0 24px 60px rgba(0,0,0,0.5)',
       },
       keyframes: {
         'pulse-ring': {
-          '0%': { boxShadow: '0 0 0 0 rgba(15,118,110,0.35)' },
-          '100%': { boxShadow: '0 0 0 8px rgba(15,118,110,0)' },
+          '0%': { boxShadow: '0 0 0 0 rgba(77,227,193,0.4)' },
+          '100%': { boxShadow: '0 0 0 8px rgba(77,227,193,0)' },
         },
         'pulse-ring-amber': {
-          '0%': { boxShadow: '0 0 0 0 rgba(214,168,75,0.35)' },
-          '100%': { boxShadow: '0 0 0 8px rgba(214,168,75,0)' },
+          '0%': { boxShadow: '0 0 0 0 rgba(255,181,71,0.4)' },
+          '100%': { boxShadow: '0 0 0 8px rgba(255,181,71,0)' },
         },
         'fade-up': {
           '0%': { opacity: '0', transform: 'translateY(4px)' },

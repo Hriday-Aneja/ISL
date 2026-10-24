@@ -22,12 +22,12 @@ export function SettingsPanel({
 
   return (
     <div
-      className="fixed inset-0 z-40 flex items-end justify-center bg-ink/30 px-4 pb-24 sm:items-start sm:justify-end sm:bg-transparent sm:pb-0 sm:pr-4 sm:pt-16"
+      className="fixed inset-0 z-40 flex items-end justify-center bg-black/50 px-4 pb-24 sm:items-start sm:justify-end sm:bg-transparent sm:pb-0 sm:pr-4 sm:pt-16"
       onClick={onClose}
       role="presentation"
     >
       <div
-        className="w-full max-w-xs animate-fade-up rounded-sm border border-room-border bg-room-surface text-room-text shadow-stage"
+        className="w-full max-w-xs animate-fade-up rounded-2xl border border-room-border bg-room-surface text-room-text shadow-stage"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-label="Settings"
@@ -56,7 +56,7 @@ export function SettingsPanel({
                 value={nameDraft}
                 maxLength={40}
                 onChange={(event) => setNameDraft(event.target.value)}
-                className="min-w-0 flex-1 rounded-sm border border-room-border bg-black/20 px-3 py-2 text-sm text-room-text focus:border-signal/50 focus:outline-none"
+                className="min-w-0 flex-1 rounded-xl border border-room-border bg-black/20 px-3 py-2 text-sm text-room-text focus:border-signal/50 focus:outline-none"
               />
               <button type="submit" disabled={!nameDraft.trim()} className="room-icon-btn h-9 w-9" aria-label="Save display name">
                 <Check size={15} />
@@ -79,7 +79,7 @@ export function SettingsPanel({
               aria-checked={debugMode}
               onClick={onToggleDebugMode}
               className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
-                debugMode ? 'bg-signal' : 'bg-line'
+                debugMode ? 'bg-signal' : 'bg-white/15'
               }`}
             >
               <span

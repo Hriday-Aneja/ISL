@@ -102,7 +102,19 @@ export function RoomGate({
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center gap-6 bg-room-bg px-6 py-16 text-center">
+    <div className="relative flex min-h-screen flex-col items-center justify-center gap-6 overflow-hidden bg-room-bg px-6 py-16 text-center">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:30px_30px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_40%,#000_25%,transparent_80%)]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-32 -top-32 h-[420px] w-[420px] animate-blob-drift rounded-full bg-signal opacity-[0.18] blur-[100px]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-32 -left-32 h-[380px] w-[380px] animate-blob-drift rounded-full bg-voice opacity-[0.15] blur-[100px] [animation-delay:-6s]"
+      />
       <Link
         to="/"
         className="room-icon-btn absolute left-4 top-4 h-9 w-9"
@@ -112,15 +124,15 @@ export function RoomGate({
         <ArrowLeft size={16} />
       </Link>
 
-      <div className={`w-full text-left ${step === 'prejoin' ? 'max-w-5xl' : 'max-w-sm'}`}>
+      <div className={`relative w-full text-left ${step === 'prejoin' ? 'max-w-5xl' : 'max-w-sm'}`}>
         <div className="mb-5 text-center">
           <div className="mb-3 inline-flex items-center gap-2.5 text-room-text">
-            <span className="flex h-9 w-9 items-center justify-center rounded-sm bg-signal text-white">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-voice text-[#1A1204] shadow-[0_8px_28px_rgba(255,181,71,0.35)]">
               <ScanFace size={18} />
             </span>
-            <span className="font-display text-lg font-semibold">SAMVAAD</span>
+            <span className="font-display text-xl font-bold tracking-tight">Samvaad</span>
           </div>
-          <h1 className="font-display text-2xl font-semibold text-room-text">
+          <h1 className="font-display text-3xl font-bold tracking-tight text-room-text">
             {step === 'prejoin' ? 'Ready to join?' : 'Communication Room'}
           </h1>
           {step === 'room' && (
@@ -137,7 +149,7 @@ export function RoomGate({
           </div>
         )}
 
-        <div className="rounded-md border border-room-border bg-room-surface p-5 shadow-stage sm:p-6">
+        <div className="rounded-3xl border border-room-border bg-room-surface/90 p-5 shadow-stage backdrop-blur-xl sm:p-7">
           {busy ? (
             <div className="flex flex-col items-center gap-3 py-6 text-center">
               <Loader2 size={22} className="animate-spin text-room-text-soft" />
@@ -145,7 +157,7 @@ export function RoomGate({
             </div>
           ) : step === 'prejoin' ? (
             <div className="grid gap-6 md:grid-cols-[1.2fr_0.8fr] md:items-center">
-              <div className="relative aspect-video overflow-hidden rounded-sm border border-white/10 bg-black">
+              <div className="relative aspect-video overflow-hidden rounded-2xl border border-white/10 bg-black">
                 <video
                   ref={previewRef}
                   autoPlay
@@ -202,7 +214,7 @@ export function RoomGate({
                       if (event.key === 'Enter') joinCall();
                     }}
                     placeholder="Enter your name"
-                    className="w-full rounded-sm border border-white/10 bg-white/[0.04] px-3.5 py-3 text-sm text-room-text placeholder:text-room-text-soft/60 focus:border-signal/50 focus:outline-none"
+                    className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-3.5 py-3 text-sm text-room-text placeholder:text-room-text-soft/60 focus:border-voice/60 focus:outline-none"
                   />
                 </div>
                 <p className="text-xs text-room-text-soft">
@@ -249,9 +261,9 @@ export function RoomGate({
                     role="radio"
                     aria-checked={role === value}
                     onClick={() => setRole(value)}
-                    className={`flex flex-col items-center gap-1 rounded-sm border px-3 py-3 text-sm font-medium transition-colors ${
+                    className={`flex flex-col items-center gap-1 rounded-2xl border px-3 py-4 text-sm font-medium transition-colors ${
                       role === value
-                        ? 'border-signal/50 bg-signal/15 text-room-text'
+                        ? 'border-voice/60 bg-voice/10 text-room-text'
                         : 'border-white/10 bg-white/[0.04] text-room-text-soft hover:text-room-text'
                     }`}
                   >
@@ -262,10 +274,10 @@ export function RoomGate({
                 ))}
               </div>
 
-              <div className="mb-4 flex gap-1 rounded-sm bg-white/[0.04] p-1">
+              <div className="mb-4 flex gap-1 rounded-full bg-white/[0.04] p-1">
                 <button
                   onClick={() => setTab('create')}
-                  className={`flex-1 rounded-sm px-3 py-2 text-sm font-medium transition-colors ${
+                  className={`flex-1 rounded-full px-3 py-2 text-sm font-medium transition-colors ${
                     tab === 'create'
                       ? 'bg-white/[0.08] text-room-text'
                       : 'text-room-text-soft hover:text-room-text'
@@ -275,7 +287,7 @@ export function RoomGate({
                 </button>
                 <button
                   onClick={() => setTab('join')}
-                  className={`flex-1 rounded-sm px-3 py-2 text-sm font-medium transition-colors ${
+                  className={`flex-1 rounded-full px-3 py-2 text-sm font-medium transition-colors ${
                     tab === 'join'
                       ? 'bg-white/[0.08] text-room-text'
                       : 'text-room-text-soft hover:text-room-text'
@@ -318,7 +330,7 @@ export function RoomGate({
                     onChange={(e) => setRoomIdInput(e.target.value.toUpperCase())}
                     placeholder="ROOM ID"
                     autoFocus={Boolean(prefillRoomId)}
-                    className="w-full rounded-sm border border-white/10 bg-white/[0.04] px-3.5 py-2.5 text-center font-mono text-sm uppercase tracking-[0.2em] text-room-text placeholder:text-room-text-soft/60 focus:border-signal/50 focus:outline-none"
+                    className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-3.5 py-2.5 text-center font-mono text-sm uppercase tracking-[0.2em] text-room-text placeholder:text-room-text-soft/60 focus:border-voice/60 focus:outline-none"
                   />
                   <button
                     type="submit"

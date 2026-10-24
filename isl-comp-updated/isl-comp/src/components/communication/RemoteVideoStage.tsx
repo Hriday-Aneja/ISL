@@ -65,7 +65,7 @@ export function RemoteVideoStage({
     .join('') || '?';
 
   return (
-    <div className="relative h-full min-h-0 overflow-hidden rounded-md border border-white/10 bg-[#080d0c] shadow-stage">
+    <div className="relative h-full min-h-0 overflow-hidden rounded-2xl border border-white/10 bg-room-bg shadow-stage">
       <video
         ref={videoRef}
         autoPlay
@@ -79,7 +79,7 @@ export function RemoteVideoStage({
       <audio ref={audioRef} autoPlay muted={!isLocal || !speakerOn} />
 
       {!hasVideo && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[radial-gradient(ellipse_at_center,_#1c2b28_0%,_#0e1513_78%)] px-6 text-center">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[radial-gradient(ellipse_at_center,_#1A2040_0%,_#0A0C16_78%)] px-6 text-center">
           {callStatus === 'peer_left' ? (
             <UserX size={32} className="text-voice" />
           ) : callStatus === 'connection_failed' ? (
@@ -105,7 +105,7 @@ export function RemoteVideoStage({
       )}
 
       <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 bg-gradient-to-t from-black/75 to-transparent px-4 pb-4 pt-12">
-        <span className="max-w-[75%] truncate rounded-sm bg-black/40 px-2.5 py-1.5 text-sm font-medium text-white">
+        <span className="max-w-[75%] truncate rounded-full bg-black/45 backdrop-blur-sm px-2.5 py-1.5 text-sm font-medium text-white">
           {participantName || 'Participant'}{isLocal ? ' · You' : ''}
         </span>
         {!micEnabled && (
