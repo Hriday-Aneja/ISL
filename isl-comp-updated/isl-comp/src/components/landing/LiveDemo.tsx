@@ -1,17 +1,16 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
-import { Languages, Loader2, Mic, MicOff, Play, Search, Send, Video, Volume2 } from 'lucide-react';
+import { Languages, Mic, MicOff, Play, Search, Send, Video, Volume2 } from 'lucide-react';
 import { AvatarPanel } from '../communication/AvatarPanel';
-import { SignSequence } from '../communication/SignSequence';
+import { SignToSpeechDemo } from './SignToSpeechDemo';
 import { SignVideo } from '../daily/SignVideo';
 import { useAvatarPlayer } from '../../hooks/useAvatarPlayer';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 import { useTextToSpeech } from '../../hooks/useTextToSpeech';
 import { mapPhraseToSigns } from '../../utils/phraseMapper';
-import { mockRecognizeSigns } from '../../services/mockRecognition';
 import { lookupHindi } from '../../services/hindi';
 import { AVATAR_VIDEOS } from '../../data/avatarVideos';
-import { SIGN_LABELS, signsToSentence } from '../../data/signMappings';
+import { SIGN_LABELS } from '../../data/signMappings';
 import { ISL_SIGNS, searchSigns } from '../../data/islSigns';
 import type { IslSign } from '../../data/islSigns';
 import type { SignId } from '../../types';
@@ -27,15 +26,9 @@ const TABS: Array<{ id: Tab; label: string }> = [
   { id: 'dictionary', label: 'Sign dictionary' },
 ];
 
-interface SignerMessage {
-  id: number;
-  text: string;
-  signs: SignId[];
-}
-
 // Interactive landing-page demo. Every part reuses what the app already has:
 // the phrase mapper, avatar player + AvatarPanel, speech-recognition and
-// text-to-speech hooks, the mock recognition adapter and the ISL catalog.
+// text-to-speech hooks, the real recognition client and the ISL catalog.
 export function LiveDemo() {
   const [tab, setTab] = useState<Tab>('speech');
   const tts = useTextToSpeech();
@@ -71,7 +64,7 @@ export function LiveDemo() {
       </div>
 
       {tab === 'speech' && <SpeechToSign tts={tts} speech={speech} />}
-      {tab === 'signer' && <SignerToSpeech tts={tts} />}
+      {tab === 'signer' && <SignToSpeechDemo />}
       {tab === 'dictionary' && <Dictionary />}
     </div>
   );
@@ -256,89 +249,6 @@ function SpeechToSign({ tts, speech }: { tts: TtsApi; speech: SpeechApi }) {
           onPlaybackComplete={handlePlaybackComplete}
           showQueue
         />
-      </div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* 2. Signer → captions + voice (uses the mock recognition adapter)    */
-/* ------------------------------------------------------------------ */
-
-function SignerToSpeech({ tts }: { tts: TtsApi }) {
-  const [busy, setBusy] = useState(false);
-  const [log, setLog] = useState<SignerMessage[]>([]);
-  const nextId = useRef(1);
-  const mounted = useRef(true);
-
-  useEffect(() => {
-    mounted.current = true;
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
-
-  const simulate = async () => {
-    if (busy) return;
-    setBusy(true);
-    try {
-      const result = await mockRecognizeSigns();
-      if (!mounted.current) return;
-      const text = signsToSentence(result.signs);
-      setLog((prev) => [...prev.slice(-3), { id: nextId.current++, text, signs: result.signs }]);
-      tts.speak(text, { lang: 'en-IN' });
-    } finally {
-      if (mounted.current) setBusy(false);
-    }
-  };
-
-  return (
-    <div className="mx-auto max-w-2xl">
-      <p className="rounded-xl border border-voice/30 bg-voice/10 px-4 py-3 text-sm text-mist">
-        <strong className="text-cream">Preview:</strong> this uses SAMVAAD’s simulated recognizer,
-        the same stand-in the room uses until the trained model is plugged in. It shows how a
-        signer’s words become captions and a voice.
-      </p>
-
-      <button
-        type="button"
-        onClick={simulate}
-        disabled={busy}
-        className="mt-5 inline-flex min-h-[48px] items-center gap-2 rounded-full bg-saffron px-6 text-[15px] font-semibold text-[#1A1204] transition-transform hover:-translate-y-0.5 disabled:opacity-70"
-      >
-        {busy ? <Loader2 size={17} className="animate-spin" /> : <Video size={17} />}
-        {busy ? 'Reading the signs…' : 'Simulate a signer'}
-      </button>
-
-      <div className="mt-6 space-y-4" aria-live="polite">
-        {log.length === 0 && (
-          <p className="text-sm text-mist">Press the button to see a signed phrase appear here.</p>
-        )}
-        {log.map((m) => (
-          <div key={m.id} className="flex items-end gap-3">
-            <span className="rounded-full bg-mint/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-mint">
-              Signed
-            </span>
-            <div className="min-w-0">
-              <p className="rounded-2xl rounded-bl-md bg-white/[0.07] px-4 py-2.5 text-[15px] text-cream">
-                {m.text}
-              </p>
-              <div className="mt-2 flex flex-wrap items-center gap-3">
-                <SignSequence signs={m.signs} />
-                {tts.supported && (
-                  <button
-                    type="button"
-                    onClick={() => tts.speak(m.text, { lang: 'en-IN' })}
-                    aria-label={`Speak: ${m.text}`}
-                    className="inline-flex items-center gap-1.5 text-sm text-mist hover:text-saffron"
-                  >
-                    <Volume2 size={15} /> Speak
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
       </div>
     </div>
   );
