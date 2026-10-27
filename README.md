@@ -4,7 +4,7 @@
 
 ### Two-way communication infrastructure for Indian Sign Language (ISL)
 
-*Sign → Text → Speech, and Speech → Text → Sign — in a browser video call, in Google Meet, and soon in the classroom.*
+_Sign → Text → Speech, and Speech → Text → Sign — in a browser video call, in Google Meet, and soon in the classroom._
 
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
@@ -20,12 +20,11 @@
 
 </div>
 
-
 ---
 
 ## 1. Introduction
 
-**Samvaad** (Hindi: *dialogue*) is a browser-based accessibility platform that connects Indian Sign Language users and hearing users. It combines a **WebRTC video call**, a **local landmark-based sign-recognition service**, **on-device browser speech APIs**, and a **sign-playback avatar layer**, so each person communicates in the way that is natural to them.
+**Samvaad** (Hindi: _dialogue_) is a browser-based accessibility platform that connects Indian Sign Language users and hearing users. It combines a **WebRTC video call**, a **local landmark-based sign-recognition service**, **on-device browser speech APIs**, and a **sign-playback avatar layer**, so each person communicates in the way that is natural to them.
 
 ---
 
@@ -34,17 +33,17 @@
 ### The problem
 
 - Deaf and hard-of-hearing ISL users are routinely excluded from video calls, healthcare visits, classrooms and service counters, where interpreters are scarce.
-- Mainstream meeting tools caption *speech* but give a signer no way to be *understood* in return, and give hearing participants no way to *follow* a signer.
+- Mainstream meeting tools caption _speech_ but give a signer no way to be _understood_ in return, and give hearing participants no way to _follow_ a signer.
 - Indian Sign Language has far fewer machine-readable resources than ASL, so off-the-shelf tooling rarely fits.
 
 ### The solution
 
 Samvaad is a **bidirectional pipeline** built around a shared vocabulary of sign IDs (`WATER`, `HELP`, `THANK_YOU` …) used by recognition, phrase mapping and avatar playback.
 
-| Direction | Pipeline |
-|---|---|
+| Direction                   | Pipeline                                                                                                                            |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | **ISL user → hearing user** | Webcam → JPEG frames → MediaPipe pose/hand landmarks → INCLUDE-style Transformer → sign label → sentence → caption + text-to-speech |
-| **Hearing user → ISL user** | Microphone / typed text / Meet captions → transcript → phrase-to-sign mapper → sign avatar clip playback |
+| **Hearing user → ISL user** | Microphone / typed text / Meet captions → transcript → phrase-to-sign mapper → sign avatar clip playback                            |
 
 Inference runs **locally** (a Python WebSocket service on `127.0.0.1`), and call audio/video flows **peer-to-peer**; the signaling server never sees media.
 
@@ -52,12 +51,12 @@ Inference runs **locally** (a Python WebSocket service on `127.0.0.1`), and call
 
 ## 3. Modules at a glance
 
-| # | Module | Location | What it delivers |
-|---|---|---|---|
-| 1 | **Daily Translator** | `isl-comp-updated/isl-comp` | Live captions from signs, speech/typed replies, text-to-speech, two-person video call |
-| 2 | **ISL Avatar** | web app, extension, `isl-connect/avatar` | Sign clip playback for speech→sign; Three.js FBX avatar renderer |
-| 3 | **Meeting Cards** | `chrome-extension/` | Google Meet panel: ready-made message cards, typed replies, readable captions, sign→text chat, speech→sign avatar |
-| 4 | **Learning Mode** | — | Lessons, demonstrations, quizzes, dictionary, camera practice (see [roadmap](#15-roadmap)) |
+| #   | Module               | Location                                 | What it delivers                                                                                                  |
+| --- | -------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| 1   | **Daily Translator** | `isl-comp-updated/isl-comp`              | Live captions from signs, speech/typed replies, text-to-speech, two-person video call                             |
+| 2   | **ISL Avatar**       | web app, extension, `isl-connect/avatar` | Sign clip playback for speech→sign; Three.js FBX avatar renderer                                                  |
+| 3   | **Meeting Cards**    | `chrome-extension/`                      | Google Meet panel: ready-made message cards, typed replies, readable captions, sign→text chat, speech→sign avatar |
+| 4   | **Learning Mode**    | —                                        | Lessons, demonstrations, quizzes, dictionary, camera practice (see [roadmap](#15-roadmap))                        |
 
 ---
 
@@ -65,21 +64,21 @@ Inference runs **locally** (a Python WebSocket service on `127.0.0.1`), and call
 
 A role-based **Communication Room** (`/room`) for face-to-face or remote conversation between an **ISL user** and a **hearing user**.
 
-| Capability | Details | Source |
-|---|---|---|
-| Two-person WebRTC call | Create/join with a 6-character room code or invite link; offer/answer/ICE; rooms capped at two peers | `src/hooks/useVideoCall.ts`, `server/server.js` |
-| Role-specific interfaces | ISL User gets **Read my signs**; Hearing User gets **Start listening**. Invite links carry the opposite role (`?role=isl` / `?role=hearing`) | `src/pages/CommunicationRoom.tsx` |
-| Sign → caption | Frames from the camera stream go to the recognition service; the predicted sign becomes a sentence captioned on the peer's screen | `src/services/recognition.ts`, `CameraPanel.tsx` |
-| Sentence builder | Deterministic lookup keyed on the sign sequence, with a label-stitching fallback | `src/data/signMappings.ts` |
-| Text-to-speech | Browser `SpeechSynthesis` reads the ISL user's sentence aloud | `src/hooks/useTextToSpeech.ts` |
-| Speech-to-text | Web Speech API, continuous with interim results, `en-IN` (Chromium) | `src/hooks/useSpeechRecognition.ts` |
-| Typed responses | Keyboard input feeds the same phrase-mapping pipeline as speech | `ManualTextInput.tsx` |
-| Speech/typed → signs | Longest-phrase-first mapper with aliases (e.g. "home" → `HOUSE`) | `src/utils/phraseMapper.ts` |
-| Message transport | Finished sentences travel over a WebRTC **data channel** (`isl-messages`) | `useVideoCall.ts` |
-| Call controls | Mic / camera / speaker toggles act on real media tracks; End Session tears the connection down | `CallControls.tsx` |
-| Transcript & history | In-session conversation history and transcript drawer | `TranscriptDrawer.tsx` |
-| Developer mode | Optional panel: detected sign, top-5 predictions, confidence, frame counts, inference time | `DebugPanel.tsx` |
-| Landing & explainer pages | Home page and "How it works" | `src/pages/` |
+| Capability                | Details                                                                                                                                      | Source                                           |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| Two-person WebRTC call    | Create/join with a 6-character room code or invite link; offer/answer/ICE; rooms capped at two peers                                         | `src/hooks/useVideoCall.ts`, `server/server.js`  |
+| Role-specific interfaces  | ISL User gets **Read my signs**; Hearing User gets **Start listening**. Invite links carry the opposite role (`?role=isl` / `?role=hearing`) | `src/pages/CommunicationRoom.tsx`                |
+| Sign → caption            | Frames from the camera stream go to the recognition service; the predicted sign becomes a sentence captioned on the peer's screen            | `src/services/recognition.ts`, `CameraPanel.tsx` |
+| Sentence builder          | Deterministic lookup keyed on the sign sequence, with a label-stitching fallback                                                             | `src/data/signMappings.ts`                       |
+| Text-to-speech            | Browser `SpeechSynthesis` reads the ISL user's sentence aloud                                                                                | `src/hooks/useTextToSpeech.ts`                   |
+| Speech-to-text            | Web Speech API, continuous with interim results, `en-IN` (Chromium)                                                                          | `src/hooks/useSpeechRecognition.ts`              |
+| Typed responses           | Keyboard input feeds the same phrase-mapping pipeline as speech                                                                              | `ManualTextInput.tsx`                            |
+| Speech/typed → signs      | Longest-phrase-first mapper with aliases (e.g. "home" → `HOUSE`)                                                                             | `src/utils/phraseMapper.ts`                      |
+| Message transport         | Finished sentences travel over a WebRTC **data channel** (`isl-messages`)                                                                    | `useVideoCall.ts`                                |
+| Call controls             | Mic / camera / speaker toggles act on real media tracks; End Session tears the connection down                                               | `CallControls.tsx`                               |
+| Transcript & history      | In-session conversation history and transcript drawer                                                                                        | `TranscriptDrawer.tsx`                           |
+| Developer mode            | Optional panel: detected sign, top-5 predictions, confidence, frame counts, inference time                                                   | `DebugPanel.tsx`                                 |
+| Landing & explainer pages | Home page and "How it works"                                                                                                                 | `src/pages/`                                     |
 
 End users see only the **final translated sentence**; raw sign tokens appear only in Developer mode. The camera and microphone are acquired once and shared by the call and the recognition client.
 
@@ -116,37 +115,37 @@ A **Manifest V3** extension (`chrome-extension/`, v0.3.0, Chrome ≥ 116, no bui
 
 ### Meeting Cards tab
 
-A student in an online class who cannot speak opens the **Cards** tab, taps *"Could you please repeat that?"*, and the message is posted to the meeting chat. If Meet captions are on, the same tab shows them in large, readable text.
+A student in an online class who cannot speak opens the **Cards** tab, taps _"Could you please repeat that?"_, and the message is posted to the meeting chat. If Meet captions are on, the same tab shows them in large, readable text.
 
-| Capability | Details |
-|---|---|
-| **Ready-made cards** | 15 cards in three groups (*Understanding*, *Taking part*, *Quick replies*), defined in `config/meeting-cards.json` — e.g. "Could you please repeat that?", "Please speak slowly.", "I have a question.", "I didn't understand." |
-| **Tap → edit → Send** | Tapping a card fills an editable message box; nothing is shared until the user presses **Send** (or Ctrl/⌘+Enter) |
-| **Send immediately (optional)** | A checkbox lets a tap on a card send it straight away, for one-tap replies |
-| **Typed responses** | The same box accepts any typed message; it is shared the same way as a card |
-| **Sharing method** | Meet chat (send or fill) per the user's setting, with a clipboard fallback when the chat box can't be found |
-| **My cards** | **Save as card** keeps a typed message as a personal card (up to 12, 200 characters each, de-duplicated; stored in extension settings); cards can be removed |
-| **Readable captions** | **Show captions** reads Meet's live captions from the page into a large-text view with speaker names and **A− / A+** size controls (14–32 px, remembered). Growing captions update in place. Meeting audio is not recorded |
-| **Avatar preview** | Cards that map to signs get a ▶ preview played by the existing avatar player. It is shown **only to the user** |
-| **Shared captions** | The Cards and Speech → Sign tabs can read captions at the same time; stopping one does not stop the other |
+| Capability                      | Details                                                                                                                                                                                                                         |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Ready-made cards**            | 15 cards in three groups (_Understanding_, _Taking part_, _Quick replies_), defined in `config/meeting-cards.json` — e.g. "Could you please repeat that?", "Please speak slowly.", "I have a question.", "I didn't understand." |
+| **Tap → edit → Send**           | Tapping a card fills an editable message box; nothing is shared until the user presses **Send** (or Ctrl/⌘+Enter)                                                                                                               |
+| **Send immediately (optional)** | A checkbox lets a tap on a card send it straight away, for one-tap replies                                                                                                                                                      |
+| **Typed responses**             | The same box accepts any typed message; it is shared the same way as a card                                                                                                                                                     |
+| **Sharing method**              | Meet chat (send or fill) per the user's setting, with a clipboard fallback when the chat box can't be found                                                                                                                     |
+| **My cards**                    | **Save as card** keeps a typed message as a personal card (up to 12, 200 characters each, de-duplicated; stored in extension settings); cards can be removed                                                                    |
+| **Readable captions**           | **Show captions** reads Meet's live captions from the page into a large-text view with speaker names and **A− / A+** size controls (14–32 px, remembered). Growing captions update in place. Meeting audio is not recorded      |
+| **Avatar preview**              | Cards that map to signs get a ▶ preview played by the existing avatar player. It is shown **only to the user**                                                                                                                  |
+| **Shared captions**             | The Cards and Speech → Sign tabs can read captions at the same time; stopping one does not stop the other                                                                                                                       |
 
-**About the avatar and other participants.** The preview plays inside the Samvaad panel on the user's own screen; other participants receive the *text* message. Showing the avatar to other participants would need a camera-stream replacement integration, which this extension does not include (see the [roadmap](#15-roadmap)). Only the 11 existing sign clips play as video; other signs in a preview appear as text cards, and a card whose words are not fully covered by the sign vocabulary gets no preview rather than a partial one.
+**About the avatar and other participants.** The preview plays inside the Samvaad panel on the user's own screen; other participants receive the _text_ message. Showing the avatar to other participants would need a camera-stream replacement integration, which this extension does not include (see the [roadmap](#15-roadmap)). Only the 11 existing sign clips play as video; other signs in a preview appear as text cards, and a card whose words are not fully covered by the sign vocabulary gets no preview rather than a partial one.
 
 ### Google Meet panel — Sign → Text and Speech → Sign
 
-| Capability | Details |
-|---|---|
-| **Sign → Text** | Camera frames stream to the same local recognition service as the web app; top-3 predictions with confidences appear as **editable text** |
-| **Review-before-send** | Nothing is sent until the user presses **Send**. The extension fills Meet's chat box and sends; the clipboard is the fallback |
-| **Sign verification** | Signs are enabled per user in Options; optional minimum-confidence and top-1/top-2 margin filters use real softmax output |
-| **Speech → Sign** | Inputs: Meet live captions (read from the page; meeting audio is not recorded), the user's microphone (on-device Web Speech by default), or typed text |
-| **Caption settling** | `CaptionTracker` waits for text to stabilise (1.5 s; 0.7 s after sentence-final punctuation) before signing |
-| **Sign mapper** | Longest-phrase-first table (`config/avatar-signs.json`, 63 phrases); words that can't be signed are reported to the reader |
-| **Avatar playback** | The 11 sign clips from §5.1; other mapped signs appear as text cards |
-| **Resilience** | Reconnect with exponential back-off, frame dropping under back-pressure, mirror auto-detection from the checkpoint |
-| **Privacy** | Transcripts kept only in panel memory; camera and socket released on stop or on leaving the meeting |
-| **Extensible** | Platform adapter registry (`src/content/platforms/registry.js`) for adding further meeting platforms |
-| **Automated tests** | Node unit tests (including Meeting Cards), syntax/manifest check, Playwright fake-Meet end-to-end tests (Speech → Sign and Cards), Python protocol check |
+| Capability             | Details                                                                                                                                                  |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sign → Text**        | Camera frames stream to the same local recognition service as the web app; top-3 predictions with confidences appear as **editable text**                |
+| **Review-before-send** | Nothing is sent until the user presses **Send**. The extension fills Meet's chat box and sends; the clipboard is the fallback                            |
+| **Sign verification**  | Signs are enabled per user in Options; optional minimum-confidence and top-1/top-2 margin filters use real softmax output                                |
+| **Speech → Sign**      | Inputs: Meet live captions (read from the page; meeting audio is not recorded), the user's microphone (on-device Web Speech by default), or typed text   |
+| **Caption settling**   | `CaptionTracker` waits for text to stabilise (1.5 s; 0.7 s after sentence-final punctuation) before signing                                              |
+| **Sign mapper**        | Longest-phrase-first table (`config/avatar-signs.json`, 63 phrases); words that can't be signed are reported to the reader                               |
+| **Avatar playback**    | The 11 sign clips from §5.1; other mapped signs appear as text cards                                                                                     |
+| **Resilience**         | Reconnect with exponential back-off, frame dropping under back-pressure, mirror auto-detection from the checkpoint                                       |
+| **Privacy**            | Transcripts kept only in panel memory; camera and socket released on stop or on leaving the meeting                                                      |
+| **Extensible**         | Platform adapter registry (`src/content/platforms/registry.js`) for adding further meeting platforms                                                     |
+| **Automated tests**    | Node unit tests (including Meeting Cards), syntax/manifest check, Playwright fake-Meet end-to-end tests (Speech → Sign and Cards), Python protocol check |
 
 An expanded in-meeting avatar, sharing the avatar with other participants, and Zoom support are on the [roadmap](#15-roadmap).
 
@@ -166,11 +165,11 @@ Learning Mode is the next product direction: an ISL learning space for both sign
 
 **Foundations already in the repository**
 
-| Learning feature | Existing building block |
-|---|---|
-| Demonstrations | 11 avatar MP4 clips, 9 FBX animations, `AvatarPanel` |
-| Dictionary | 24-sign vocabulary (`shared/vocabulary_real.json`), label/ID system, `recognition-ml/sign_reference.html` |
-| Practice | Recognition service + `recognition.ts` client returning label, top-5 and confidence |
+| Learning feature | Existing building block                                                                                   |
+| ---------------- | --------------------------------------------------------------------------------------------------------- |
+| Demonstrations   | 11 avatar MP4 clips, 9 FBX animations, `AvatarPanel`                                                      |
+| Dictionary       | 24-sign vocabulary (`shared/vocabulary_real.json`), label/ID system, `recognition-ml/sign_reference.html` |
+| Practice         | Recognition service + `recognition.ts` client returning label, top-5 and confidence                       |
 
 ---
 
@@ -327,17 +326,17 @@ A FastAPI service (`POST /convert`: `{"signs":[…]}` → `{"text","lang"}`) bac
 
 ## 11. Technology stack
 
-| Layer | Technologies |
-|---|---|
-| **Web frontend** | React 18.3, TypeScript 5.6, Vite 5.4, React Router 6, Tailwind CSS 3.4, `lucide-react` |
-| **Realtime** | WebRTC (`RTCPeerConnection`, data channel), `socket.io-client` 4.8 |
-| **Signaling server** | Node.js (ES modules), Express 4, Socket.IO 4.8, CORS |
-| **Browser speech** | Web Speech API (`SpeechRecognition`, `en-IN`), `SpeechSynthesis` |
+| Layer                   | Technologies                                                                                                                 |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **Web frontend**        | React 18.3, TypeScript 5.6, Vite 5.4, React Router 6, Tailwind CSS 3.4, `lucide-react`                                       |
+| **Realtime**            | WebRTC (`RTCPeerConnection`, data channel), `socket.io-client` 4.8                                                           |
+| **Signaling server**    | Node.js (ES modules), Express 4, Socket.IO 4.8, CORS                                                                         |
+| **Browser speech**      | Web Speech API (`SpeechRecognition`, `en-IN`), `SpeechSynthesis`                                                             |
 | **Recognition service** | Python 3.12, PyTorch, Hugging Face `transformers` 4.44.2, MediaPipe 0.10.14, `websockets`, `timm`, `scikit-learn`, `xgboost` |
-| **Personalisation** | TensorFlow/Keras, MediaPipe, OpenCV, NumPy, scikit-learn, Matplotlib |
-| **Sentence model** | FastAPI, Uvicorn, T5 (`transformers`), PyTorch, pandas, SentencePiece |
-| **3D avatar** | Three.js (`FBXLoader`, `AnimationMixer`), React, Vite, Tailwind |
-| **Extension** | Chrome Manifest V3, plain JavaScript, service worker, content scripts, `playwright-core` |
+| **Personalisation**     | TensorFlow/Keras, MediaPipe, OpenCV, NumPy, scikit-learn, Matplotlib                                                         |
+| **Sentence model**      | FastAPI, Uvicorn, T5 (`transformers`), PyTorch, pandas, SentencePiece                                                        |
+| **3D avatar**           | Three.js (`FBXLoader`, `AnimationMixer`), React, Vite, Tailwind                                                              |
+| **Extension**           | Chrome Manifest V3, plain JavaScript, service worker, content scripts, `playwright-core`                                     |
 
 ---
 
@@ -402,13 +401,13 @@ Samvaad/
 
 ### Prerequisites
 
-| Requirement | Notes |
-|---|---|
-| **Chrome or Edge** | Web Speech API is Chromium-only; the extension needs Chrome ≥ 116 |
-| **Node.js + npm** | Web app and signaling server |
-| **Python 3.12** | Recognition service |
-| **Trained checkpoint** | `custom_best.pth` is git-ignored — obtain the approved file from the project owner |
-| **Webcam + microphone** | |
+| Requirement             | Notes                                                                              |
+| ----------------------- | ---------------------------------------------------------------------------------- |
+| **Chrome or Edge**      | Web Speech API is Chromium-only; the extension needs Chrome ≥ 116                  |
+| **Node.js + npm**       | Web app and signaling server                                                       |
+| **Python 3.12**         | Recognition service                                                                |
+| **Trained checkpoint**  | `custom_best.pth` is git-ignored — obtain the approved file from the project owner |
+| **Webcam + microphone** |                                                                                    |
 
 ### Step 1 — Recognition service
 
@@ -424,14 +423,14 @@ python recognition_service.py
 
 Expected output: `ISL recognition service listening on ws://127.0.0.1:8765`
 
-| Flag | Default | |
-|---|---|---|
-| `--host` | `127.0.0.1` | |
-| `--port` | `8765` | |
-| `--model` | `models/custom_scratch/custom_best.pth` | checkpoint path |
-| `--labels` | `INCLUDE-master/label_maps/label_map_include.json` | |
-| `--device` | `auto` | `auto` · `cpu` · `cuda` |
-| `--min-frames` / `--max-frames` | `8` / `256` | |
+| Flag                            | Default                                            |                         |
+| ------------------------------- | -------------------------------------------------- | ----------------------- |
+| `--host`                        | `127.0.0.1`                                        |                         |
+| `--port`                        | `8765`                                             |                         |
+| `--model`                       | `models/custom_scratch/custom_best.pth`            | checkpoint path         |
+| `--labels`                      | `INCLUDE-master/label_maps/label_map_include.json` |                         |
+| `--device`                      | `auto`                                             | `auto` · `cpu` · `cuda` |
+| `--min-frames` / `--max-frames` | `8` / `256`                                        |                         |
 
 > The pins matter: `transformers` 5.x breaks the model code and newer MediaPipe releases removed `mp.solutions`.
 
@@ -487,49 +486,53 @@ uvicorn src.api:app --port 8000
 cd isl-connect/frontend && npm install && npm run dev
 ```
 
-| Service | Address |
-|---|---|
-| Recognition service | `ws://127.0.0.1:8765` |
-| Signaling server | `http://localhost:4000` |
-| Web app (Vite) | `http://localhost:5173` (typical) |
-| NLP sentence API | `http://localhost:8000` |
+| Service             | Address                           |
+| ------------------- | --------------------------------- |
+| Recognition service | `ws://127.0.0.1:8765`             |
+| Signaling server    | `http://localhost:4000`           |
+| Web app (Vite)      | `http://localhost:5173` (typical) |
+| NLP sentence API    | `http://localhost:8000`           |
 
 ---
 
 ## 14. Testing
 
-| Suite | Command |
-|---|---|
-| Transformer padding-mask test | `cd isl-connect/include-ml && python -m unittest test_padding_mask.py` |
-| Per-class evaluation (confusion matrix) | `python evaluate_custom.py --split test --device cpu` |
-| Extension syntax / manifest check | `cd chrome-extension && npm run check` |
-| Extension unit tests | `npm test` |
-| Extension end-to-end (fake Meet page) | `npm install && npm run test:e2e` |
-| Meeting Cards end-to-end (fake Meet page) | `npm run test:e2e:cards` |
-| Speech → Sign end-to-end (fake Meet page) | `npm run test:e2e:speech` |
-| Service protocol check | `python chrome-extension/tools/protocol_check.py --url ws://127.0.0.1:8765` |
+| Suite                                     | Command                                                                     |
+| ----------------------------------------- | --------------------------------------------------------------------------- |
+| Transformer padding-mask test             | `cd isl-connect/include-ml && python -m unittest test_padding_mask.py`      |
+| Per-class evaluation (confusion matrix)   | `python evaluate_custom.py --split test --device cpu`                       |
+| Extension syntax / manifest check         | `cd chrome-extension && npm run check`                                      |
+| Extension unit tests                      | `npm test`                                                                  |
+| Extension end-to-end (fake Meet page)     | `npm install && npm run test:e2e`                                           |
+| Meeting Cards end-to-end (fake Meet page) | `npm run test:e2e:cards`                                                    |
+| Speech → Sign end-to-end (fake Meet page) | `npm run test:e2e:speech`                                                   |
+| Service protocol check                    | `python chrome-extension/tools/protocol_check.py --url ws://127.0.0.1:8765` |
 
 ---
 
 ## 15. Roadmap
 
 **Learning Mode**
+
 - [ ] Structured ISL lessons and sign demonstrations built on the avatar and clip library
 - [ ] Quizzes and a searchable sign dictionary
 - [ ] Camera-based practice with live feedback from the recognition service
 
 **ISL Avatar**
+
 - [ ] Connect the Three.js renderer to the web app through the existing `AvatarProps` contract
 - [ ] Expand sign coverage across the full vocabulary
 - [ ] **Video-to-avatar motion preservation** (landmark extraction → skeletal retargeting)
 
 **Recognition**
+
 - [ ] Larger vocabulary and more signers
 - [ ] Continuous / sliding-window recognition with confidence smoothing
 - [ ] Serve personalised models from the fine-tuning pipeline
 - [ ] Integrate the sentence-generation model
 
 **Meeting Cards**
+
 - [ ] Share the avatar with other participants (camera-stream integration, to be built and tested)
 - [ ] More card sets (classroom, interview, workplace) and in-place card editing
 - [ ] Expanded in-meeting avatar
@@ -537,6 +540,7 @@ cd isl-connect/frontend && npm install && npm run dev
 - [ ] Chrome Web Store packaging
 
 **Platform**
+
 - [ ] TURN server for calls across restrictive networks
 - [ ] Consolidated shared vocabulary and asset package
 
@@ -549,7 +553,7 @@ cd isl-connect/frontend && npm install && npm run dev
 - **Public services and everyday places** — restaurants, shops, railway stations, offices.
 - **Remote work and online meetings** — letting signers take part in mainstream video calls.
 
-**Long-term vision:** an open, privacy-respecting, **local-first** ISL accessibility layer — recognition that runs on the user's own device, avatars that sign back faithfully, and tools that help hearing people *learn* ISL, not only translate it. The shared sign-ID vocabulary, the swappable avatar contract and the recognition-as-a-service boundary let each piece improve independently.
+**Long-term vision:** an open, privacy-respecting, **local-first** ISL accessibility layer — recognition that runs on the user's own device, avatars that sign back faithfully, and tools that help hearing people _learn_ ISL, not only translate it. The shared sign-ID vocabulary, the swappable avatar contract and the recognition-as-a-service boundary let each piece improve independently.
 
 ---
 
@@ -562,6 +566,6 @@ cd isl-connect/frontend && npm install && npm run dev
 
 <div align="center">
 
-*Samvaad — because every conversation deserves to be two-way.*
+_Samvaad — because every conversation deserves to be two-way._
 
 </div>

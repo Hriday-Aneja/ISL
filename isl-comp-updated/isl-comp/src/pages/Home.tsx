@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import {
   ArrowLeftRight,
   ArrowRight,
@@ -15,6 +16,7 @@ import {
 } from 'lucide-react';
 import { HeroOrb } from '../components/landing/HeroOrb';
 import { LandingShell } from '../components/landing/LandingShell';
+import { LiveDemo } from '../components/landing/LiveDemo';
 import { CountUp, Reveal } from '../components/landing/Reveal';
 import { SIGN_LABELS } from '../data/signMappings';
 
@@ -25,6 +27,17 @@ const gradientText =
   'bg-gradient-to-b from-white to-[#BFC6E0] bg-clip-text text-transparent';
 
 export function Home() {
+  const { hash } = useLocation();
+  // Arriving from another page via /#live-demo: scroll to the demo once mounted.
+  useEffect(() => {
+    if (hash !== '#live-demo') return;
+    const t = setTimeout(
+      () => document.getElementById('live-demo')?.scrollIntoView({ behavior: 'smooth' }),
+      100
+    );
+    return () => clearTimeout(t);
+  }, [hash]);
+
   return (
     <LandingShell>
       {/* Hero */}
@@ -138,6 +151,27 @@ export function Home() {
             </span>
           ))}
         </div>
+      </section>
+
+      {/* Live demo */}
+      <section id="live-demo" className={`${WRAP} pt-24`}>
+        <Reveal>
+          <SectionHead
+            eyebrow="Live demo"
+            title={
+              <>
+                <span className={gradientText}>Type a word, </span>
+                <span className="text-saffron">watch it sign</span>
+              </>
+            }
+            sub="Try the same phrase-to-sign mapping and avatar the communication room uses, right here."
+          />
+        </Reveal>
+        <Reveal delay={0.1}>
+          <div className="mt-12">
+            <LiveDemo />
+          </div>
+        </Reveal>
       </section>
 
       {/* Features */}
