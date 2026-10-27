@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, Play } from 'lucide-react';
 
 const NAV_LINKS = [
   { to: '/', label: 'Home' },
@@ -122,7 +122,20 @@ function LandingNav() {
         })}
       </nav>
 
-      <div className="flex justify-end">
+      <div className="flex items-center justify-end gap-2.5">
+        <Link
+          to="/#live-demo"
+          onClick={(e) => {
+            const el = document.getElementById('live-demo');
+            if (pathname === '/' && el) {
+              e.preventDefault();
+              el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }}
+          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-saffron/40 bg-saffron/10 px-4 text-sm font-semibold text-saffron transition-transform hover:-translate-y-0.5"
+        >
+          <Play size={12} fill="currentColor" /> Live demo
+        </Link>
         <Link
           to="/room"
           className="inline-flex min-h-[44px] items-center rounded-full border border-white/20 bg-white/[0.04] px-[22px] text-[15px] font-semibold text-cream transition-transform hover:-translate-y-0.5"
