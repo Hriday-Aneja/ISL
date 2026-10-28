@@ -11,14 +11,14 @@ export default {
         line: '#DDE4E1',
         // Room accents: mint = the signer's side, saffron = the speaker's side.
         signal: {
-          DEFAULT: '#4DE3C1',
-          soft: 'rgba(77, 227, 193, 0.12)',
-          deep: '#7CEBD3',
+          DEFAULT: '#8CA596',
+          soft: 'rgba(140,165,150, 0.12)',
+          deep: '#A3B9AB',
         },
         voice: {
-          DEFAULT: '#FFB547',
-          soft: 'rgba(255, 181, 71, 0.12)',
-          deep: '#FFC96F',
+          DEFAULT: '#C58B4E',
+          soft: 'rgba(197,139,78, 0.12)',
+          deep: '#D49E64',
         },
         alert: {
           DEFAULT: '#DC4C4C',
@@ -26,22 +26,22 @@ export default {
         },
         // Dark shell for the Communication Room, matching the landing page.
         room: {
-          bg: '#0A0C16',
-          surface: '#11152A',
-          raised: '#1A2040',
-          border: '#242B4A',
-          text: '#F4F1EA',
-          'text-soft': '#A7ADC2',
+          bg: '#121416',
+          surface: '#1A1D20',
+          raised: '#23272B',
+          border: '#30353A',
+          text: '#E8E2D5',
+          'text-soft': '#A39F94',
         },
         // Landing page palette (midnight + saffron + mint).
         night: {
-          DEFAULT: '#0A0C16',
-          card: '#11152A',
+          DEFAULT: '#121416',
+          card: '#1A1D20',
         },
-        saffron: '#FFB547',
-        mint: '#4DE3C1',
-        mist: '#A7ADC2',
-        cream: '#F4F1EA',
+        saffron: '#C58B4E',
+        mint: '#8CA596',
+        mist: '#A39F94',
+        cream: '#E8E2D5',
       },
       fontFamily: {
         display: ['"Bricolage Grotesque"', 'sans-serif'],
@@ -49,7 +49,7 @@ export default {
         mono: ['"JetBrains Mono"', 'monospace'],
         bricolage: ['"Bricolage Grotesque"', 'sans-serif'],
         dm: ['"DM Sans"', 'sans-serif'],
-        deva: ['"Noto Sans Devanagari"', 'sans-serif'],
+        deva: ['"Noto Serif Devanagari"', 'serif'],
       },
       borderRadius: {
         sm: '10px',
@@ -60,17 +60,17 @@ export default {
         panel: '0 1px 2px rgba(23,33,31,0.04), 0 1px 0 rgba(23,33,31,0.04)',
         stage: '0 1px 2px rgba(0,0,0,0.3), 0 16px 40px -16px rgba(0,0,0,0.6)',
         float: '0 8px 24px -10px rgba(23,33,31,0.18)',
-        orb: '0 50px 140px rgba(0,0,0,0.6), 0 0 0 1px rgba(77,227,193,0.08), 0 0 80px rgba(77,227,193,0.10)',
+        orb: '0 50px 140px rgba(0,0,0,0.6), 0 0 0 1px rgba(140,165,150,0.08), 0 0 80px rgba(140,165,150,0.10)',
         glass: '0 24px 60px rgba(0,0,0,0.5)',
       },
       keyframes: {
         'pulse-ring': {
-          '0%': { boxShadow: '0 0 0 0 rgba(77,227,193,0.4)' },
-          '100%': { boxShadow: '0 0 0 8px rgba(77,227,193,0)' },
+          '0%': { boxShadow: '0 0 0 0 rgba(140,165,150,0.4)' },
+          '100%': { boxShadow: '0 0 0 8px rgba(140,165,150,0)' },
         },
         'pulse-ring-amber': {
-          '0%': { boxShadow: '0 0 0 0 rgba(255,181,71,0.4)' },
-          '100%': { boxShadow: '0 0 0 8px rgba(255,181,71,0)' },
+          '0%': { boxShadow: '0 0 0 0 rgba(197,139,78,0.4)' },
+          '100%': { boxShadow: '0 0 0 8px rgba(197,139,78,0)' },
         },
         'fade-up': {
           '0%': { opacity: '0', transform: 'translateY(4px)' },

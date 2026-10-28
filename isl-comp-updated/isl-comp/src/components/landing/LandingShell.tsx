@@ -24,18 +24,9 @@ export function LandingShell({ children }: { children: ReactNode }) {
           maskImage: 'radial-gradient(ellipse 75% 65% at 70% 30%, #000 25%, transparent 80%)',
         }}
       />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-32 -top-32 h-[520px] w-[520px] animate-blob-drift rounded-full bg-mint opacity-[0.22] blur-[100px]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -left-36 top-[520px] h-[420px] w-[420px] animate-blob-drift rounded-full bg-saffron opacity-[0.18] blur-[100px] [animation-delay:-6s]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute left-[38%] top-[280px] h-[360px] w-[360px] animate-blob-drift rounded-full bg-[#7C6CFF] opacity-[0.18] blur-[100px] [animation-delay:-3s]"
-      />
+      
+      
+      
 
       <LandingNav />
       <main className="relative">{children}</main>
@@ -96,7 +87,7 @@ function LandingNav() {
   return (
     <header className="relative z-30 mx-auto grid max-w-[1312px] grid-cols-[1fr_auto] items-center px-6 py-6 sm:grid-cols-[1fr_auto_1fr] lg:px-16">
       <Link to="/" className="flex items-center gap-3">
-        <span className="flex h-[42px] w-[42px] items-center justify-center rounded-[13px] bg-saffron text-[#1A1204] shadow-[0_8px_28px_rgba(255,181,71,0.35)]">
+        <span className="flex h-[42px] w-[42px] items-center justify-center rounded-[13px] bg-saffron text-[#1A1204] shadow-[0_8px_28px_rgba(197,139,78,0.35)]">
           <MessageCircle size={22} strokeWidth={2.2} />
         </span>
         <span className="font-bricolage text-2xl font-bold tracking-tight text-cream">

@@ -79,7 +79,7 @@ export function RemoteVideoStage({
       <audio ref={audioRef} autoPlay muted={!isLocal || !speakerOn} />
 
       {!hasVideo && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[radial-gradient(ellipse_at_center,_#1A2040_0%,_#0A0C16_78%)] px-6 text-center">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[radial-gradient(ellipse_at_center,_#23272B_0%,_#121416_78%)] px-6 text-center">
           {callStatus === 'peer_left' ? (
             <UserX size={32} className="text-voice" />
           ) : callStatus === 'connection_failed' ? (

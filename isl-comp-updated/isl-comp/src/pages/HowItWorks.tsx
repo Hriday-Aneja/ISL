@@ -118,7 +118,7 @@ export function HowItWorks() {
           </div>
           <Link
             to="/room"
-            className="relative inline-flex min-h-[54px] flex-none items-center justify-center gap-2.5 overflow-hidden rounded-full bg-saffron px-7 text-base font-semibold text-[#1A1204] shadow-[0_12px_44px_rgba(255,181,71,0.32)] transition-transform hover:-translate-y-0.5"
+            className="relative inline-flex min-h-[54px] flex-none items-center justify-center gap-2.5 overflow-hidden rounded-full bg-saffron px-7 text-base font-semibold text-[#1A1204] shadow-[0_12px_44px_rgba(197,139,78,0.32)] transition-transform hover:-translate-y-0.5"
           >
             Try the room <ArrowRight size={18} strokeWidth={2.4} />
             <span

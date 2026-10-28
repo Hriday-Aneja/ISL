@@ -93,7 +93,7 @@ export function AvatarPanel({
   return (
     <div
       className={`relative flex h-full flex-col items-center justify-center
-        overflow-hidden bg-[radial-gradient(ellipse_at_center,_#1A2040_0%,_#0A0C16_78%)]
+        overflow-hidden bg-[radial-gradient(ellipse_at_center,_#23272B_0%,_#121416_78%)]
         text-white ${compact ? 'gap-1.5 px-2 py-2' : 'gap-4 px-4 py-4'}`}
     >
       <div

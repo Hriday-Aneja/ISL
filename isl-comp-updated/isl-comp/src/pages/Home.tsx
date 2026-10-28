@@ -14,7 +14,8 @@ import {
   Play,
   Video,
 } from 'lucide-react';
-import { HeroOrb } from '../components/landing/HeroOrb';
+import { HandLab } from '../components/landing/HandLab';
+import { SilenceHero } from '../components/landing/SilenceHero';
 import { LandingShell } from '../components/landing/LandingShell';
 import { LiveDemo } from '../components/landing/LiveDemo';
 import { DemoSection } from '../components/signdemo/DemoSection';
@@ -41,97 +42,10 @@ export function Home() {
 
   return (
     <LandingShell>
-      {/* Hero */}
-      <section className="relative mx-auto grid max-w-[1312px] items-center gap-10 px-6 pb-20 pt-10 lg:grid-cols-2 lg:px-16">
-        <div>
-          <div
-            className="inline-flex animate-word-rise items-center gap-2.5 rounded-full border border-mint/35 bg-mint/10 py-2 pl-3 pr-[18px] text-sm font-medium text-mint"
-          >
-            <span className="h-2 w-2 animate-dot-pulse rounded-full bg-mint" />
-            Real-time Indian Sign Language
-          </div>
+      {/* Hero: trapped words -> signing hand */}
+      <SilenceHero signCount={SIGN_COUNT} />
 
-          <h1 className="mt-7 font-bricolage text-[clamp(44px,6vw,88px)] font-bold leading-[0.96] tracking-[-0.04em]">
-            <span
-              className={`inline-block animate-word-rise ${gradientText}`}
-              style={{ animationDelay: '0.1s' }}
-            >
-              Signs speak.
-            </span>
-            <br />
-            <span
-              className="relative inline-block animate-word-rise text-saffron"
-              style={{ animationDelay: '0.2s' }}
-            >
-              Words sign
-              <svg
-                aria-hidden
-                viewBox="0 0 300 16"
-                preserveAspectRatio="none"
-                className="absolute -bottom-2 left-0 h-3.5 w-full"
-              >
-                <path
-                  d="M4 10C60 2 140 2 296 8"
-                  stroke="#FFB547"
-                  strokeWidth={4}
-                  fill="none"
-                  strokeLinecap="round"
-                  className="animate-draw"
-                  style={{ strokeDasharray: 300, strokeDashoffset: 300 }}
-                />
-              </svg>
-            </span>
-            <br />
-            <span
-              className={`inline-block animate-word-rise ${gradientText}`}
-              style={{ animationDelay: '0.3s' }}
-            >
-              back.
-            </span>
-          </h1>
-
-          <p
-            className="mt-8 max-w-[500px] animate-word-rise text-[19px] leading-relaxed text-mist"
-            style={{ animationDelay: '0.4s' }}
-          >
-            SAMVAAD turns sign language into live captions and speech into a signing avatar, so
-            deaf and hearing people can talk in the same room, or on the same call.
-          </p>
-
-          <div
-            className="mt-10 flex animate-word-rise flex-wrap gap-3.5"
-            style={{ animationDelay: '0.5s' }}
-          >
-            <Link
-              to="/room"
-              className="relative inline-flex min-h-[54px] items-center gap-2.5 overflow-hidden rounded-full bg-saffron px-7 text-base font-semibold text-[#1A1204] shadow-[0_12px_44px_rgba(255,181,71,0.32)] transition-transform hover:-translate-y-0.5"
-            >
-              Start a conversation <ArrowRight size={18} strokeWidth={2.4} />
-              <span
-                aria-hidden
-                className="absolute left-[-60%] top-0 h-full w-[40%] animate-shine bg-gradient-to-r from-transparent via-white/55 to-transparent"
-              />
-            </Link>
-            <Link
-              to="/how-it-works"
-              className="inline-flex min-h-[54px] items-center rounded-full border border-white/20 bg-white/[0.04] px-7 text-base font-semibold text-cream transition-transform hover:-translate-y-0.5"
-            >
-              How it works
-            </Link>
-          </div>
-
-          <div
-            className="mt-12 flex max-w-[500px] animate-word-rise gap-11 border-t border-white/10 pt-6"
-            style={{ animationDelay: '0.6s' }}
-          >
-            <Stat value={String(SIGN_COUNT)} label="ISL signs mapped" />
-            <Stat value="2-way" label="sign ⇄ speech" />
-            <Stat value="Live" label="in the browser" />
-          </div>
-        </div>
-
-        <HeroOrb />
-      </section>
+      <HandLab />
 
       {/* Sign marquee */}
       <section
@@ -403,7 +317,7 @@ export function Home() {
             <div className="relative mt-9 flex flex-wrap justify-center gap-3.5">
               <Link
                 to="/room"
-                className="relative inline-flex min-h-[54px] items-center gap-2.5 overflow-hidden rounded-full bg-saffron px-7 text-base font-semibold text-[#1A1204] shadow-[0_12px_44px_rgba(255,181,71,0.32)] transition-transform hover:-translate-y-0.5"
+                className="relative inline-flex min-h-[54px] items-center gap-2.5 overflow-hidden rounded-full bg-saffron px-7 text-base font-semibold text-[#1A1204] shadow-[0_12px_44px_rgba(197,139,78,0.32)] transition-transform hover:-translate-y-0.5"
               >
                 Start a conversation <ArrowRight size={18} strokeWidth={2.4} />
                 <span

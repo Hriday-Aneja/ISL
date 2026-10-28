@@ -6,11 +6,11 @@
  */
 
 .sd-root {
-  --sd-accent: #4de3c1; /* the single accent colour: electric mint-cyan */
-  --sd-accent-rgb: 77, 227, 193;
+  --sd-accent: #8CA596; /* the single accent colour: electric mint-cyan */
+  --sd-accent-rgb: 140,165,150;
   --sd-on-accent: #04201a;
-  --sd-text: #f4f1ea;
-  --sd-muted: #a7adc2;
+  --sd-text: #E8E2D5;
+  --sd-muted: #A39F94;
   --sd-surface: rgba(17, 21, 42, 0.72);
   --sd-surface-2: rgba(255, 255, 255, 0.045);
   --sd-border: rgba(255, 255, 255, 0.1);

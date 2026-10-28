@@ -51,7 +51,7 @@ export interface SkeletonStyle {
 }
 
 export const DEFAULT_STYLE: SkeletonStyle = {
-  accent: '#4DE3C1',
+  accent: '#8CA596',
   body: 'rgba(167, 173, 194, 0.55)',
   joint: '#EFFFFB',
   glow: 14,

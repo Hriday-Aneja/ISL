@@ -127,7 +127,7 @@ export function RoomGate({
       <div className={`relative w-full text-left ${step === 'prejoin' ? 'max-w-5xl' : 'max-w-sm'}`}>
         <div className="mb-5 text-center">
           <div className="mb-3 inline-flex items-center gap-2.5 text-room-text">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-voice text-[#1A1204] shadow-[0_8px_28px_rgba(255,181,71,0.35)]">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-voice text-[#1A1204] shadow-[0_8px_28px_rgba(197,139,78,0.35)]">
               <ScanFace size={18} />
             </span>
             <span className="font-display text-xl font-bold tracking-tight">Samvaad</span>
