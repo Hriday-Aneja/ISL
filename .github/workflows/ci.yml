@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  recognition-service:
+    name: Recognition service (websockets ${{ matrix.websockets }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # requirements-service.txt allows websockets >=12,<16: test both ends of the range
+        websockets: ["12.0", "15.0.1"]
+    defaults:
+      run:
+        working-directory: isl-connect/include-ml
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # Heavy ML deps (torch, MediaPipe, OpenCV) are stubbed by the tests, so this stays fast.
+      - run: pip install "websockets==${{ matrix.websockets }}" numpy
+      - run: python -m unittest test_recognition_service -v
+
+  chrome-extension:
+    name: Chrome extension
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: chrome-extension
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: chrome-extension/package-lock.json
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      # Playwright e2e (npm run test:e2e*) needs a browser; add a separate job when wanted.
+
+  web-app:
+    name: Web app + signaling server
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: isl-comp-updated/isl-comp
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            isl-comp-updated/isl-comp/package-lock.json
+            isl-comp-updated/isl-comp/server/package-lock.json
+      - run: npm ci   # postinstall also installs server/
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build

@@ -432,6 +432,14 @@ Expected output: `ISL recognition service listening on ws://127.0.0.1:8765`
 | `--device`                      | `auto`                                             | `auto` · `cpu` · `cuda` |
 | `--min-frames` / `--max-frames` | `8` / `256`                                        |                         |
 
+**Origin check.** Browsers can open `ws://127.0.0.1:8765` from *any* web page (WebSockets ignore CORS), so the service only accepts connections whose `Origin` is allow-listed: `localhost` / `127.0.0.1` on any port, `https://samvaad-khaki.vercel.app`, and `chrome-extension://*`. Non-browser clients (scripts, `protocol_check.py`) send no `Origin` and are allowed. Rejected connections are closed with code 1008.
+
+| Flag / env                            | Purpose                                                                                      |
+|---------------------------------------|----------------------------------------------------------------------------------------------|
+| `--allowed-origin PATTERN` (repeat)   | add an origin, e.g. your own deployment URL; `fnmatch` patterns. Env: `SAMVAAD_ALLOWED_ORIGINS` (comma-separated) |
+| `--no-default-origins`                | use only the origins you list, e.g. pin one extension: `--no-default-origins --allowed-origin chrome-extension://<id>` |
+| `--allow-any-origin`                  | disable the check (development only)                                                         |
+
 > The pins matter: `transformers` 5.x breaks the model code and newer MediaPipe releases removed `mp.solutions`.
 
 ### Step 2 — Signaling server
@@ -500,6 +508,7 @@ cd isl-connect/frontend && npm install && npm run dev
 | Suite                                     | Command                                                                     |
 | ----------------------------------------- | --------------------------------------------------------------------------- |
 | Transformer padding-mask test             | `cd isl-connect/include-ml && python -m unittest test_padding_mask.py`      |
+| Recognition service WebSocket layer       | `cd isl-connect/include-ml && python -m unittest test_recognition_service -v` (needs only `websockets` + `numpy`) |
 | Per-class evaluation (confusion matrix)   | `python evaluate_custom.py --split test --device cpu`                       |
 | Extension syntax / manifest check         | `cd chrome-extension && npm run check`                                      |
 | Extension unit tests                      | `npm test`                                                                  |
