@@ -1,0 +1,12 @@
+--- a/isl-connect/include-ml/recognition_service.py	2026-10-20 17:57:31.000000000 +0000
++++ b/isl-connect/include-ml/recognition_service.py	2026-10-21 12:37:56.104706205 +0000
+@@ -66,6 +66,9 @@
+             "feature_size": int(self.meta["input_size"]),
+             "train_fps": self.train_fps,
+             "preprocessing_version": self.meta.get("preprocessing_version"),
++            # Additive field: whether training clips were mirrored before MediaPipe. Clients that
++            # send frames (e.g. the Chrome extension) must flip to match; older clients ignore it.
++            "flip_horizontal": self.meta.get("flip_horizontal"),
+             "model": "DeterministicEvalTransformer",
+             "device": str(self.device),
+         }

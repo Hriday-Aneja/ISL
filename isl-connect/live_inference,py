@@ -1,0 +1,397 @@
+"""Live webcam inference for the AI4Bharat INCLUDE Transformer.
+
+Run from include-ml:
+    venv\\Scripts\\python.exe live_inference.py
+
+Feature layout: pose (25 x 2), hand1 (21 x 2), hand2 (21 x 2) = 134.
+
+Recording is manual, not auto-detected: press SPACE to start recording a
+sign, press SPACE again to stop and classify. This mirrors exactly what
+test_video_inference.py does with an .MOV file -- one clean, isolated clip
+(real frames, then zero-padded up to --sequence-length) sent to the model
+once -- instead of guessing where a sign starts/ends from hand visibility,
+which is unreliable in practice (motion blur, brief tracking loss mid-sign,
+or holding a pose too long) and can hand the model out-of-distribution
+input.
+
+Press q or Escape to quit.
+"""
+import argparse
+import json
+import sys
+import time
+from pathlib import Path
+
+import cv2
+import mediapipe as mp
+import numpy as np
+import torch
+
+ROOT = Path(__file__).resolve().parent
+INCLUDE_ROOT = ROOT / "INCLUDE-master"
+MODEL_PATH = ROOT / "models" / "transformer_small" / "transformer.pth"
+LABEL_PATH = INCLUDE_ROOT / "label_maps" / "label_map_include.json"
+CAPTURES_DIR = ROOT / "captures"
+sys.path.insert(0, str(INCLUDE_ROOT))
+from configs import TransformerConfig  # noqa: E402
+from models import Transformer  # noqa: E402
+
+POSE_LANDMARKS = 25
+HAND_LANDMARKS = 21
+# runner.py passes max_frame_len=169 to every KeypointsDataset used for the
+# trained transformer run. The model has positional capacity for 256, but the
+# training tensor length is 169.
+SEQUENCE_LENGTH = 169
+# dataset.py (KeypointsDataset, used to build every training tensor) hardcodes
+# frame_width=1920 / frame_length=1080 and multiplies EVERY clip's normalized
+# x/y by those constants, regardless of that clip's real resolution. MediaPipe
+# always returns x/y normalized to the aspect ratio of whatever frame you feed
+# it -- not to a fixed 1920x1080 -- so this scaling only reproduces the real
+# pixel geometry when the source frame is also 16:9. test_video_inference.py
+# works because INCLUDE .MOV files are native 1920x1080. cv2.VideoCapture with
+# no resolution request inherits the webcam's default mode, which on most
+# laptops is 4:3 (e.g. 640x480) or a non-1080p 16:9 mode. If that default
+# isn't 16:9, every x/y this script produces is silently stretched/squashed
+# relative to what the model was trained on -- this is the #1 suspect for why
+# live predictions are wrong even when replaying an actual ground-truth
+# INCLUDE clip in front of the camera (that test rules out signing accuracy
+# and points straight at the capture pipeline). We force a 16:9 request below
+# and verify what the driver actually granted.
+FRAME_WIDTH = 1920.0
+FRAME_HEIGHT = 1080.0
+CAM_ASPECT_TOLERANCE = 0.05  # allowed deviation from 16/9 before we warn loudly
+mp_hands = mp.solutions.hands
+mp_pose = mp.solutions.pose
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Live INCLUDE sign inference")
+    parser.add_argument("--camera", type=int, default=0)
+    parser.add_argument("--model", type=Path, default=MODEL_PATH)
+    parser.add_argument("--labels", type=Path, default=LABEL_PATH)
+    parser.add_argument("--sequence-length", type=int, default=SEQUENCE_LENGTH)
+    parser.add_argument("--min-frames", type=int, default=5,
+                         help="minimum recorded frames before a clip can be classified")
+    parser.add_argument("--confidence-threshold", type=float, default=0.0)
+    parser.add_argument("--cam-width", type=int, default=1920,
+                         help="requested webcam capture width; kept 16:9 with --cam-height")
+    parser.add_argument("--cam-height", type=int, default=1080,
+                         help="requested webcam capture height; kept 16:9 with --cam-width")
+    parser.add_argument("--cam-fps", type=float, default=0.0,
+                         help="requested webcam FPS (0 = leave at driver default)")
+    parser.add_argument("--no-save-features", action="store_true",
+                         help="skip saving a .npz of raw landmarks + model input per clip")
+    parser.add_argument("--no-mirror", action="store_true",
+                         help="disable the horizontal flip applied to every frame before MediaPipe "
+                              "(confirmed necessary via compare_features.py: mirroring the live "
+                              "tensor took MVI_0015 'you' from ~14%% wrong to 14.82%% top-1 correct, "
+                              "matching the un-mirrored reference video's 49.18%% 'you'). Only pass "
+                              "this if your webcam driver already mirrors frames itself.")
+    parser.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto",
+                         help="pin the device so a compare_features.py replay of the saved .npz is "
+                              "reproducible -- pass --device cpu here and on compare_features.py if "
+                              "a replay doesn't match the capture-time prediction.")
+    parser.add_argument("--hand-min-detection-confidence", type=float, default=0.5)
+    parser.add_argument("--hand-min-tracking-confidence", type=float, default=0.5)
+    parser.add_argument("--pose-min-detection-confidence", type=float, default=0.5)
+    parser.add_argument("--pose-min-tracking-confidence", type=float, default=0.5)
+    return parser.parse_args()
+
+
+def landmark_xy(landmarks, count):
+    if landmarks is None:
+        return np.full((count, 2), np.nan, dtype=np.float32)
+    return np.asarray([[p.x, p.y] for p in landmarks.landmark[:count]], dtype=np.float32)
+
+
+def swap_hands(pose, hand1, hand2):
+    """Match generate_keypoints_missing.py's wrist-based hand assignment."""
+    first_missing = np.isnan(hand1[0]).any()
+    second_missing = np.isnan(hand2[0]).any()
+    if first_missing == second_missing or np.isnan(pose[15]).any() or np.isnan(pose[16]).any():
+        return hand1, hand2
+    hand = hand2 if first_missing else hand1
+    left = np.sum((pose[15] - hand[0]) ** 2)
+    right = np.sum((pose[16] - hand[0]) ** 2)
+    # Matches generate_keypoints.py / generate_keypoints_missing.py / test_video_inference.py:
+    # a lone "h1" detection swaps when it's closer to the RIGHT wrist (pose[16]);
+    # a lone "h2" detection swaps when it's closer to the LEFT wrist (pose[15]).
+    if (right < left and not first_missing) or (left < right and first_missing):
+        return hand2, hand1
+    return hand1, hand2
+
+
+def extract_frame(hand_results, pose_results):
+    pose = landmark_xy(pose_results.pose_landmarks if pose_results else None, 25)
+    detected = hand_results.multi_hand_landmarks if hand_results and hand_results.multi_hand_landmarks else []
+    hand1 = landmark_xy(detected[0] if len(detected) > 0 else None, HAND_LANDMARKS)
+    hand2 = landmark_xy(detected[1] if len(detected) > 1 else None, HAND_LANDMARKS)
+    hand1, hand2 = swap_hands(pose, hand1, hand2)
+    return pose, hand1, hand2, bool(detected)
+
+
+def interpolate(stream):
+    """Match pandas linear interpolation with edge filling in dataset.py."""
+    result = stream.copy()
+    for landmark in range(stream.shape[1]):
+        for coordinate in range(2):
+            values = stream[:, landmark, coordinate]
+            valid = np.flatnonzero(~np.isnan(values))
+            result[:, landmark, coordinate] = 0.0 if len(valid) == 0 else np.interp(
+                np.arange(len(values)), valid, values[valid]
+            )
+    return result
+
+
+def prepare_sequence(frames, sequence_length):
+    """Return the model input shape (1, sequence_length, 134)."""
+    pose = interpolate(np.stack([frame[0] for frame in frames]))
+    hand1 = interpolate(np.stack([frame[1] for frame in frames]))
+    hand2 = interpolate(np.stack([frame[2] for frame in frames]))
+    scale = np.array([FRAME_WIDTH, FRAME_HEIGHT], dtype=np.float32)
+    data = np.concatenate([
+        (pose * scale).reshape(len(frames), 50),
+        (hand1 * scale).reshape(len(frames), 42),
+        (hand2 * scale).reshape(len(frames), 42),
+    ], axis=1).astype(np.float32)
+    if len(data) > sequence_length:
+        data = data[-sequence_length:]
+    elif len(data) < sequence_length:
+        data = np.pad(data, ((0, sequence_length - len(data)), (0, 0)))
+    return torch.from_numpy(data).unsqueeze(0)
+
+
+def clip_diagnostics(clip_frames):
+    """Detection-rate / NaN stats for one recorded clip, pose+hand1+hand2."""
+    pose = np.stack([f[0] for f in clip_frames])
+    hand1 = np.stack([f[1] for f in clip_frames])
+    hand2 = np.stack([f[2] for f in clip_frames])
+    stats = {}
+    for name, block in (("pose", pose), ("hand1", hand1), ("hand2", hand2)):
+        frame_present = ~np.isnan(block).any(axis=(1, 2))
+        stats[name] = float(frame_present.mean())
+    return stats, pose, hand1, hand2
+
+
+def save_capture_features(path, clip_frames, model_input, cam_width, cam_height,
+                           cam_fps, top_predictions):
+    """Save raw (pre-pad) landmark streams + the exact model input tensor, so
+    compare_features.py can line this clip up against a real INCLUDE video."""
+    _, pose, hand1, hand2 = clip_diagnostics(clip_frames)
+    np.savez(
+        path,
+        pose=pose, hand1=hand1, hand2=hand2,
+        model_input=model_input.squeeze(0).cpu().numpy(),
+        cam_width=cam_width, cam_height=cam_height, cam_fps=cam_fps,
+        frame_width_used_for_scaling=FRAME_WIDTH,
+        frame_height_used_for_scaling=FRAME_HEIGHT,
+        top_predictions=np.array([f"{label}:{conf:.6f}" for label, conf in top_predictions]),
+    )
+
+
+def load_model(model_path, device, n_classes):
+    checkpoint = torch.load(model_path, map_location=device)
+    if not isinstance(checkpoint, dict) or "model" not in checkpoint:
+        raise ValueError(f"Expected a checkpoint with a 'model' key: {model_path}")
+    model = Transformer(TransformerConfig(size="small", max_position_embeddings=256), n_classes=n_classes).to(device)
+    model.load_state_dict(checkpoint["model"])
+    model.eval()
+    return model
+
+
+def main():
+    args = parse_args()
+    if args.sequence_length > 256:
+        raise ValueError("--sequence-length cannot exceed 256")
+    if not args.model.is_file():
+        raise FileNotFoundError(f"Model checkpoint not found: {args.model}")
+    if not args.labels.is_file():
+        raise FileNotFoundError(f"Label map not found: {args.labels}")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu") if args.device == "auto" \
+        else torch.device(args.device)
+    print(f"Using device: {device}")
+    if device.type == "cuda":
+        print(f"GPU: {torch.cuda.get_device_name(0)}")
+    with args.labels.open(encoding="utf-8") as handle:
+        label_map = json.load(handle)
+    labels = [label for label, _ in sorted(label_map.items(), key=lambda item: item[1])]
+    if args.model == MODEL_PATH and len(labels) != 263:
+        raise ValueError(f"Expected 263 INCLUDE labels, found {len(labels)} "
+                          f"(pass --labels/--model matching a custom checkpoint if that's intended)")
+    model = load_model(args.model, device, n_classes=len(labels))
+    camera = cv2.VideoCapture(args.camera)
+    if not camera.isOpened():
+        raise RuntimeError(f"Could not open webcam {args.camera}")
+
+    # Force a 16:9 capture mode so MediaPipe's normalized x/y -- and the
+    # FRAME_WIDTH/FRAME_HEIGHT scaling below -- represent the same aspect
+    # ratio the model was trained on (see the comment on FRAME_WIDTH above).
+    camera.set(cv2.CAP_PROP_FRAME_WIDTH, args.cam_width)
+    camera.set(cv2.CAP_PROP_FRAME_HEIGHT, args.cam_height)
+    if args.cam_fps:
+        camera.set(cv2.CAP_PROP_FPS, args.cam_fps)
+    actual_width = int(camera.get(cv2.CAP_PROP_FRAME_WIDTH))
+    actual_height = int(camera.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    actual_fps = camera.get(cv2.CAP_PROP_FPS)
+    aspect = actual_width / actual_height if actual_height else 0.0
+    print(f"Requested capture: {args.cam_width}x{args.cam_height} @ {args.cam_fps or 'driver default'} fps")
+    print(f"Actual capture:    {actual_width}x{actual_height} @ {actual_fps:.1f} fps  (aspect {aspect:.4f}, target {16/9:.4f})")
+    if abs(aspect - 16 / 9) > CAM_ASPECT_TOLERANCE:
+        print("!" * 70)
+        print(f"WARNING: webcam granted {actual_width}x{actual_height}, which is NOT 16:9.")
+        print("This will distort every x/y coordinate relative to the 1920x1080")
+        print("training data (dataset.py always scales by 1920x1080). Predictions")
+        print("will likely be wrong until the driver grants a 16:9 mode. Try a")
+        print("different --cam-width/--cam-height pair your webcam actually supports.")
+        print("!" * 70)
+    mirror = not args.no_mirror
+    print(f"Horizontal mirror: {'ON' if mirror else 'OFF'} "
+          f"({'confirmed necessary against MVI_0015 (you)' if mirror else 'disabled via --no-mirror'})")
+
+    CAPTURES_DIR.mkdir(exist_ok=True)
+
+    def classify(clip_frames):
+        stats, _, _, _ = clip_diagnostics(clip_frames)
+        model_input = prepare_sequence(clip_frames, args.sequence_length).to(device)
+        with torch.inference_mode():
+            probabilities = torch.softmax(model(model_input), dim=-1)[0]
+        values, indices = torch.topk(probabilities, k=5)
+        top = [(labels[int(i)], float(v)) for v, i in zip(values.cpu(), indices.cpu())]
+        label, conf = top[0]
+        if args.confidence_threshold and conf < args.confidence_threshold:
+            label = "Uncertain"
+        print(f"[clip] {len(clip_frames)} frames  "
+              f"detection rate: pose={stats['pose']:.0%} hand1={stats['hand1']:.0%} hand2={stats['hand2']:.0%}")
+        print("Top-5 predictions:")
+        for rank, (lbl, c) in enumerate(top, 1):
+            print(f"  {rank}. {lbl}: {c:.6f}")
+        if not args.no_save_features:
+            feat_path = CAPTURES_DIR / f"features_{int(time.time())}.npz"
+            save_capture_features(feat_path, clip_frames, model_input,
+                                   actual_width, actual_height, actual_fps, top)
+            print(f"Saved features: {feat_path}  "
+                  f"(compare with: python compare_features.py --live {feat_path} --video <INCLUDE .MOV>)")
+        return label, conf, top[:3]
+
+    # clip_frames holds ONLY the frames between the two SPACE presses -- the
+    # same way test_video_inference.py holds only the frames of one .MOV
+    # file. We deliberately do NOT try to auto-detect the start/end of a
+    # sign from hand visibility: that heuristic is fragile in practice and
+    # can hand the model an out-of-distribution clip (cut off mid-sign, or
+    # never zero-padded because a held pose kept "hand present" true).
+    # Recording is 100% under your control instead.
+    clip_frames = []
+    recording = False
+    video_writer = None
+    video_path = None
+    prediction, confidence, top_predictions = "Waiting...", 0.0, []
+    previous_time = time.perf_counter()
+    try:
+        with mp_hands.Hands(static_image_mode=False,
+                            min_detection_confidence=args.hand_min_detection_confidence,
+                            min_tracking_confidence=args.hand_min_tracking_confidence,
+                            max_num_hands=2) as hands, \
+             mp_pose.Pose(static_image_mode=False,
+                          min_detection_confidence=args.pose_min_detection_confidence,
+                          min_tracking_confidence=args.pose_min_tracking_confidence) as pose:
+            # Running per-clip detection counters, reset whenever a new
+            # recording starts, so the on-screen readout below tells you
+            # WHILE you're signing whether hand2 is dropping out -- instead
+            # of only finding out after you stop and classify.
+            frames_seen = pose_hits = hand1_hits = hand2_hits = 0
+            while True:
+                ok, frame = camera.read()
+                if not ok:
+                    raise RuntimeError("Webcam stopped returning frames")
+                if mirror:
+                    # Confirmed via compare_features.py on MVI_0015 (you): the raw
+                    # webcam frame's left/right orientation does not match the
+                    # INCLUDE recordings. Flipping the frame BEFORE MediaPipe runs
+                    # (rather than flipping x-coordinates after the fact) keeps
+                    # pose/hand detection, the wrist-based hand-swap logic, the
+                    # saved .mov clip, and the on-screen preview all self-consistent.
+                    frame = cv2.flip(frame, 1)
+                rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                frame_data = extract_frame(hands.process(rgb), pose.process(rgb))
+                pose_kp, hand1_kp, hand2_kp, _ = frame_data
+
+                if recording:
+                    clip_frames.append(frame_data)
+                    frames_seen += 1
+                    pose_hits += int(not np.isnan(pose_kp).any())
+                    hand1_hits += int(not np.isnan(hand1_kp).any())
+                    hand2_hits += int(not np.isnan(hand2_kp).any())
+                    if video_writer is not None:
+                        video_writer.write(frame)
+                    if len(clip_frames) >= args.sequence_length:
+                        # Hit the model's trained length; classify now.
+                        prediction, confidence, top_predictions = classify(clip_frames)
+                        recording = False
+                        clip_frames = []
+                        if video_writer is not None:
+                            video_writer.release()
+                            video_writer = None
+                            print(f"Saved clip: {video_path}")
+
+                key = cv2.waitKey(1) & 0xFF
+                if key == ord(" "):
+                    if not recording:
+                        recording = True
+                        clip_frames = []
+                        frames_seen = pose_hits = hand1_hits = hand2_hits = 0
+                        prediction, confidence, top_predictions = "Recording...", 0.0, []
+                        CAPTURES_DIR.mkdir(exist_ok=True)
+                        video_path = CAPTURES_DIR / f"capture_{int(time.time())}.mov"
+                        height, width = frame.shape[:2]
+                        video_writer = cv2.VideoWriter(
+                            str(video_path), cv2.VideoWriter_fourcc(*"mp4v"), 20.0, (width, height)
+                        )
+                    else:
+                        recording = False
+                        if video_writer is not None:
+                            video_writer.release()
+                            video_writer = None
+                            print(f"Saved clip: {video_path}")
+                        if len(clip_frames) >= args.min_frames:
+                            prediction, confidence, top_predictions = classify(clip_frames)
+                        else:
+                            prediction, confidence, top_predictions = "Too short, try again", 0.0, []
+                        clip_frames = []
+                elif key in (ord("q"), 27):
+                    break
+
+                fps = 1.0 / max(time.perf_counter() - previous_time, 1e-6)
+                previous_time = time.perf_counter()
+                status = f"REC {len(clip_frames)} frames" if recording else "Press SPACE to record a sign"
+                color = (0, 0, 255) if recording else (220, 220, 220)
+                cv2.putText(frame, f"Sign: {prediction} ({confidence:.2f})", (20, 35),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 255, 0), 2)
+                cv2.putText(frame, f"FPS: {fps:.1f}  {status}", (20, 65),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.55, color, 1)
+                for rank, (label, probability) in enumerate(top_predictions[1:], 2):
+                    cv2.putText(frame, f"{rank}. {label} ({probability:.2f})", (20, 65 + rank * 25),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (200, 200, 200), 1)
+                if recording and frames_seen:
+                    # Live detection-rate readout so you can SEE hand2 drop
+                    # out and reposition (move it back into frame, improve
+                    # lighting, slow down) instead of only finding out after
+                    # classify() prints the clip summary.
+                    def dot(hit, present):
+                        return (0, 255, 0) if present else (0, 0, 255)
+                    readout = (f"pose={pose_hits/frames_seen:.0%} "
+                               f"hand1={hand1_hits/frames_seen:.0%} "
+                               f"hand2={hand2_hits/frames_seen:.0%}")
+                    cv2.circle(frame, (20, 95), 6, dot(pose_hits, not np.isnan(pose_kp).any()), -1)
+                    cv2.circle(frame, (40, 95), 6, dot(hand1_hits, not np.isnan(hand1_kp).any()), -1)
+                    cv2.circle(frame, (60, 95), 6, dot(hand2_hits, not np.isnan(hand2_kp).any()), -1)
+                    cv2.putText(frame, readout, (75, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 1)
+                cv2.imshow("INCLUDE Live Inference", frame)
+    finally:
+        if video_writer is not None:
+            video_writer.release()
+        camera.release()
+        cv2.destroyAllWindows()
+
+
+if __name__ == "__main__":
+    main()

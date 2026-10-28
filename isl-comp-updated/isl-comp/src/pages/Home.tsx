@@ -17,6 +17,7 @@ import {
 import { HeroOrb } from '../components/landing/HeroOrb';
 import { LandingShell } from '../components/landing/LandingShell';
 import { LiveDemo } from '../components/landing/LiveDemo';
+import { DemoSection } from '../components/signdemo/DemoSection';
 import { CountUp, Reveal } from '../components/landing/Reveal';
 import { SIGN_LABELS } from '../data/signMappings';
 
@@ -152,6 +153,9 @@ export function Home() {
           ))}
         </div>
       </section>
+
+      {/* See Samvaad in action: frontend-only sign-to-text pipeline demo */}
+      <DemoSection />
 
       {/* Live demo */}
       <section id="live-demo" className={`${WRAP} pt-24`}>

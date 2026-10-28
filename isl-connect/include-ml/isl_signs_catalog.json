@@ -1,0 +1,821 @@
+﻿[
+    {
+        "category":  "Adjectives",
+        "signs":  [
+                      {
+                          "name":  "alive"
+                      },
+                      {
+                          "name":  "bad"
+                      },
+                      {
+                          "name":  "Beautiful"
+                      },
+                      {
+                          "name":  "big large"
+                      },
+                      {
+                          "name":  "Blind"
+                      },
+                      {
+                          "name":  "clean"
+                      },
+                      {
+                          "name":  "cold"
+                      },
+                      {
+                          "name":  "cool"
+                      },
+                      {
+                          "name":  "dead"
+                      },
+                      {
+                          "name":  "Deaf"
+                      },
+                      {
+                          "name":  "deep"
+                      },
+                      {
+                          "name":  "dirty"
+                      },
+                      {
+                          "name":  "dry"
+                      },
+                      {
+                          "name":  "famous"
+                      },
+                      {
+                          "name":  "fast"
+                      },
+                      {
+                          "name":  "good"
+                      },
+                      {
+                          "name":  "happy"
+                      },
+                      {
+                          "name":  "hard"
+                      },
+                      {
+                          "name":  "healthy"
+                      },
+                      {
+                          "name":  "heavy"
+                      },
+                      {
+                          "name":  "high"
+                      },
+                      {
+                          "name":  "hot"
+                      },
+                      {
+                          "name":  "light"
+                      },
+                      {
+                          "name":  "long"
+                      },
+                      {
+                          "name":  "loud"
+                      },
+                      {
+                          "name":  "low"
+                      },
+                      {
+                          "name":  "narrow"
+                      },
+                      {
+                          "name":  "new"
+                      },
+                      {
+                          "name":  "old"
+                      },
+                      {
+                          "name":  "quiet"
+                      },
+                      {
+                          "name":  "sad"
+                      },
+                      {
+                          "name":  "shallow"
+                      },
+                      {
+                          "name":  "short"
+                      },
+                      {
+                          "name":  "sick"
+                      },
+                      {
+                          "name":  "slow"
+                      },
+                      {
+                          "name":  "small little"
+                      },
+                      {
+                          "name":  "soft"
+                      },
+                      {
+                          "name":  "strong"
+                      },
+                      {
+                          "name":  "tall"
+                      },
+                      {
+                          "name":  "Ugly"
+                      },
+                      {
+                          "name":  "warm"
+                      },
+                      {
+                          "name":  "weak"
+                      },
+                      {
+                          "name":  "wet"
+                      },
+                      {
+                          "name":  "wide"
+                      },
+                      {
+                          "name":  "young"
+                      }
+                  ]
+    },
+    {
+        "category":  "Animals",
+        "signs":  [
+                      {
+                          "name":  "Animal"
+                      },
+                      {
+                          "name":  "Bird"
+                      },
+                      {
+                          "name":  "Cat"
+                      },
+                      {
+                          "name":  "Cow"
+                      },
+                      {
+                          "name":  "Dog"
+                      },
+                      {
+                          "name":  "Fish"
+                      },
+                      {
+                          "name":  "Horse"
+                      },
+                      {
+                          "name":  "Mouse"
+                      }
+                  ]
+    },
+    {
+        "category":  "Clothes",
+        "signs":  [
+                      {
+                          "name":  "Clothing"
+                      },
+                      {
+                          "name":  "Dress"
+                      },
+                      {
+                          "name":  "Hat"
+                      },
+                      {
+                          "name":  "Pant"
+                      },
+                      {
+                          "name":  "Pocket"
+                      },
+                      {
+                          "name":  "Shirt"
+                      },
+                      {
+                          "name":  "Shoes"
+                      },
+                      {
+                          "name":  "Skirt"
+                      },
+                      {
+                          "name":  "Suit"
+                      },
+                      {
+                          "name":  "T-Shirt"
+                      }
+                  ]
+    },
+    {
+        "category":  "Colours",
+        "signs":  [
+                      {
+                          "name":  "Black"
+                      },
+                      {
+                          "name":  "Blue"
+                      },
+                      {
+                          "name":  "Brown"
+                      },
+                      {
+                          "name":  "Colour"
+                      },
+                      {
+                          "name":  "Green"
+                      },
+                      {
+                          "name":  "Grey"
+                      },
+                      {
+                          "name":  "Orange"
+                      },
+                      {
+                          "name":  "Pink"
+                      },
+                      {
+                          "name":  "Red"
+                      },
+                      {
+                          "name":  "White"
+                      },
+                      {
+                          "name":  "Yellow"
+                      }
+                  ]
+    },
+    {
+        "category":  "Days_and_Time",
+        "signs":  [
+                      {
+                          "name":  "Afternoon"
+                      },
+                      {
+                          "name":  "Evening"
+                      },
+                      {
+                          "name":  "Friday"
+                      },
+                      {
+                          "name":  "Hour"
+                      },
+                      {
+                          "name":  "Minute"
+                      },
+                      {
+                          "name":  "Monday"
+                      },
+                      {
+                          "name":  "Month"
+                      },
+                      {
+                          "name":  "Morning"
+                      },
+                      {
+                          "name":  "Night"
+                      },
+                      {
+                          "name":  "Saturday"
+                      },
+                      {
+                          "name":  "Second"
+                      },
+                      {
+                          "name":  "Sunday"
+                      },
+                      {
+                          "name":  "Thursday"
+                      },
+                      {
+                          "name":  "Time"
+                      },
+                      {
+                          "name":  "Today"
+                      },
+                      {
+                          "name":  "Tomorrow"
+                      },
+                      {
+                          "name":  "Tuesday"
+                      },
+                      {
+                          "name":  "Wednesday"
+                      },
+                      {
+                          "name":  "Week"
+                      },
+                      {
+                          "name":  "Year"
+                      },
+                      {
+                          "name":  "Yesterday"
+                      }
+                  ]
+    },
+    {
+        "category":  "Electronics",
+        "signs":  [
+                      {
+                          "name":  "Camera"
+                      },
+                      {
+                          "name":  "Cell phone"
+                      },
+                      {
+                          "name":  "Clock"
+                      },
+                      {
+                          "name":  "Computer"
+                      },
+                      {
+                          "name":  "Fan"
+                      },
+                      {
+                          "name":  "Lamp"
+                      },
+                      {
+                          "name":  "Laptop"
+                      },
+                      {
+                          "name":  "Radio"
+                      },
+                      {
+                          "name":  "Screen"
+                      },
+                      {
+                          "name":  "Television"
+                      }
+                  ]
+    },
+    {
+        "category":  "Greetings",
+        "signs":  [
+                      {
+                          "name":  "Alright"
+                      },
+                      {
+                          "name":  "Good afternoon"
+                      },
+                      {
+                          "name":  "Good evening"
+                      },
+                      {
+                          "name":  "Good Morning"
+                      },
+                      {
+                          "name":  "Good night"
+                      },
+                      {
+                          "name":  "Hello"
+                      },
+                      {
+                          "name":  "How are you"
+                      },
+                      {
+                          "name":  "Pleased"
+                      },
+                      {
+                          "name":  "Thank you"
+                      }
+                  ]
+    },
+    {
+        "category":  "Home",
+        "signs":  [
+                      {
+                          "name":  "Bag"
+                      },
+                      {
+                          "name":  "Bathroom"
+                      },
+                      {
+                          "name":  "Bed"
+                      },
+                      {
+                          "name":  "Bedroom"
+                      },
+                      {
+                          "name":  "Book"
+                      },
+                      {
+                          "name":  "Box"
+                      },
+                      {
+                          "name":  "Card"
+                      },
+                      {
+                          "name":  "Chair"
+                      },
+                      {
+                          "name":  "Door"
+                      },
+                      {
+                          "name":  "Dream"
+                      },
+                      {
+                          "name":  "Gift"
+                      },
+                      {
+                          "name":  "Key"
+                      },
+                      {
+                          "name":  "Kitchen"
+                      },
+                      {
+                          "name":  "Letter"
+                      },
+                      {
+                          "name":  "Lock"
+                      },
+                      {
+                          "name":  "Page"
+                      },
+                      {
+                          "name":  "Paint"
+                      },
+                      {
+                          "name":  "Paper"
+                      },
+                      {
+                          "name":  "Pen"
+                      },
+                      {
+                          "name":  "Pencil"
+                      },
+                      {
+                          "name":  "Photograph"
+                      },
+                      {
+                          "name":  "Ring"
+                      },
+                      {
+                          "name":  "Soap"
+                      },
+                      {
+                          "name":  "Table"
+                      },
+                      {
+                          "name":  "Telephone"
+                      },
+                      {
+                          "name":  "Tool"
+                      },
+                      {
+                          "name":  "Window"
+                      }
+                  ]
+    },
+    {
+        "category":  "Jobs",
+        "signs":  [
+                      {
+                          "name":  "Actor"
+                      },
+                      {
+                          "name":  "Artist"
+                      },
+                      {
+                          "name":  "Author"
+                      },
+                      {
+                          "name":  "Doctor"
+                      },
+                      {
+                          "name":  "Job"
+                      },
+                      {
+                          "name":  "Lawyer"
+                      },
+                      {
+                          "name":  "Manager"
+                      },
+                      {
+                          "name":  "Patient"
+                      },
+                      {
+                          "name":  "Police"
+                      },
+                      {
+                          "name":  "Priest"
+                      },
+                      {
+                          "name":  "Reporter"
+                      },
+                      {
+                          "name":  "Secretary"
+                      },
+                      {
+                          "name":  "Soldier"
+                      },
+                      {
+                          "name":  "Student"
+                      },
+                      {
+                          "name":  "Teacher"
+                      },
+                      {
+                          "name":  "Waiter"
+                      }
+                  ]
+    },
+    {
+        "category":  "Means_of_Transportation",
+        "signs":  [
+                      {
+                          "name":  "Bicycle"
+                      },
+                      {
+                          "name":  "Boat"
+                      },
+                      {
+                          "name":  "Bus"
+                      },
+                      {
+                          "name":  "Car"
+                      },
+                      {
+                          "name":  "Plane"
+                      },
+                      {
+                          "name":  "Train"
+                      },
+                      {
+                          "name":  "train ticket"
+                      },
+                      {
+                          "name":  "Transportation"
+                      },
+                      {
+                          "name":  "Truck"
+                      }
+                  ]
+    },
+    {
+        "category":  "People",
+        "signs":  [
+                      {
+                          "name":  "Adult"
+                      },
+                      {
+                          "name":  "Baby"
+                      },
+                      {
+                          "name":  "Boy"
+                      },
+                      {
+                          "name":  "Brother"
+                      },
+                      {
+                          "name":  "Child"
+                      },
+                      {
+                          "name":  "Crowd"
+                      },
+                      {
+                          "name":  "Daughter"
+                      },
+                      {
+                          "name":  "Family"
+                      },
+                      {
+                          "name":  "Father"
+                      },
+                      {
+                          "name":  "Friend"
+                      },
+                      {
+                          "name":  "Girl"
+                      },
+                      {
+                          "name":  "Grandfather"
+                      },
+                      {
+                          "name":  "Grandmother"
+                      },
+                      {
+                          "name":  "Husband"
+                      },
+                      {
+                          "name":  "King"
+                      },
+                      {
+                          "name":  "Man"
+                      },
+                      {
+                          "name":  "Mother"
+                      },
+                      {
+                          "name":  "Neighbour"
+                      },
+                      {
+                          "name":  "Parent"
+                      },
+                      {
+                          "name":  "Player"
+                      },
+                      {
+                          "name":  "President"
+                      },
+                      {
+                          "name":  "Queen"
+                      },
+                      {
+                          "name":  "Sister"
+                      },
+                      {
+                          "name":  "Son"
+                      },
+                      {
+                          "name":  "Wife"
+                      },
+                      {
+                          "name":  "Woman"
+                      }
+                  ]
+    },
+    {
+        "category":  "Places",
+        "signs":  [
+                      {
+                          "name":  "Bank"
+                      },
+                      {
+                          "name":  "City"
+                      },
+                      {
+                          "name":  "Court"
+                      },
+                      {
+                          "name":  "Ground"
+                      },
+                      {
+                          "name":  "Hospital"
+                      },
+                      {
+                          "name":  "House"
+                      },
+                      {
+                          "name":  "India"
+                      },
+                      {
+                          "name":  "Library"
+                      },
+                      {
+                          "name":  "Location"
+                      },
+                      {
+                          "name":  "Market"
+                      },
+                      {
+                          "name":  "Office"
+                      },
+                      {
+                          "name":  "Park"
+                      },
+                      {
+                          "name":  "Restaurant"
+                      },
+                      {
+                          "name":  "School"
+                      },
+                      {
+                          "name":  "Store or Shop"
+                      },
+                      {
+                          "name":  "Street or Road"
+                      },
+                      {
+                          "name":  "Temple"
+                      },
+                      {
+                          "name":  "Train Station"
+                      },
+                      {
+                          "name":  "University"
+                      }
+                  ]
+    },
+    {
+        "category":  "Pronouns",
+        "signs":  [
+                      {
+                          "name":  "he"
+                      },
+                      {
+                          "name":  "I"
+                      },
+                      {
+                          "name":  "it"
+                      },
+                      {
+                          "name":  "she"
+                      },
+                      {
+                          "name":  "they"
+                      },
+                      {
+                          "name":  "we"
+                      },
+                      {
+                          "name":  "you"
+                      },
+                      {
+                          "name":  "you (plural)"
+                      }
+                  ]
+    },
+    {
+        "category":  "Seasons",
+        "signs":  [
+                      {
+                          "name":  "Ex. Monsoon"
+                      },
+                      {
+                          "name":  "Fall"
+                      },
+                      {
+                          "name":  "Season"
+                      },
+                      {
+                          "name":  "Spring"
+                      },
+                      {
+                          "name":  "Summer"
+                      },
+                      {
+                          "name":  "Winter"
+                      }
+                  ]
+    },
+    {
+        "category":  "Society",
+        "signs":  [
+                      {
+                          "name":  "Attack"
+                      },
+                      {
+                          "name":  "Ball"
+                      },
+                      {
+                          "name":  "Bill"
+                      },
+                      {
+                          "name":  "Death"
+                      },
+                      {
+                          "name":  "Election"
+                      },
+                      {
+                          "name":  "Energy"
+                      },
+                      {
+                          "name":  "Exercise"
+                      },
+                      {
+                          "name":  "God"
+                      },
+                      {
+                          "name":  "Gun"
+                      },
+                      {
+                          "name":  "Marriage"
+                      },
+                      {
+                          "name":  "Medicine"
+                      },
+                      {
+                          "name":  "Money"
+                      },
+                      {
+                          "name":  "Newspaper"
+                      },
+                      {
+                          "name":  "Peace"
+                      },
+                      {
+                          "name":  "Price"
+                      },
+                      {
+                          "name":  "Race (ethnicity)"
+                      },
+                      {
+                          "name":  "Religion"
+                      },
+                      {
+                          "name":  "Science"
+                      },
+                      {
+                          "name":  "Sign"
+                      },
+                      {
+                          "name":  "Sport"
+                      },
+                      {
+                          "name":  "Team"
+                      },
+                      {
+                          "name":  "Technology"
+                      },
+                      {
+                          "name":  "War"
+                      }
+                  ]
+    }
+]
