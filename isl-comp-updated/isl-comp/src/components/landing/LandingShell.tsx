@@ -11,19 +11,12 @@ const NAV_LINKS = [
 
 const TEAM = ['Hriday', 'Anshu', 'Arnav', 'Aayush'];
 
+import { DotField } from './DotField';
+
 export function LandingShell({ children }: { children: ReactNode }) {
   return (
     <div className="landing relative min-h-screen overflow-hidden bg-night font-dm text-cream">
-      {/* Background: dotted grid + drifting colour glows */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.1)_1px,transparent_1px)] [background-size:30px_30px]"
-        style={{
-          WebkitMaskImage:
-            'radial-gradient(ellipse 75% 65% at 70% 30%, #000 25%, transparent 80%)',
-          maskImage: 'radial-gradient(ellipse 75% 65% at 70% 30%, #000 25%, transparent 80%)',
-        }}
-      />
+      <DotField />
       
       
       

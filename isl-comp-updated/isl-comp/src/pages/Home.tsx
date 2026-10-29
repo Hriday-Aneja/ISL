@@ -14,7 +14,8 @@ import {
   Play,
   Video,
 } from 'lucide-react';
-import { HandLab } from '../components/landing/HandLab';
+import { DailyDemo } from '../components/landing/DailyDemo';
+import { MirrorHands } from '../components/landing/MirrorHands';
 import { SilenceHero } from '../components/landing/SilenceHero';
 import { LandingShell } from '../components/landing/LandingShell';
 import { LiveDemo } from '../components/landing/LiveDemo';
@@ -45,7 +46,7 @@ export function Home() {
       {/* Hero: trapped words -> signing hand */}
       <SilenceHero signCount={SIGN_COUNT} />
 
-      <HandLab />
+      <MirrorHands />
 
       {/* Sign marquee */}
       <section
@@ -67,6 +68,8 @@ export function Home() {
           ))}
         </div>
       </section>
+
+      <DailyDemo />
 
       {/* See Samvaad in action: frontend-only sign-to-text pipeline demo */}
       <DemoSection />
@@ -401,8 +404,8 @@ function SectionHead({
   sub?: string;
 }) {
   return (
-    <div className="mx-auto max-w-2xl text-center">
-      <span className="inline-block rounded-full border border-mint/35 bg-mint/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-mint">
+    <div className="max-w-2xl">
+      <span className="eyebrow">
         {eyebrow}
       </span>
       <h2 className="mt-5 font-bricolage text-[clamp(32px,4.4vw,54px)] font-bold leading-[1.04] tracking-[-0.035em]">
