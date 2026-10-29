@@ -38,7 +38,8 @@ class DeterministicEvalTransformer(Transformer):
         x = self.l1(x)
         x = self.embedding(x)
         for layer in self.layers:
-            x = layer(x, attention_mask=extended_mask)[0]
+            out = layer(x, attention_mask=extended_mask)
+            x = out[0] if isinstance(out, (tuple, list)) else out
         x = masked_max_pool(x, attention_mask)
         x = F.dropout(x, p=0.2, training=self.training)
         x = self.l2(x)
