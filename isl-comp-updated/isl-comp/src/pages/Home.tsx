@@ -27,7 +27,7 @@ const SIGN_WORDS = Array.from(new Set(Object.values(SIGN_LABELS)));
 const SIGN_COUNT = SIGN_WORDS.length;
 
 const gradientText =
-  'bg-gradient-to-b from-white to-[#BFC6E0] bg-clip-text text-transparent';
+  'bg-gradient-to-b from-white to-[#c9ccd2] bg-clip-text text-transparent';
 
 export function Home() {
   const { hash } = useLocation();
@@ -131,7 +131,7 @@ export function Home() {
                   <span className="rounded-full bg-saffron/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-saffron">
                     Spoken
                   </span>
-                  <p className="rounded-2xl rounded-br-md bg-saffron px-4 py-2.5 text-[15px] font-medium text-[#1A1204]">
+                  <p className="rounded-2xl rounded-br-md bg-saffron px-4 py-2.5 text-[15px] font-medium text-[#0e1116]">
                     Please sit down. What is the pain?
                   </p>
                 </div>
@@ -151,7 +151,7 @@ export function Home() {
                   <span
                     key={w}
                     className={`inline-flex items-center gap-1.5 rounded-[10px] px-3 py-1.5 text-xs font-semibold uppercase tracking-wide ${
-                      i === 0 ? 'bg-saffron text-[#1A1204]' : 'bg-white/[0.06] text-mist'
+                      i === 0 ? 'bg-saffron text-[#0e1116]' : 'bg-white/[0.06] text-mist'
                     }`}
                   >
                     <Play size={11} fill="currentColor" /> {w}
@@ -301,14 +301,14 @@ export function Home() {
       {/* Closing call to action */}
       <section className={`${WRAP} pb-24`}>
         <Reveal>
-          <div className="relative overflow-hidden rounded-[36px] border border-white/10 bg-gradient-to-br from-[#2a1f5c] via-[#171f48] to-[#0f2f33] px-8 py-20 text-center">
+          <div className="relative overflow-hidden rounded-[36px] border border-white/10 bg-gradient-to-br from-[#24262b] via-[#1a1c20] to-[#15171a] px-8 py-20 text-center">
             <div
               aria-hidden
-              className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 animate-blob-drift rounded-full bg-saffron opacity-25 blur-[90px]"
+              className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 animate-blob-drift rounded-full bg-white opacity-[0.05] blur-[90px]"
             />
             <div
               aria-hidden
-              className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 animate-blob-drift rounded-full bg-mint opacity-25 blur-[90px] [animation-delay:-5s]"
+              className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 animate-blob-drift rounded-full bg-white opacity-[0.05] blur-[90px] [animation-delay:-5s]"
             />
             <h2 className="relative mx-auto max-w-2xl font-bricolage text-[clamp(32px,4.4vw,56px)] font-bold leading-[1.04] tracking-[-0.035em]">
               <span className={gradientText}>Start a conversation </span>
@@ -320,7 +320,7 @@ export function Home() {
             <div className="relative mt-9 flex flex-wrap justify-center gap-3.5">
               <Link
                 to="/room"
-                className="relative inline-flex min-h-[54px] items-center gap-2.5 overflow-hidden rounded-full bg-saffron px-7 text-base font-semibold text-[#1A1204] shadow-[0_12px_44px_rgba(197,139,78,0.32)] transition-transform hover:-translate-y-0.5"
+                className="relative inline-flex min-h-[54px] items-center gap-2.5 overflow-hidden rounded-full bg-saffron px-7 text-base font-semibold text-[#0e1116] shadow-[0_12px_44px_rgba(143,164,196,0.32)] transition-transform hover:-translate-y-0.5"
               >
                 Start a conversation <ArrowRight size={18} strokeWidth={2.4} />
                 <span

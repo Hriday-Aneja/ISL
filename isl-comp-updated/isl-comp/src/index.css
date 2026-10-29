@@ -4,7 +4,7 @@
 
 @layer base {
   html {
-    background-color: #121416;
+    background-color: #000000;
     color-scheme: dark;
   }
   body {
@@ -16,11 +16,11 @@
     @apply font-display text-cream;
   }
   :focus-visible {
-    outline: 2px solid #C58B4E;
+    outline: 2px solid #8fa4c4;
     outline-offset: 2px;
   }
   ::selection {
-    background: rgba(197,139,78, 0.35);
+    background: rgba(143,164,196, 0.35);
   }
 }
 
@@ -38,13 +38,13 @@
     @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed;
   }
   .btn-primary {
-    @apply btn bg-voice text-[#1A1204] shadow-[0_8px_28px_rgba(197,139,78,0.25)] hover:-translate-y-0.5 hover:bg-voice-deep;
+    @apply btn bg-voice text-[#0e1116] shadow-[0_8px_28px_rgba(143,164,196,0.25)] hover:-translate-y-0.5 hover:bg-voice-deep;
   }
   .btn-secondary {
     @apply btn bg-white/[0.04] text-room-text border border-white/15 hover:bg-white/[0.08];
   }
   .btn-voice {
-    @apply btn bg-voice text-[#1A1204] shadow-[0_8px_28px_rgba(197,139,78,0.25)] hover:-translate-y-0.5 hover:bg-voice-deep;
+    @apply btn bg-voice text-[#0e1116] shadow-[0_8px_28px_rgba(143,164,196,0.25)] hover:-translate-y-0.5 hover:bg-voice-deep;
   }
   .btn-danger {
     @apply btn bg-alert text-white hover:bg-[#c23f3f];
@@ -125,27 +125,27 @@
 .landing { position: relative; }
 
 /* Film grain overlay disabled */
-.landing main > section + section { border-top: 1px solid rgba(232, 226, 213, 0.08); }
+.landing main > section + section { border-top: 1px solid rgba(236,237,238, 0.08); }
 .landing [class*='backdrop-blur'] { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
 .landing [class*='shadow-glass'], .landing [class*='shadow-orb'], .landing [class*='shadow-[0_'] { box-shadow: none !important; }
-.landing .bg-clip-text { background-image: none !important; color: #e8e2d5 !important; -webkit-text-fill-color: #e8e2d5 !important; }
+.landing .bg-clip-text { background-image: none !important; color: #ececee !important; -webkit-text-fill-color: #ececee !important; }
 .landing a[class*='rounded-full'], .landing button[class*='rounded-full'] { border-radius: 4px !important; }
 .landing [class*='rounded-2xl'], .landing [class*='rounded-3xl'], .landing [class*='rounded-lg'], .landing [class*='rounded-md'] { border-radius: 6px !important; }
 .landing .animate-float, .landing .animate-tilt, .landing .animate-shine, .landing .animate-ring-spin { animation: none !important; }
-.landing [class*='bg-white/[0.0'], .landing [class*='bg-night-card'] { background-color: #1a1d20; }
+.landing [class*='bg-white/[0.0'], .landing [class*='bg-night-card'] { background-color: #101114; }
 .landing h2 { text-wrap: balance; }
-.landing ::selection { background: rgba(197, 139, 78, 0.35); }
+.landing ::selection { background: rgba(143,164,196, 0.35); }
 
 /* ---------- Landing: one system for every section ---------- */
 .landing main { counter-reset: sec; }
 .landing .eyebrow {
   counter-increment: sec; display: inline-block; font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #c58b4e;
+  font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #8fa4c4;
 }
 .landing .eyebrow::before { content: '§0' counter(sec) '  ·  '; opacity: 0.75; }
 .landing main > section:not(:first-child):not([aria-label]) { padding-top: 6rem !important; padding-bottom: 6rem !important; }
 .landing span[class*='rounded-full'][class*='px-'] { border-radius: 4px !important; }
-.landing .card, .landing [class*='bg-night-card'] { background-color: #1a1d20; border: 1px solid rgba(232, 226, 213, 0.1); border-radius: 6px; box-shadow: none; }
+.landing .card, .landing [class*='bg-night-card'] { background-color: #101114; border: 1px solid rgba(236,237,238, 0.1); border-radius: 6px; box-shadow: none; }
 .landing .landing-dot.is-twinkle { animation: twinkle 5.5s ease-in-out infinite; }
 @keyframes twinkle { 0%, 100% { opacity: var(--o); } 50% { opacity: calc(var(--o) * 0.2); } }
 @media (prefers-reduced-motion: reduce) { .landing .landing-dot { animation: none !important; } }

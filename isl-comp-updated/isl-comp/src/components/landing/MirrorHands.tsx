@@ -106,15 +106,15 @@ export function MirrorHands() {
     const scene = new THREE.Scene();
     const cam = new THREE.PerspectiveCamera(40, 4 / 3, 0.1, 50);
     cam.position.z = 7;
-    scene.add(new THREE.HemisphereLight(0xe8e2d5, 0x1a1d20, 1.1));
-    const key = new THREE.DirectionalLight(0xfff0dc, 2.4);
+    scene.add(new THREE.HemisphereLight(0xececee, 0x101114, 1.1));
+    const key = new THREE.DirectionalLight(0xffffff, 2.4);
     key.position.set(2, 4, 6);
     scene.add(key);
-    const rim = new THREE.DirectionalLight(0xc58b4e, 1.4);
+    const rim = new THREE.DirectionalLight(0x8fa4c4, 1.4);
     rim.position.set(-4, 1, -3);
     scene.add(rim);
 
-    const mats = [0xd9d2c4, 0xcfd3c6].map((c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.78 }));
+    const mats = [0xd6d8dc, 0xc8cbd0].map((c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.78 }));
     const hands = mats.map((m) => makeHand(scene, m));
     const miss = [99, 99];
 
@@ -205,7 +205,7 @@ export function MirrorHands() {
             <button
               onClick={start}
               disabled={status === 'loading'}
-              className="inline-flex min-h-[52px] items-center rounded-[4px] bg-saffron px-7 text-base font-semibold text-[#1A1204] transition-transform hover:-translate-y-0.5 disabled:opacity-60"
+              className="inline-flex min-h-[52px] items-center rounded-[4px] bg-saffron px-7 text-base font-semibold text-[#0e1116] transition-transform hover:-translate-y-0.5 disabled:opacity-60"
             >
               {status === 'loading' ? 'Starting…' : 'Start camera'}
             </button>

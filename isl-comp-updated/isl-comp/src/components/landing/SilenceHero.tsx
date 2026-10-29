@@ -66,10 +66,10 @@ export function SilenceHero({ signCount }: { signCount: number }) {
       tgt[i * 2] = x;
       tgt[i * 2 + 1] = y;
       seed[i] = Math.random() * 100;
-      const k = Math.min(1, Math.max(0, (y + 1.6) / 3.9)); // mint (palm) -> saffron (fingertips)
-      hcol[i * 3] = 0.55 + 0.22 * k;
-      hcol[i * 3 + 1] = 0.65 - 0.1 * k;
-      hcol[i * 3 + 2] = 0.59 - 0.28 * k;
+      const k = Math.min(1, Math.max(0, (y + 1.6) / 3.9)); // teal (palm) -> steel blue (fingertips)
+      hcol[i * 3] = 0.525 + 0.036 * k;
+      hcol[i * 3 + 1] = 0.659 - 0.016 * k;
+      hcol[i * 3 + 2] = 0.624 + 0.145 * k;
     }
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
@@ -217,7 +217,7 @@ export function SilenceHero({ signCount }: { signCount: number }) {
           <div className="pointer-events-auto mt-10 flex flex-wrap gap-3.5">
             <Link
               to="/room"
-              className="inline-flex min-h-[52px] items-center gap-2.5 rounded-full bg-saffron px-7 text-base font-semibold text-[#1A1204] transition-transform hover:-translate-y-0.5"
+              className="inline-flex min-h-[52px] items-center gap-2.5 rounded-full bg-saffron px-7 text-base font-semibold text-[#0e1116] transition-transform hover:-translate-y-0.5"
             >
               Start a conversation <ArrowRight size={18} strokeWidth={2.4} />
             </Link>

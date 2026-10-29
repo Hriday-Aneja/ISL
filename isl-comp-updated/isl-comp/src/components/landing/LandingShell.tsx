@@ -28,7 +28,7 @@ export function LandingShell({ children }: { children: ReactNode }) {
         <div className="mx-auto grid max-w-[1312px] gap-10 px-6 py-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr] lg:px-16">
           <div>
             <Link to="/" className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-saffron text-[#1A1204]">
+              <span className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-saffron text-[#0e1116]">
                 <MessageCircle size={20} strokeWidth={2.2} />
               </span>
               <span className="font-bricolage text-xl font-bold tracking-tight text-cream">
@@ -80,7 +80,7 @@ function LandingNav() {
   return (
     <header className="relative z-30 mx-auto grid max-w-[1312px] grid-cols-[1fr_auto] items-center px-6 py-6 sm:grid-cols-[1fr_auto_1fr] lg:px-16">
       <Link to="/" className="flex items-center gap-3">
-        <span className="flex h-[42px] w-[42px] items-center justify-center rounded-[13px] bg-saffron text-[#1A1204] shadow-[0_8px_28px_rgba(197,139,78,0.35)]">
+        <span className="flex h-[42px] w-[42px] items-center justify-center rounded-[13px] bg-saffron text-[#0e1116] shadow-[0_8px_28px_rgba(143,164,196,0.35)]">
           <MessageCircle size={22} strokeWidth={2.2} />
         </span>
         <span className="font-bricolage text-2xl font-bold tracking-tight text-cream">
@@ -97,7 +97,7 @@ function LandingNav() {
               key={link.to}
               to={link.to}
               className={`rounded-full px-[18px] py-2 text-sm transition-colors hover:bg-white/[0.08] ${
-                active ? 'bg-white/10 text-cream' : 'text-[#B6BBCE] hover:text-cream'
+                active ? 'bg-white/10 text-cream' : 'text-[#a8abb1] hover:text-cream'
               }`}
             >
               {link.label}

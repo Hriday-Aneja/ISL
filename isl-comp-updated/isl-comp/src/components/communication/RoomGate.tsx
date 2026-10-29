@@ -109,11 +109,11 @@ export function RoomGate({
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-32 -top-32 h-[420px] w-[420px] animate-blob-drift rounded-full bg-signal opacity-[0.18] blur-[100px]"
+        className="pointer-events-none absolute -right-32 -top-32 h-[420px] w-[420px] animate-blob-drift rounded-full bg-white opacity-[0.05] blur-[100px]"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -bottom-32 -left-32 h-[380px] w-[380px] animate-blob-drift rounded-full bg-voice opacity-[0.15] blur-[100px] [animation-delay:-6s]"
+        className="pointer-events-none absolute -bottom-32 -left-32 h-[380px] w-[380px] animate-blob-drift rounded-full bg-white opacity-[0.05] blur-[100px] [animation-delay:-6s]"
       />
       <Link
         to="/"
@@ -127,7 +127,7 @@ export function RoomGate({
       <div className={`relative w-full text-left ${step === 'prejoin' ? 'max-w-5xl' : 'max-w-sm'}`}>
         <div className="mb-5 text-center">
           <div className="mb-3 inline-flex items-center gap-2.5 text-room-text">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-voice text-[#1A1204] shadow-[0_8px_28px_rgba(197,139,78,0.35)]">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-voice text-[#0e1116] shadow-[0_8px_28px_rgba(143,164,196,0.35)]">
               <ScanFace size={18} />
             </span>
             <span className="font-display text-xl font-bold tracking-tight">Samvaad</span>

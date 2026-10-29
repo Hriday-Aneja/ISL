@@ -50,7 +50,7 @@ export function FocusMode({ messages, startId, speakingId, ttsSupported, onSpeak
     >
       <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span className={`rounded-sm px-3 py-1 text-base font-bold uppercase tracking-wide ${me ? 'bg-signal text-[#06231d]' : 'bg-voice text-[#1A1204]'}`}>
+          <span className={`rounded-sm px-3 py-1 text-base font-bold uppercase tracking-wide ${me ? 'bg-signal text-[#0c1413]' : 'bg-voice text-[#0e1116]'}`}>
             {me ? 'You' : 'Other person'}
           </span>
           <span className="text-base text-white/80">

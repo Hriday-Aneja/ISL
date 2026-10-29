@@ -11,7 +11,7 @@ import { mapPhraseToSigns } from '../../utils/phraseMapper';
 import { lookupHindi } from '../../services/hindi';
 import { AVATAR_VIDEOS } from '../../data/avatarVideos';
 import { SIGN_LABELS } from '../../data/signMappings';
-import { ISL_SIGNS, searchSigns } from '../../data/islSigns';
+import { ISL_CATEGORIES, ISL_SIGNS, searchSigns } from '../../data/islSigns';
 import type { IslSign } from '../../data/islSigns';
 import type { SignId } from '../../types';
 
@@ -55,7 +55,7 @@ export function LiveDemo() {
             aria-selected={tab === t.id}
             onClick={() => changeTab(t.id)}
             className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
-              tab === t.id ? 'bg-saffron text-[#1A1204]' : 'text-mist hover:text-cream'
+              tab === t.id ? 'bg-saffron text-[#0e1116]' : 'text-mist hover:text-cream'
             }`}
           >
             {t.label}
@@ -175,7 +175,7 @@ function SpeechToSign({ tts, speech }: { tts: TtsApi; speech: SpeechApi }) {
           )}
           <button
             type="submit"
-            className="inline-flex min-h-[48px] items-center gap-2 rounded-full bg-saffron px-5 text-[15px] font-semibold text-[#1A1204] transition-transform hover:-translate-y-0.5"
+            className="inline-flex min-h-[48px] items-center gap-2 rounded-full bg-saffron px-5 text-[15px] font-semibold text-[#0e1116] transition-transform hover:-translate-y-0.5"
           >
             <Send size={16} /> Sign it
           </button>
@@ -263,9 +263,13 @@ const DICTIONARY_LIMIT = 18;
 function Dictionary() {
   const [query, setQuery] = useState('');
   const [onlyVideo, setOnlyVideo] = useState(true);
+  const [category, setCategory] = useState<string | null>(null);
   const [selected, setSelected] = useState<IslSign | null>(null);
 
-  const results = useMemo(() => searchSigns({ query, onlyWithVideo: onlyVideo }), [query, onlyVideo]);
+  const results = useMemo(
+    () => searchSigns({ query, category, onlyWithVideo: onlyVideo }),
+    [query, category, onlyVideo]
+  );
 
   return (
     <div>
@@ -297,6 +301,50 @@ function Dictionary() {
           <Video size={15} /> Only signs with video
         </button>
       </div>
+
+      <div className="mt-4">
+        <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-mist">Browse by category</p>
+        <div className="mt-2 flex max-h-24 flex-wrap gap-2 overflow-y-auto">
+          <button
+            type="button"
+            onClick={() => setCategory(null)}
+            className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+              category === null
+                ? 'border-saffron bg-saffron/15 text-saffron'
+                : 'border-white/15 text-mist hover:text-cream'
+            }`}
+          >
+            All
+          </button>
+          {ISL_CATEGORIES.map((item) => (
+            <button
+              key={item.category}
+              type="button"
+              onClick={() => setCategory(item.category)}
+              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                category === item.category
+                  ? 'border-saffron bg-saffron/15 text-saffron'
+                  : 'border-white/15 text-mist hover:text-cream'
+              }`}
+            >
+              {item.label} · {item.count}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <p className="mt-4 text-xs leading-relaxed text-mist">
+        Dataset reference:{' '}
+        <a
+          href="https://zenodo.org/records/4010759"
+          target="_blank"
+          rel="noreferrer"
+          className="text-saffron underline decoration-saffron/40 underline-offset-2 hover:text-cream"
+        >
+          INCLUDE: A Large Scale Dataset for Indian Sign Language Recognition
+        </a>{' '}
+        · Zenodo record 4010759.
+      </p>
 
       <div className="mt-5 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
         <div>

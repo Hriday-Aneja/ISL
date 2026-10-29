@@ -36,7 +36,7 @@ export function SignsTab({ favouriteSigns, onOpen, onUse, onToggleFavourite }: S
 
   const chip = (active: boolean) =>
     `min-h-[44px] rounded-full border-2 px-3.5 text-sm font-semibold transition-colors ${
-      active ? 'border-signal bg-signal text-[#06231d]' : 'border-white/15 bg-night-card text-cream hover:border-signal'
+      active ? 'border-signal bg-signal text-[#0c1413]' : 'border-white/15 bg-night-card text-cream hover:border-signal'
     }`;
 
   return (

@@ -216,7 +216,7 @@ export function SignToSpeechDemo() {
                 type="button"
                 onClick={camera.start}
                 disabled={camera.state.status === 'requesting'}
-                className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-saffron px-5 text-sm font-semibold text-[#1A1204]"
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-saffron px-5 text-sm font-semibold text-[#0e1116]"
               >
                 <Video size={16} /> {camera.state.status === 'requesting' ? 'Starting…' : 'Start camera'}
               </button>
@@ -234,7 +234,7 @@ export function SignToSpeechDemo() {
             <button
               type="button"
               onClick={() => void stopRecording()}
-              className="inline-flex min-h-[48px] items-center gap-2 rounded-full bg-mint px-6 text-[15px] font-semibold text-[#04150E]"
+              className="inline-flex min-h-[48px] items-center gap-2 rounded-full bg-mint px-6 text-[15px] font-semibold text-[#0c1413]"
             >
               <Square size={15} fill="currentColor" /> Done — translate
             </button>
@@ -243,7 +243,7 @@ export function SignToSpeechDemo() {
               type="button"
               onClick={() => void startRecording()}
               disabled={!cameraOn || phase === 'reading' || !serviceUp}
-              className="inline-flex min-h-[48px] items-center gap-2 rounded-full bg-saffron px-6 text-[15px] font-semibold text-[#1A1204] transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-h-[48px] items-center gap-2 rounded-full bg-saffron px-6 text-[15px] font-semibold text-[#0e1116] transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {phase === 'reading' ? <Loader2 size={17} className="animate-spin" /> : <ScanFace size={17} />}
               {phase === 'reading' ? 'Reading the sign…' : 'Start signing'}
@@ -308,7 +308,7 @@ export function SignToSpeechDemo() {
               <button
                 type="button"
                 onClick={pickRandom}
-                className="inline-flex items-center gap-1.5 rounded-full bg-saffron px-3 py-1.5 text-xs font-semibold text-[#1A1204]"
+                className="inline-flex items-center gap-1.5 rounded-full bg-saffron px-3 py-1.5 text-xs font-semibold text-[#0e1116]"
               >
                 <Shuffle size={12} /> Random sign
               </button>

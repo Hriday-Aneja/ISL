@@ -345,14 +345,14 @@ export function DailyTranslator() {
                         }
                       }}
                       className={`min-h-[48px] flex-1 rounded-sm px-3 text-base font-bold transition-colors ${
-                        tab === t.id ? 'bg-signal text-[#06231d]' : 'text-mist hover:bg-white/[0.06] hover:text-cream'
+                        tab === t.id ? 'bg-signal text-[#0c1413]' : 'text-mist hover:bg-white/[0.06] hover:text-cream'
                       }`}
                     >
                       {t.id === 'signs' && <Hand size={16} className="mr-1.5 inline -translate-y-px" aria-hidden />}
                       {t.id === 'ai' && <span className="mr-1.5" aria-hidden>✦</span>}
                       {t.label}
                       {t.id === 'ai' && newAiCards > 0 && (
-                        <span className="ml-1.5 rounded-full bg-voice px-2 py-0.5 text-xs text-[#1A1204]">
+                        <span className="ml-1.5 rounded-full bg-voice px-2 py-0.5 text-xs text-[#0e1116]">
                           {newAiCards}
                         </span>
                       )}

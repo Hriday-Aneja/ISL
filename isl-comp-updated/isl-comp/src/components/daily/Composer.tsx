@@ -66,7 +66,7 @@ export function Composer({ onSend, listenHindi = false }: ComposerProps) {
   const permissionDenied = state.status === 'error' && /denied|not allowed/i.test(state.errorMessage ?? '');
 
   return (
-    <div className="space-y-2.5 border-t border-white/10 bg-[#202c33] p-3.5">
+    <div className="space-y-2.5 border-t border-white/10 bg-[#1e2024] p-3.5">
       <div role="group" aria-label="Who is sending this message?" className="grid grid-cols-2 gap-2">
         {([
           ['other', 'Other person'],
@@ -80,8 +80,8 @@ export function Composer({ onSend, listenHindi = false }: ComposerProps) {
             className={`min-h-[44px] rounded-sm border-2 text-sm font-bold transition-colors ${
               sender === value
                 ? value === 'me'
-                  ? 'border-signal bg-signal text-[#06231d]'
-                  : 'border-voice-deep bg-voice text-[#1A1204]'
+                  ? 'border-signal bg-signal text-[#0c1413]'
+                  : 'border-voice-deep bg-voice text-[#0e1116]'
                 : 'border-white/15 bg-night-card text-mist hover:text-cream'
             }`}
           >
@@ -155,7 +155,7 @@ export function Composer({ onSend, listenHindi = false }: ComposerProps) {
           className={`inline-flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-sm border-2 text-base font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
             listening
               ? 'border-[#b83a3a] bg-[#b83a3a] text-white hover:bg-[#9f3030]'
-              : 'border-voice-deep bg-voice text-[#1A1204] hover:bg-voice-deep hover:text-[#1A1204]'
+              : 'border-voice-deep bg-voice text-[#0e1116] hover:bg-voice-deep hover:text-[#0e1116]'
           }`}
         >
           {listening ? <Square size={17} /> : <Mic size={19} />}

@@ -20,9 +20,9 @@ export function StatusBar({ status }: { status: SessionStatus }) {
 
   const toneClasses =
     config.tone === 'signal'
-      ? 'bg-signal/15 text-[#5EEAD4] border-signal/30'
+      ? 'bg-signal/15 text-[#b3cfc9] border-signal/30'
       : config.tone === 'voice'
-      ? 'bg-voice/15 text-[#F0CE8B] border-voice/30'
+      ? 'bg-voice/15 text-[#bfcce0] border-voice/30'
       : 'bg-white/[0.04] text-room-text-soft border-room-border';
 
   return (

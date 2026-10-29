@@ -19,7 +19,7 @@ export function SignSequence({
       : 'bg-voice-soft border-voice/30 text-voice-deep';
 
   const activeToneClasses =
-    tone === 'signal' ? 'bg-signal border-signal text-[#06231d]' : 'bg-voice border-voice text-ink';
+    tone === 'signal' ? 'bg-signal border-signal text-[#0c1413]' : 'bg-voice border-voice text-ink';
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">

@@ -93,14 +93,14 @@ export function AvatarPanel({
   return (
     <div
       className={`relative flex h-full flex-col items-center justify-center
-        overflow-hidden bg-[radial-gradient(ellipse_at_center,_#23272B_0%,_#121416_78%)]
+        overflow-hidden bg-[radial-gradient(ellipse_at_center,_#17181b_0%,_#0a0b0d_78%)]
         text-white ${compact ? 'gap-1.5 px-2 py-2' : 'gap-4 px-4 py-4'}`}
     >
       <div
         className={`pointer-events-none absolute left-1/2 top-1/2
           -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl
           ${compact ? 'h-16 w-16' : 'h-48 w-48 sm:h-56 sm:w-56'}
-          ${isActive ? 'bg-voice/[0.12]' : 'bg-signal/[0.07]'}`}
+          ${isActive ? 'bg-white/[0.08]' : 'bg-white/[0.04]'}`}
       />
 
       <div

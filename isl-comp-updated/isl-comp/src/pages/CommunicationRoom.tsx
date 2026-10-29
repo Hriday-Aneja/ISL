@@ -281,11 +281,11 @@ export function CommunicationRoom() {
       <div className="relative flex min-h-screen flex-col items-center justify-center gap-5 overflow-hidden bg-room-bg px-6 text-center">
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-24 -top-24 h-[360px] w-[360px] animate-blob-drift rounded-full bg-signal opacity-[0.16] blur-[100px]"
+          className="pointer-events-none absolute -right-24 -top-24 h-[360px] w-[360px] animate-blob-drift rounded-full bg-white opacity-[0.05] blur-[100px]"
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute -bottom-24 -left-24 h-[320px] w-[320px] animate-blob-drift rounded-full bg-voice opacity-[0.14] blur-[100px] [animation-delay:-6s]"
+          className="pointer-events-none absolute -bottom-24 -left-24 h-[320px] w-[320px] animate-blob-drift rounded-full bg-white opacity-[0.05] blur-[100px] [animation-delay:-6s]"
         />
         <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-signal/15 text-signal">
           <ShieldCheck size={22} />
@@ -370,7 +370,7 @@ export function CommunicationRoom() {
           </Link>
           <div className="leading-tight">
             <p className="flex items-center gap-2 text-sm font-semibold text-room-text">
-              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-voice text-[#1A1204]">
+              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-voice text-[#0e1116]">
                 <Hand size={13} strokeWidth={2.4} />
               </span>
               <span className="font-display text-base font-bold tracking-tight">Samvaad</span>

@@ -20,9 +20,9 @@ const BARS = Array.from({ length: BAR_COUNT }, (_, i) => {
 });
 
 const CAPTIONS = [
-  { text: 'Hello!', color: '#E8E2D5' },
-  { text: 'Doctor', color: '#C58B4E' },
-  { text: 'Thank you', color: '#8CA596' },
+  { text: 'Hello!', color: '#ececee' },
+  { text: 'Doctor', color: '#8fa4c4' },
+  { text: 'Thank you', color: '#86a89f' },
 ];
 
 const FLOATING_WORDS = [
@@ -41,18 +41,18 @@ export function HeroOrb() {
         className="pointer-events-none absolute left-1/2 top-1/2 hidden h-[600px] w-[600px] animate-ring-spin rounded-full border border-dashed border-white/15 sm:block"
         style={{ transform: 'translate(-50%, -50%)' }}
       >
-        <span className="absolute -top-[5px] left-1/2 h-2.5 w-2.5 rounded-full bg-saffron shadow-[0_0_20px_#C58B4E]" />
+        <span className="absolute -top-[5px] left-1/2 h-2.5 w-2.5 rounded-full bg-saffron shadow-[0_0_20px_#8fa4c4]" />
       </div>
       <div
         aria-hidden
         className="pointer-events-none absolute left-1/2 top-1/2 hidden h-[520px] w-[520px] animate-ring-spin rounded-full border border-dashed border-mint/20 [animation-direction:reverse] [animation-duration:45s] sm:block"
         style={{ transform: 'translate(-50%, -50%)' }}
       >
-        <span className="absolute -right-[5px] top-1/2 h-2.5 w-2.5 rounded-full bg-mint shadow-[0_0_20px_#8CA596]" />
+        <span className="absolute -right-[5px] top-1/2 h-2.5 w-2.5 rounded-full bg-mint shadow-[0_0_20px_#86a89f]" />
       </div>
 
       {/* Floating glass cards */}
-      <div className="absolute -left-5 top-12 z-20 hidden animate-float items-center gap-3 rounded-2xl border border-white/15 bg-[#1A1D20]/80 px-4 py-3 shadow-glass backdrop-blur-xl [animation-delay:-2s] lg:flex">
+      <div className="absolute -left-5 top-12 z-20 hidden animate-float items-center gap-3 rounded-2xl border border-white/15 bg-[#101114]/80 px-4 py-3 shadow-glass backdrop-blur-xl [animation-delay:-2s] lg:flex">
         <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-saffron/15 text-saffron">
           <Video size={18} />
         </span>
@@ -70,7 +70,7 @@ export function HeroOrb() {
         </div>
       </div>
 
-      <div className="absolute -left-9 bottom-10 z-20 hidden w-[290px] animate-float rounded-2xl border border-white/15 bg-[#1A1D20]/80 p-4 shadow-glass backdrop-blur-xl [animation-delay:-4s] lg:block">
+      <div className="absolute -left-9 bottom-10 z-20 hidden w-[290px] animate-float rounded-2xl border border-white/15 bg-[#101114]/80 p-4 shadow-glass backdrop-blur-xl [animation-delay:-4s] lg:block">
         <div className="flex items-center justify-between">
           <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-mint">
             <Mic size={14} /> Speech → Sign
@@ -89,7 +89,7 @@ export function HeroOrb() {
           “Hello, thank you.”
         </p>
         <div className="flex gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-[10px] bg-saffron px-3 py-1.5 text-xs font-semibold tracking-wide text-[#1A1204]">
+          <span className="inline-flex items-center gap-1.5 rounded-[10px] bg-saffron px-3 py-1.5 text-xs font-semibold tracking-wide text-[#0e1116]">
             <Play size={11} fill="currentColor" /> HELLO
           </span>
           <span className="inline-flex items-center gap-1.5 rounded-[10px] bg-white/[0.06] px-3 py-1.5 text-xs font-semibold tracking-wide text-mist">
@@ -98,7 +98,7 @@ export function HeroOrb() {
         </div>
       </div>
 
-      <div className="absolute -right-3 bottom-32 z-20 hidden animate-float items-center gap-2.5 rounded-2xl border border-white/15 bg-[#1A1D20]/80 px-4 py-3 text-sm font-medium text-cream shadow-glass backdrop-blur-xl [animation-delay:-3s] lg:flex">
+      <div className="absolute -right-3 bottom-32 z-20 hidden animate-float items-center gap-2.5 rounded-2xl border border-white/15 bg-[#101114]/80 px-4 py-3 text-sm font-medium text-cream shadow-glass backdrop-blur-xl [animation-delay:-3s] lg:flex">
         <span className="flex h-8 w-8 items-center justify-center rounded-[9px] bg-mint/15 text-mint">
           <Globe size={16} />
         </span>
@@ -106,7 +106,7 @@ export function HeroOrb() {
       </div>
 
       {/* Main orb card */}
-      <div className="relative mx-auto max-w-[470px] animate-tilt rounded-[30px] border border-white/10 bg-gradient-to-br from-[#181e38]/95 to-[#0d1020]/95 shadow-orb">
+      <div className="relative mx-auto max-w-[470px] animate-tilt rounded-[30px] border border-white/10 bg-gradient-to-br from-[#1b1c20]/95 to-[#111215]/95 shadow-orb">
         <div className="flex items-center justify-between border-b border-white/[0.08] px-[22px] py-4">
           <div className="flex gap-[7px]">
             <span className="h-[11px] w-[11px] rounded-full bg-[#FF6B6B]" />
@@ -119,7 +119,7 @@ export function HeroOrb() {
           </div>
         </div>
 
-        <div className="relative m-4 h-[430px] overflow-hidden rounded-[20px] border border-mint/20 bg-[radial-gradient(ellipse_at_50%_60%,#12203A,#080A16_75%)]">
+        <div className="relative m-4 h-[430px] overflow-hidden rounded-[20px] border border-mint/20 bg-[radial-gradient(ellipse_at_50%_60%,#1c1e22,#0e0f11_75%)]">
           <svg aria-hidden className="absolute inset-0 h-full w-full">
             <defs>
               <pattern id="orbGrid" width="36" height="36" patternUnits="userSpaceOnUse">
@@ -138,12 +138,12 @@ export function HeroOrb() {
           >
             <defs>
               <radialGradient id="orbCore" cx="50%" cy="40%" r="70%">
-                <stop offset="0" stopColor="#2A2F63" />
-                <stop offset="1" stopColor="#0E1128" />
+                <stop offset="0" stopColor="#2a2c31" />
+                <stop offset="1" stopColor="#15161a" />
               </radialGradient>
               <linearGradient id="orbRim" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stopColor="#C58B4E" />
-                <stop offset="1" stopColor="#8CA596" />
+                <stop offset="0" stopColor="#8fa4c4" />
+                <stop offset="1" stopColor="#86a89f" />
               </linearGradient>
             </defs>
             <g transform="translate(200,232)">
@@ -153,7 +153,7 @@ export function HeroOrb() {
                   r={84}
                   fill="none"
                   strokeWidth={2}
-                  stroke={d === 0 ? '#8CA596' : '#C58B4E'}
+                  stroke={d === 0 ? '#86a89f' : '#8fa4c4'}
                   className="animate-ripple"
                   style={{
                     transformBox: 'fill-box',
@@ -199,7 +199,7 @@ export function HeroOrb() {
                 fontWeight={600}
                 fontSize={10}
                 letterSpacing={3}
-                fill="#A39F94"
+                fill="#9a9ea5"
               >
                 DIALOGUE
               </text>
@@ -216,7 +216,7 @@ export function HeroOrb() {
             </div>
           ))}
 
-          <div className="absolute bottom-3.5 left-3.5 rounded-full bg-[#121416]/85 px-3 py-1.5 text-xs font-semibold tracking-[0.05em] text-mint">
+          <div className="absolute bottom-3.5 left-3.5 rounded-full bg-[#0a0b0d]/85 px-3 py-1.5 text-xs font-semibold tracking-[0.05em] text-mint">
             SIGN ⇄ SPEECH
           </div>
           <div className="absolute bottom-3.5 right-3.5 rounded-full bg-saffron/15 px-3 py-1.5 text-xs font-bold tracking-[0.05em] text-saffron">

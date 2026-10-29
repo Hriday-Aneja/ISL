@@ -31,7 +31,7 @@ export function ScenarioPicker({ onPick }: ScenarioPickerProps) {
             >
               <span
                 className={`flex h-10 w-10 items-center justify-center rounded-sm ${
-                  urgent ? 'bg-[#b83a3a] text-white' : 'bg-signal-soft text-signal-deep group-hover:bg-signal group-hover:text-[#06231d]'
+                  urgent ? 'bg-[#b83a3a] text-white' : 'bg-signal-soft text-signal-deep group-hover:bg-signal group-hover:text-[#0c1413]'
                 }`}
               >
                 <Icon size={20} strokeWidth={2.1} />

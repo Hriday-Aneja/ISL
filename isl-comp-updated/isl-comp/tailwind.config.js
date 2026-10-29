@@ -4,21 +4,21 @@ export default {
   theme: {
     extend: {
       colors: {
-        paper: '#F7F8F5',
-        'paper-dim': '#EEF1ED',
-        ink: '#17211F',
-        'ink-soft': '#66736F',
-        line: '#DDE4E1',
-        // Room accents: mint = the signer's side, saffron = the speaker's side.
+        paper: '#f6f6f7',
+        'paper-dim': '#edeef0',
+        ink: '#16171a',
+        'ink-soft': '#6a6d73',
+        line: '#dee0e3',
+        // Room accents: signal (sage-teal) = the signer's side, voice (steel blue) = the speaker's side.
         signal: {
-          DEFAULT: '#8CA596',
-          soft: 'rgba(140,165,150, 0.12)',
-          deep: '#A3B9AB',
+          DEFAULT: '#86a89f',
+          soft: 'rgba(134,168,159, 0.12)',
+          deep: '#9cbab3',
         },
         voice: {
-          DEFAULT: '#C58B4E',
-          soft: 'rgba(197,139,78, 0.12)',
-          deep: '#D49E64',
+          DEFAULT: '#8fa4c4',
+          soft: 'rgba(143,164,196, 0.12)',
+          deep: '#a6b8d2',
         },
         alert: {
           DEFAULT: '#DC4C4C',
@@ -26,22 +26,23 @@ export default {
         },
         // Dark shell for the Communication Room, matching the landing page.
         room: {
-          bg: '#121416',
-          surface: '#1A1D20',
-          raised: '#23272B',
-          border: '#30353A',
-          text: '#E8E2D5',
-          'text-soft': '#A39F94',
+          bg: '#0a0b0d',
+          surface: '#101114',
+          raised: '#17181b',
+          border: '#222428',
+          text: '#ececee',
+          'text-soft': '#9a9ea5',
         },
-        // Landing page palette (midnight + saffron + mint).
+        // Landing page palette (neutral graphite + steel blue + sage). The names saffron/mint/cream/mist are
+        // kept so existing classes keep working; the values are no longer warm or yellowish.
         night: {
-          DEFAULT: '#121416',
-          card: '#1A1D20',
+          DEFAULT: '#0a0b0d',
+          card: '#101114',
         },
-        saffron: '#C58B4E',
-        mint: '#8CA596',
-        mist: '#A39F94',
-        cream: '#E8E2D5',
+        saffron: '#8fa4c4',
+        mint: '#86a89f',
+        mist: '#9a9ea5',
+        cream: '#ececee',
       },
       fontFamily: {
         display: ['"Bricolage Grotesque"', 'sans-serif'],
@@ -57,20 +58,20 @@ export default {
         lg: '22px',
       },
       boxShadow: {
-        panel: '0 1px 2px rgba(23,33,31,0.04), 0 1px 0 rgba(23,33,31,0.04)',
+        panel: '0 1px 2px rgba(22,23,26,0.04), 0 1px 0 rgba(22,23,26,0.04)',
         stage: '0 1px 2px rgba(0,0,0,0.3), 0 16px 40px -16px rgba(0,0,0,0.6)',
-        float: '0 8px 24px -10px rgba(23,33,31,0.18)',
-        orb: '0 50px 140px rgba(0,0,0,0.6), 0 0 0 1px rgba(140,165,150,0.08), 0 0 80px rgba(140,165,150,0.10)',
+        float: '0 8px 24px -10px rgba(22,23,26,0.18)',
+        orb: '0 50px 140px rgba(0,0,0,0.6), 0 0 0 1px rgba(134,168,159,0.08), 0 0 80px rgba(134,168,159,0.10)',
         glass: '0 24px 60px rgba(0,0,0,0.5)',
       },
       keyframes: {
         'pulse-ring': {
-          '0%': { boxShadow: '0 0 0 0 rgba(140,165,150,0.4)' },
-          '100%': { boxShadow: '0 0 0 8px rgba(140,165,150,0)' },
+          '0%': { boxShadow: '0 0 0 0 rgba(134,168,159,0.4)' },
+          '100%': { boxShadow: '0 0 0 8px rgba(134,168,159,0)' },
         },
         'pulse-ring-amber': {
-          '0%': { boxShadow: '0 0 0 0 rgba(197,139,78,0.4)' },
-          '100%': { boxShadow: '0 0 0 8px rgba(197,139,78,0)' },
+          '0%': { boxShadow: '0 0 0 0 rgba(143,164,196,0.4)' },
+          '100%': { boxShadow: '0 0 0 8px rgba(143,164,196,0)' },
         },
         'fade-up': {
           '0%': { opacity: '0', transform: 'translateY(4px)' },

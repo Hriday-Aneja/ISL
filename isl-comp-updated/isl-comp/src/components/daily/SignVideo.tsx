@@ -65,7 +65,7 @@ export function SignVideo({ src, label, autoPlay = false, className = '', dark =
         type="button"
         onClick={replay}
         className={`mt-2 inline-flex min-h-[44px] items-center gap-2 rounded-sm px-3 text-base font-semibold ${
-          dark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-signal-soft text-signal-deep hover:bg-signal hover:text-[#06231d]'
+          dark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-signal-soft text-signal-deep hover:bg-signal hover:text-[#0c1413]'
         }`}
       >
         <RotateCcw size={17} /> Replay

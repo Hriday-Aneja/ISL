@@ -55,7 +55,7 @@ export function ConversationPanel({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex items-center justify-between gap-2 border-b border-white/10 bg-[#202c33] px-3.5 py-2.5">
+      <div className="flex items-center justify-between gap-2 border-b border-white/10 bg-[#1e2024] px-3.5 py-2.5">
         <h2 className="flex items-center gap-2 font-display text-lg font-semibold text-cream">
           <MessageSquareText size={19} /> Conversation
         </h2>
@@ -149,7 +149,7 @@ export function ConversationPanel({
         role="log"
         aria-live="polite"
         aria-label="Conversation messages"
-        className={`relative min-h-0 flex-1 space-y-2 overflow-y-auto bg-[#0b141a] px-3 py-2.5 ${
+        className={`relative min-h-0 flex-1 space-y-2 overflow-y-auto bg-[#131417] px-3 py-2.5 ${
           dragActive ? 'ring-2 ring-inset ring-signal' : ''
         }`}
       >
