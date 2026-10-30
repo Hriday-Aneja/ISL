@@ -9,7 +9,7 @@ const NAV_LINKS = [
   { to: '/daily', label: 'Daily Translator' },
 ];
 
-const TEAM = ['Hriday', 'Anshu', 'Arnav', 'Aayush'];
+const TEAM = ['Anshu', 'Aayush', 'Akash Das'];
 
 import { DotField } from './DotField';
 
